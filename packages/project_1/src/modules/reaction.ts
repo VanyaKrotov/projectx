@@ -2,14 +2,14 @@ import { nanoid } from "nanoid";
 
 import {
   InterceptorEvent,
-  OptimizationTreeInstance,
+  PathsTreeInstance,
   ReactionInstance,
   WatchCallback,
 } from "shared/types";
 
 import batch from "./batch";
 import interceptor from "./interceptor";
-import OptimizationTree from "./optimization-tree";
+import PathTree from "./paths-tree";
 import rootManager from "./root-manager";
 
 class Reaction implements ReactionInstance {
@@ -33,12 +33,12 @@ class Reaction implements ReactionInstance {
     this.unsubscribeFns = [];
   };
 
-  public getOptimizationTree(): OptimizationTreeInstance | null {
+  public getOptimizationTree(): PathsTreeInstance | null {
     if (!this.paths.length) {
       return null;
     }
 
-    return new OptimizationTree(this.paths);
+    return new PathTree(this.paths);
   }
 
   public dispose(): void {

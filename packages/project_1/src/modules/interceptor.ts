@@ -4,7 +4,7 @@ import {
   InterceptorInstance,
 } from "shared/types";
 
-import OptimizationTree from "modules/optimization-tree";
+import PathTree from "modules/paths-tree";
 
 class Interceptor implements InterceptorInstance {
   private readonly batches = new Set<InterceptorListener>();
@@ -44,12 +44,12 @@ class Interceptor implements InterceptorInstance {
 
     return {
       result,
-      variables: new OptimizationTree(paths),
+      variables: new PathTree(paths),
     };
   }
 
-  public optimizePaths(paths: string[][]): OptimizationTree {
-    return new OptimizationTree(paths);
+  public optimizePaths(paths: string[][]): PathTree {
+    return new PathTree(paths);
   }
 }
 

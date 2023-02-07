@@ -168,7 +168,7 @@
   var batch = new Batch();
   var batch_default = batch;
 
-  // src/modules/optimization-tree.ts
+  // src/modules/paths-tree.ts
   var TreeNode = class {
     constructor(value, manager) {
       this.value = value;
@@ -179,30 +179,25 @@
     get keys() {
       return Object.keys(this.children);
     }
-    pushPath([path, ...paths]) {
-      var _a;
-      const nextNode = this.children[path] || new TreeNode(path, ((_a = this.manager) == null ? void 0 : _a.getManager(path)) || null);
+    push([path, ...paths]) {
+      const nextNode = this.children[path] || new TreeNode(path, this.manager.getManager(path));
       this.children[path] = nextNode;
       if (!paths.length) {
         return;
       }
-      return nextNode.pushPath(paths);
+      return nextNode.push(paths);
     }
   };
-  var OptimizationTree = class extends TreeNode {
+  var PathTree = class {
     constructor(paths) {
-      super("", null);
-      this.children = OptimizationTree.createNodesFromPaths(paths);
-      this.linking();
-    }
-    static createNodesFromPaths(paths) {
-      const nodes = {};
-      for (const full of paths) {
-        const [path, ...rest] = full;
-        nodes[path] = nodes[path] || new TreeNode(path, root_manager_default.getManager(path));
-        nodes[path].pushPath(rest);
+      __publicField(this, "nodes", {});
+      for (const [path, ...restPath] of paths) {
+        this.nodes[path] = this.nodes[path] || new TreeNode(path, root_manager_default.getManager(path));
+        this.nodes[path].push(restPath);
       }
-      return nodes;
+      for (const key in this.nodes) {
+        this.linkingRecursive(this.nodes[key]);
+      }
     }
     linkingRecursive(node) {
       const keys = Object.keys(node.children);
@@ -212,11 +207,6 @@
       node.listenTypes = isEqualArray(keys, node.manager.keys) ? ["add", "change", "remove"] : ["change"];
       for (const key of keys) {
         this.linkingRecursive(node.children[key]);
-      }
-    }
-    linking() {
-      for (const key in this.children) {
-        this.linkingRecursive(this.children[key]);
       }
     }
     optimizedManagersRec(node) {
@@ -233,13 +223,13 @@
     }
     getListenManagers() {
       let result = [];
-      for (const key in this.children) {
-        result = result.concat(this.optimizedManagersRec(this.children[key]));
+      for (const key in this.nodes) {
+        result = result.concat(this.optimizedManagersRec(this.nodes[key]));
       }
       return result;
     }
   };
-  var optimization_tree_default = OptimizationTree;
+  var paths_tree_default = PathTree;
 
   // src/modules/interceptor.ts
   var Interceptor = class {
@@ -271,11 +261,11 @@
       });
       return {
         result,
-        variables: new optimization_tree_default(paths)
+        variables: new paths_tree_default(paths)
       };
     }
     optimizePaths(paths) {
-      return new optimization_tree_default(paths);
+      return new paths_tree_default(paths);
     }
   };
   var interceptor = new Interceptor();
@@ -303,7 +293,7 @@
       if (!this.paths.length) {
         return null;
       }
-      return new optimization_tree_default(this.paths);
+      return new paths_tree_default(this.paths);
     }
     dispose() {
       root_manager_default.deleteReaction(this.id);

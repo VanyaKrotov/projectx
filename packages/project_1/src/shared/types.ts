@@ -23,7 +23,7 @@ export type ObserverTypes =
   | "dispose"
   | "all";
 
-export interface ManagerInstance<T = any, M = any>
+export interface ManagerInstance<T = unknown, M = unknown>
   extends ObserverWithTypeInstance<T, ObserverTypes>,
     RequiredManagerInstance<T> {
   path: string[];
@@ -68,15 +68,15 @@ export interface ObserverWithTypeInstance<T, E> {
 
 //#endregion
 
-//#region OptimizationTree
+//#region PathTree
 
-export interface TreeNodeInstance {
+export interface PathNodeInstance {
   value: string;
   manager: ManagerInstance | null;
   listenTypes: ObserverTypes[];
-  children: Record<string, TreeNodeInstance>;
+  children: Record<string, PathNodeInstance>;
   get keys(): string[];
-  pushPath(paths: string[]): void;
+  push(paths: string[]): void;
 }
 
 export type ListenManagersResult = {
@@ -84,7 +84,7 @@ export type ListenManagersResult = {
   listenTypes: ObserverTypes[];
 };
 
-export interface OptimizationTreeInstance {
+export interface PathsTreeInstance {
   getListenManagers(): ListenManagersResult[];
 }
 
@@ -104,11 +104,11 @@ export interface InterceptorInstance {
   emit(event: InterceptorEvent): void;
   getCaptured<T>(fn: () => T): {
     result: T;
-    variables: OptimizationTreeInstance;
+    variables: PathsTreeInstance;
   };
   register(listener: InterceptorListener): void;
   unregister(listener: InterceptorListener): void;
-  optimizePaths(paths: string[][]): OptimizationTreeInstance;
+  optimizePaths(paths: string[][]): PathsTreeInstance;
 }
 
 //#endregion
@@ -153,7 +153,7 @@ export interface ReactionInstance {
   dispose(): void;
   startWatch(): void;
   endWatch(): void;
-  getOptimizationTree(): OptimizationTreeInstance | null;
+  getOptimizationTree(): PathsTreeInstance | null;
   syncCaptured<T>(fn: () => T): T;
   watch(watch: WatchCallback): VoidFunction;
 }
