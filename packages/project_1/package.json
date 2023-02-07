@@ -1,0 +1,25 @@
+{
+  "name": "project_1",
+  "version": "0.0.1",
+  "description": "Lightweight reactive storage",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "dev": "node ./scripts/dev.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vanyakrotov3059@gmail.com",
+  "license": "ISC",
+  "keywords": [
+    "store",
+    "observe",
+    "reactive"
+  ],
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "esbuild": "0.17.5"
+  },
+  "dependencies": {
+    "nanoid": "^4.0.0"
+  }
+}

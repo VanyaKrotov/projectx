@@ -1,0 +1,158 @@
+import { observable } from "modules/observable";
+import {
+  ArrayAnnotation,
+  ManagerInstance,
+  ManagerOptions,
+  RequiredManagerInstance,
+} from "shared/types";
+import { isFunction } from "shared/utils";
+
+import { ARRAY_ANNOTATION } from "./constants";
+import Manager from "./manager";
+
+class ArrayManager<T>
+  extends Manager<Array<T>, ArrayAnnotation, Array<ManagerInstance<T>>>
+  implements RequiredManagerInstance<Array<T>>
+{
+  private managers: Array<ManagerInstance> = [];
+  private proxy: Array<T>;
+
+  constructor(private target: Array<T>, options: ManagerOptions) {
+    super(options, ARRAY_ANNOTATION);
+
+    this.proxy = this.define(target);
+
+    this.emit("define", { current: this.value });
+  }
+
+  private handlers: Required<
+    Pick<ProxyHandler<Array<T>>, "deleteProperty" | "get" | "set">
+  > = {
+    get: (_target, key) => {
+      const index = Number(key);
+      if (!Number.isNaN(index)) {
+        return this.managers[index]?.value;
+      }
+
+      const value = this.target[key as keyof Array<T>];
+      if (isFunction(value as any)) {
+        return (...args: any[]) =>
+          (value as Function).call(this.proxy, ...args);
+      }
+
+      return value;
+    },
+    set: (_target, key, value) => {
+      const index = Number(key);
+      if (!Number.isNaN(index)) {
+        if (index in this.managers) {
+          return this.managers[index].setValue(value);
+        }
+
+        try {
+          this.managers[index] = observable(value, {
+            path: this.joinToPath(key),
+          });
+          this.target[index] = value;
+
+          this.emit("add", { current: this.value });
+
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      this.target[key as keyof Array<T>] = value;
+
+      return true;
+    },
+    deleteProperty: (_target, key) => {
+      const index = Number(key);
+      if (Number.isNaN(index)) {
+        return false;
+      }
+
+      if (!(index in this.target)) {
+        return false;
+      }
+
+      const manager = this.managers[index];
+      const deleteResult = this.target.splice(index, 1).length === 1;
+      if (deleteResult) {
+        if (manager) {
+          this.managers.splice(index, 1);
+          manager.dispose();
+        }
+      }
+
+      return deleteResult;
+    },
+  };
+
+  public setValue(value: Array<T>): boolean {
+    const prev = this.value;
+
+    this.target = value;
+    this.proxy = this.define(value);
+
+    this.emit("change", {
+      current: value,
+      prev,
+    });
+
+    return true;
+  }
+
+  public get snapshot(): Array<T> {
+    return [...this.target];
+  }
+
+  public get keys(): string[] {
+    const result = [];
+    for (const index in this.target) {
+      result.push(index);
+    }
+
+    return result;
+  }
+
+  public get value(): Array<T> {
+    this.reportUsage();
+
+    return this.proxy;
+  }
+
+  public getManager(key: string | symbol): ManagerInstance | null {
+    return this.managers[Number(key)];
+  }
+
+  private clearManagers() {
+    for (const manager of this.managers) {
+      manager.dispose();
+    }
+
+    this.managers = [];
+  }
+
+  public dispose(): void {
+    super.dispose();
+    this.clearManagers();
+  }
+
+  private define(target: Array<T>): Array<T> {
+    this.clearManagers();
+
+    for (const item of target) {
+      this.managers.push(
+        observable<T>(item, {
+          path: this.joinToPath(String(this.managers.length)),
+        })
+      );
+    }
+
+    return new Proxy(target, this.handlers);
+  }
+}
+
+export default ArrayManager;
