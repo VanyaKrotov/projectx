@@ -6,7 +6,7 @@
   var __getOwnPropSymbols = Object.getOwnPropertySymbols;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __propIsEnum = Object.prototype.propertyIsEnumerable;
-  var __defNormalProp = (obj2, key, value) => key in obj2 ? __defProp(obj2, key, { enumerable: true, configurable: true, writable: true, value }) : obj2[key] = value;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __spreadValues = (a, b) => {
     for (var prop in b || (b = {}))
       if (__hasOwnProp.call(b, prop))
@@ -31,29 +31,9 @@
       }
     return target;
   };
-  var __publicField = (obj2, key, value) => {
-    __defNormalProp(obj2, typeof key !== "symbol" ? key + "" : key, value);
+  var __publicField = (obj, key, value) => {
+    __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
     return value;
-  };
-  var __async = (__this, __arguments, generator) => {
-    return new Promise((resolve, reject) => {
-      var fulfilled = (value) => {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      };
-      var rejected = (value) => {
-        try {
-          step(generator.throw(value));
-        } catch (e) {
-          reject(e);
-        }
-      };
-      var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-      step((generator = generator.apply(__this, __arguments)).next());
-    });
   };
 
   // src/modules/root-manager.ts
@@ -123,9 +103,9 @@
   function runAfterScript(fn) {
     return Promise.resolve().then(fn);
   }
-  function getGetters(obj2, ignoredKeys = []) {
+  function getGetters(obj, ignoredKeys = []) {
     const descriptions = Object.getOwnPropertyDescriptors(
-      Object.getPrototypeOf(obj2)
+      Object.getPrototypeOf(obj)
     );
     const result = {};
     for (const key in descriptions) {
@@ -135,6 +115,12 @@
       }
     }
     return result;
+  }
+  function isEqualArray(arr1, arr2) {
+    if (arr1.length !== arr2.length) {
+      return false;
+    }
+    return arr1.every((key) => arr2.indexOf(key) !== -1);
   }
 
   // src/modules/observable.ts
@@ -153,6 +139,34 @@
     }
     return new value_manager_default(target, options);
   }
+
+  // src/modules/batch.ts
+  var Batch = class {
+    constructor() {
+      __publicField(this, "batches", []);
+    }
+    get hasBatch() {
+      return this.batches.length > 0;
+    }
+    open() {
+      this.batches.push(/* @__PURE__ */ new Set());
+    }
+    action(handler) {
+      if (!this.hasBatch) {
+        return handler();
+      }
+      this.batches[this.batches.length - 1].add(handler);
+    }
+    closeBatch() {
+      const batch2 = this.batches.pop();
+      if (!batch2) {
+        return;
+      }
+      batch2.forEach((handler) => handler());
+    }
+  };
+  var batch = new Batch();
+  var batch_default = batch;
 
   // src/modules/optimization-tree.ts
   var TreeNode = class {
@@ -175,12 +189,6 @@
       return nextNode.pushPath(paths);
     }
   };
-  function isEqualArray(arr1, arr2) {
-    if (arr1.length !== arr2.length) {
-      return false;
-    }
-    return arr1.every((key) => arr2.indexOf(key) !== -1);
-  }
   var OptimizationTree = class extends TreeNode {
     constructor(paths) {
       super("", null);
@@ -233,33 +241,8 @@
   };
   var optimization_tree_default = OptimizationTree;
 
-  // src/modules/batch-manager.ts
-  var Batch = class {
-    constructor() {
-      __publicField(this, "batches", []);
-    }
-    get hasBatch() {
-      return this.batches.length > 0;
-    }
-    open() {
-      this.batches.push(/* @__PURE__ */ new Set());
-    }
-    action(handler) {
-      if (!this.hasBatch) {
-        return handler();
-      }
-      const lastBatch = this.batches[this.batches.length - 1];
-      lastBatch.add(handler);
-    }
-    closeBatch() {
-      const batch = this.batches.pop();
-      if (!batch) {
-        return;
-      }
-      batch.forEach((handler) => handler());
-    }
-  };
-  var BatchManager = class {
+  // src/modules/interceptor.ts
+  var Interceptor = class {
     constructor() {
       __publicField(this, "batches", /* @__PURE__ */ new Set());
     }
@@ -295,8 +278,8 @@
       return new optimization_tree_default(paths);
     }
   };
-  var transactionBatches = new Batch();
-  var batch_manager_default = new BatchManager();
+  var interceptor = new Interceptor();
+  var interceptor_default = interceptor;
 
   // src/modules/reaction.ts
   var Reaction = class {
@@ -329,10 +312,10 @@
     }
     startWatch() {
       this.paths = [];
-      batch_manager_default.register(this.listener);
+      interceptor_default.register(this.listener);
     }
     endWatch() {
-      batch_manager_default.unregister(this.listener);
+      interceptor_default.unregister(this.listener);
     }
     watch(watch2) {
       const tree = this.getOptimizationTree();
@@ -348,7 +331,7 @@
       this.unlisten();
       this.unsubscribeFns = managers.map(
         ({ listenTypes, manager }) => manager.listen(listenTypes, () => {
-          transactionBatches.action(handler);
+          batch_default.action(handler);
         })
       );
       return this.unlisten;
@@ -436,7 +419,7 @@
       if (!this.annotation.observable) {
         return;
       }
-      batch_manager_default.emit({ path: this.path });
+      interceptor_default.emit({ path: this.path });
     }
     joinToPath(key) {
       return [...this.path, String(key)];
@@ -789,8 +772,8 @@
       new object_manager_default(new Target(), { path: [createUniqPath(Target.name)] })
     ),
     array: (target) => new array_manager_default(target, { path: [createUniqPath()] }),
-    map: () => /* @__PURE__ */ new Map(),
-    set: () => /* @__PURE__ */ new Set()
+    map: (target) => target,
+    set: (target) => target
   };
 
   // src/modules/watch.ts
@@ -852,110 +835,8 @@
 
   // src/modules/transaction.ts
   function transaction(callback) {
-    transactionBatches.open();
+    batch_default.open();
     callback();
-    transactionBatches.closeBatch();
+    batch_default.closeBatch();
   }
-
-  // src/index.ts
-  var BaseState = class {
-    constructor() {
-      __publicField(this, "counter", 1);
-      __publicField(this, "array", [10, 23]);
-    }
-    get mul() {
-      return this.counter * 2;
-    }
-  };
-  var State = class extends BaseState {
-    increment() {
-      this.counter++;
-    }
-    decrement() {
-      this.counter--;
-    }
-    fetch() {
-      return __async(this, null, function* () {
-        this.array[0] = this.counter + 1;
-      });
-    }
-    push() {
-      transaction(() => {
-        this.counter++;
-        this.array.push(this.array.length * this.counter);
-        this.counter++;
-      });
-    }
-  };
-  var obj = {
-    counter: 1,
-    inc() {
-      this.counter++;
-    },
-    dec() {
-      this.counter--;
-    }
-  };
-  var state = observable2.class(State);
-  var stateObj = observable2.object(obj);
-  console.log(state);
-  var div = document.createElement("div");
-  var div1 = document.createElement("div");
-  var div2 = document.createElement("div");
-  var buttonPlus = document.createElement("button");
-  var buttonMinus = document.createElement("button");
-  var buttonPlus2 = document.createElement("button");
-  var buttonMinus2 = document.createElement("button");
-  var buttonFetch = document.createElement("button");
-  var buttonPush = document.createElement("button");
-  buttonMinus.innerText = "-";
-  buttonPlus.innerText = "+";
-  buttonPlus2.innerText = "+";
-  buttonMinus2.innerText = "-";
-  buttonFetch.innerText = "fetch";
-  buttonPush.innerText = "push";
-  autorun(() => {
-    console.log("trigger counter");
-    div.innerText = `state: ${state.counter}`;
-  });
-  autorun(() => {
-    console.log("trigger stateObj");
-    div1.innerText = `stateObj: ${stateObj.counter}`;
-  });
-  autorun(() => {
-    console.log("trigger array");
-    div2.innerText = `arr: ${JSON.stringify(state.array)}`;
-    div.innerText = `state: ${state.counter}`;
-  });
-  when(() => state.counter > 3).then(() => {
-    console.log("test");
-  });
-  buttonPlus.addEventListener("click", () => {
-    state.increment();
-  });
-  buttonMinus.addEventListener("click", () => {
-    state.decrement();
-  });
-  buttonPlus2.addEventListener("click", () => {
-    stateObj.inc();
-  });
-  buttonMinus2.addEventListener("click", () => {
-    stateObj.dec();
-  });
-  buttonFetch.addEventListener("click", () => {
-    state.fetch();
-  });
-  buttonPush.addEventListener("click", () => {
-    state.push();
-  });
-  document.body.appendChild(div);
-  document.body.appendChild(div1);
-  document.body.appendChild(div2);
-  document.body.appendChild(buttonPlus);
-  document.body.appendChild(buttonMinus);
-  document.body.appendChild(buttonPlus2);
-  document.body.appendChild(buttonMinus2);
-  document.body.appendChild(buttonFetch);
-  document.body.appendChild(buttonPush);
 })();
-//# sourceMappingURL=storex.js.map

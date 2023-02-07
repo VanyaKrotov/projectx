@@ -3,15 +3,10 @@ const path = require("path");
 const http = require("http");
 const fs = require("fs");
 
+const { getConfig } = require("../config/esbuild.config");
+
 esbuild
-  .context({
-    entryPoints: ["./src/dev.js"],
-    outfile: "dist/storex.js",
-    target: "es2015",
-    bundle: true,
-    sourcemap: true,
-    tsconfig: path.resolve(__dirname, "../tsconfig.json"),
-  })
+  .context(getConfig({}))
   .then((ctx) => ctx.watch())
   .catch((err) => {
     console.error(err);
