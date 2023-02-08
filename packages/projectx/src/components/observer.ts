@@ -5,7 +5,7 @@ import {
   ObserverWithTypeInstance,
 } from "shared/types";
 
-class Observer<T> implements ObserverInstance<T> {
+export class Observer<T> implements ObserverInstance<T> {
   private listeners = new Set<Listener<T>>();
 
   public listen(listener: Listener<T>): VoidFunction {
@@ -51,7 +51,7 @@ class ObserverWithType<T, E extends string>
     };
   }
 
-  public emit(type: E, event: Event<T>): void {
+  public emit(type: Exclude<E, "all">, event: Event<T>): void {
     if (!this.observable || event.current === event.prev) {
       return;
     }
