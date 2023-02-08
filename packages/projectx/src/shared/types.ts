@@ -23,7 +23,7 @@ export type ObserverTypes =
   | "dispose"
   | "all";
 
-export interface ManagerInstance<T = unknown, M = unknown>
+export interface ManagerInstance<T = unknown, M = never>
   extends ObserverWithTypeInstance<T, ObserverTypes>,
     RequiredManagerInstance<T> {
   path: string[];

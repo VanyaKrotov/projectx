@@ -1,19 +1,20 @@
 const path = require("path");
 
-const { name } = require("../package.json");
+const { name, version } = require("../package.json");
 
 const ENTRY_POINTS = {
   development: ["./src/dev.js"],
   production: ["./src/index.js"],
 };
 
-function getConfig({ mode = 'development', minify = false }) {
+function getConfig({ mode = "development", minify = false }) {
   const isDevelopment = mode === "development";
   const outDir = isDevelopment ? "dist" : "build";
+  const versionPOstfix = isDevelopment ? "" : `.v${version}`;
 
   return {
     entryPoints: ENTRY_POINTS[mode],
-    outfile: `${outDir}/${name}${minify ? ".min" : ""}.js`,
+    outfile: `${outDir}/${name}${minify ? ".min" : ""}${versionPOstfix}.js`,
     target: "es2015",
     bundle: true,
     sourcemap: isDevelopment,
