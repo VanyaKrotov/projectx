@@ -7,4 +7,4 @@ export {
   transaction,
 } from "./modules";
 
-export type { Annotated, EntryAnnotation } from "shared/types";
+export type { Annotated, EntryAnnotation } from "./shared/types";

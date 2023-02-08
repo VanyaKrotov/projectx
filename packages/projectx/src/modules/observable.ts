@@ -1,5 +1,5 @@
-import { isObject } from "shared/utils";
-import type { ManagerInstance, ManagerOptions } from "shared/types";
+import { isObject } from "../shared/utils";
+import type { ManagerInstance, ManagerOptions } from "../shared/types";
 
 import { ArrayManager, ObjectManager, ValueManager } from "./components";
 

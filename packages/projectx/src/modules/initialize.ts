@@ -1,8 +1,8 @@
-import { ManagerInstance, ReactionInstance } from "shared/types";
+import { ManagerInstance, ReactionInstance } from "../shared/types";
+import { __DEV__ } from "../shared/constants";
 
-import Batch from "components/batch";
-import Interceptor from "components/interceptor";
-import { __DEV__ } from "shared/constants";
+import Batch from "../components/batch";
+import Interceptor from "../components/interceptor";
 
 export const interceptor = new Interceptor();
 

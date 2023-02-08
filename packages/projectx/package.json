@@ -1,5 +1,5 @@
 {
-  "name": "projectx",
+  "name": "projectx-store",
   "version": "0.0.1",
   "description": "Lightweight reactive storage",
   "main": "src/index.ts",

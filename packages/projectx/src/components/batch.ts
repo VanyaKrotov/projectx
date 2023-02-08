@@ -1,4 +1,4 @@
-import { BatchInstance } from "shared/types";
+import { BatchInstance } from "../shared/types";
 
 class Batch implements BatchInstance {
   private readonly batches: Set<VoidFunction>[] = [];

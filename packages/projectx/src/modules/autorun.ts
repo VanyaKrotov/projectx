@@ -1,5 +1,5 @@
-import { WatchCallback } from "shared/types";
-import { runAfterScript } from "shared/utils";
+import { WatchCallback } from "../shared/types";
+import { runAfterScript } from "../shared/utils";
 
 import { Reaction } from "./reaction";
 

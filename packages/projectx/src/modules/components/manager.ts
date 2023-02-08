@@ -3,11 +3,11 @@ import {
   ManagerInstance,
   ManagerOptions,
   ObserverTypes,
-} from "shared/types";
+} from "../../shared/types";
 
-import { ObserverWithType } from "components/observer";
+import { ObserverWithType } from "../../components/observer";
 
-import { interceptor } from "modules/initialize";
+import { interceptor } from "../initialize";
 
 abstract class Manager<T, A extends Annotation, M>
   extends ObserverWithType<T, ObserverTypes>

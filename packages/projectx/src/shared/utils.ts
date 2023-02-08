@@ -1,4 +1,4 @@
-import { uid } from "shared/uid";
+import { uid } from "./uid";
 
 export function isObject<T>(target: T) {
   return target && typeof target === "object" && !Array.isArray(target);

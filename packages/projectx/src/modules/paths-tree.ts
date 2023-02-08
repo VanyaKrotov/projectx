@@ -4,10 +4,10 @@ import {
   ObserverTypes,
   PathNodeInstance,
   PathsTreeInstance,
-} from "shared/types";
-import { isEqualArray } from "shared/utils";
+} from "../shared/types";
+import { isEqualArray } from "../shared/utils";
 
-import { managers } from "modules/initialize";
+import { managers } from "../modules/initialize";
 
 class PathNode implements PathNodeInstance {
   public children: Record<string, PathNodeInstance> = {};

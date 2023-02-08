@@ -4,9 +4,9 @@ import type {
   ManagerOptions,
   ReactionInstance,
   RequiredManagerInstance,
-} from "shared/types";
-import { runAfterScript } from "shared/utils";
-import { ANNOTATIONS } from "shared/constants";
+} from "../../shared/types";
+import { runAfterScript } from "../../shared/utils";
+import { ANNOTATIONS } from "../../shared/constants";
 
 import { Reaction } from "../reaction";
 import Manager from "./manager";

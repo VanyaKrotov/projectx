@@ -13,12 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": false,
-    "noEmit": true,
-    "paths": {
-      "shared/*": ["./src/shared/*"],
-      "components/*": ["./src/components/*"],
-      "modules/*": ["./src/modules/*"]
-    }
+    "noEmit": true
   },
   "include": ["src/**/*"]
 }

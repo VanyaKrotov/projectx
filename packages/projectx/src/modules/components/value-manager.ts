@@ -3,8 +3,8 @@ import {
   ManagerOptions,
   RequiredManagerInstance,
   ValueAnnotation,
-} from "shared/types";
-import { ANNOTATIONS } from "shared/constants";
+} from "../../shared/types";
+import { ANNOTATIONS } from "../../shared/constants";
 
 import Manager from "./manager";
 

@@ -1,5 +1,5 @@
-import { WatchOptions } from "shared/types";
-import { runAfterScript } from "shared/utils";
+import { WatchOptions } from "../shared/types";
+import { runAfterScript } from "../shared/utils";
 
 import { Reaction } from "./reaction";
 

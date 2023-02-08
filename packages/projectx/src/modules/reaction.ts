@@ -3,11 +3,11 @@ import {
   PathsTreeInstance,
   ReactionInstance,
   WatchCallback,
-} from "shared/types";
-import { uid } from "shared/uid";
+} from "../shared/types";
+import { uid } from "../shared/uid";
 
-import PathTree from "modules/paths-tree";
-import { batch, interceptor, reactions } from "modules/initialize";
+import PathTree from "./paths-tree";
+import { batch, interceptor, reactions } from "./initialize";
 
 class Reaction implements ReactionInstance {
   private paths: string[][] = [];

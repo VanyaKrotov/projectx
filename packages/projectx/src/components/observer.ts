@@ -3,7 +3,7 @@ import {
   Listener,
   ObserverInstance,
   ObserverWithTypeInstance,
-} from "shared/types";
+} from "../shared/types";
 
 export class Observer<T> implements ObserverInstance<T> {
   private listeners = new Set<Listener<T>>();

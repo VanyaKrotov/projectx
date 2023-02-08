@@ -3,11 +3,11 @@ import {
   ManagerInstance,
   ManagerOptions,
   RequiredManagerInstance,
-} from "shared/types";
-import { isFunction } from "shared/utils";
-import { ANNOTATIONS } from "shared/constants";
+} from "../../shared/types";
+import { isFunction } from "../../shared/utils";
+import { ANNOTATIONS } from "../../shared/constants";
 
-import { observable } from "modules/observable";
+import { observable } from "../observable";
 
 import Manager from "./manager";
 

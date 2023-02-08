@@ -1,8 +1,7 @@
-import { managers } from "modules/initialize";
+import type { ManagerInstance, Constructable, Annotated } from "../shared/types";
+import { createUniqPath } from "../shared/utils";
 
-import type { ManagerInstance, Constructable, Annotated } from "shared/types";
-import { createUniqPath } from "shared/utils";
-
+import { managers } from "./initialize";
 import { ArrayManager, ObjectManager } from "./components";
 
 function register<T>(manager: ManagerInstance<T>): T {

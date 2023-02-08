@@ -3,8 +3,8 @@ const path = require("path");
 const { name, version } = require("../package.json");
 
 const ENTRY_POINTS = {
-  development: ["./src/dev.js"],
-  production: ["./src/index.js"],
+  development: ["./src/dev.ts"],
+  production: ["./src/index.ts"],
 };
 
 function getConfig({ mode = "development", minify = false }) {

@@ -2,7 +2,7 @@ import {
   InterceptorEvent,
   InterceptorListener,
   InterceptorInstance,
-} from "shared/types";
+} from "../shared/types";
 
 class Interceptor implements InterceptorInstance {
   private readonly listeners = new Set<InterceptorListener>();
