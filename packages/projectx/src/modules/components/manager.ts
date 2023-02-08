@@ -7,7 +7,7 @@ import {
 
 import { ObserverWithType } from "components/observer";
 
-import interceptor from "modules/interceptor";
+import { interceptor } from "modules/initialize";
 
 abstract class Manager<T, A extends Annotation, M>
   extends ObserverWithType<T, ObserverTypes>
@@ -26,6 +26,7 @@ abstract class Manager<T, A extends Annotation, M>
 
   public dispose(): void {
     this.path = [];
+    this.disposeManagers();
     this.emit("dispose", { prev: this.snapshot });
   }
 
@@ -57,6 +58,8 @@ abstract class Manager<T, A extends Annotation, M>
   public toString(): string {
     return String(this.snapshot);
   }
+
+  public disposeManagers(): void {}
 }
 
 export default Manager;

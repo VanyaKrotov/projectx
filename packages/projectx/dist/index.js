@@ -36,44 +36,98 @@
     return value;
   };
 
-  // src/modules/root-manager.ts
+  // src/components/batch.ts
+  var Batch = class {
+    constructor() {
+      __publicField(this, "batches", []);
+    }
+    open() {
+      this.batches.push(/* @__PURE__ */ new Set());
+    }
+    action(handler) {
+      if (!this.batches.length) {
+        return handler();
+      }
+      this.batches[this.batches.length - 1].add(handler);
+    }
+    close() {
+      const batch2 = this.batches.pop();
+      if (!batch2) {
+        return;
+      }
+      batch2.forEach((handler) => handler());
+    }
+  };
+  var batch_default = Batch;
+
+  // src/components/interceptor.ts
+  var Interceptor = class {
+    constructor() {
+      __publicField(this, "listeners", /* @__PURE__ */ new Set());
+    }
+    register(listener) {
+      this.listeners.add(listener);
+    }
+    unregister(listener) {
+      this.listeners.delete(listener);
+    }
+    emit(event) {
+      if (!this.listeners.size) {
+        return;
+      }
+      Array.from(this.listeners).pop()(event);
+    }
+  };
+  var interceptor_default = Interceptor;
+
+  // src/components/reaction-manager.ts
+  var ReactionManager = class {
+    constructor() {
+      __publicField(this, "reactions", {});
+    }
+    add(id, reaction) {
+      this.reactions[id] = reaction;
+    }
+    delete(id) {
+      return delete this.reactions[id];
+    }
+    get(id) {
+      return this.reactions[id];
+    }
+  };
+  var reaction_manager_default = ReactionManager;
+
+  // src/components/root-manager.ts
   var RootManager = class {
     constructor() {
       __publicField(this, "managers", {});
-      __publicField(this, "reactions", {});
     }
-    addReaction(id, reaction) {
-      this.reactions[id] = reaction;
-    }
-    deleteReaction(id) {
-      return delete this.reactions[id];
-    }
-    getReaction(id) {
-      return this.reactions[id];
-    }
-    addManager(manager) {
+    add(manager) {
       this.managers[manager.name] = manager;
     }
-    getManager(id) {
+    get(id) {
       return this.managers[id];
     }
-    getManagerByPathRecursive(root, [path, ...rest]) {
+    getByPathRec(root, [path, ...rest]) {
       if (root.name === path) {
         return root;
       }
       if (!rest.length) {
         return root.managers[path];
       }
-      return this.getManagerByPathRecursive(root.managers[path], rest);
+      return this.getByPathRec(root.managers[path], rest);
     }
-    getManagerByPath([
-      rootPath,
-      ...restPath
-    ]) {
-      return this.getManagerByPathRecursive(this.managers[rootPath], restPath);
+    getByPath([rootPath, ...restPath]) {
+      return this.getByPathRec(this.managers[rootPath], restPath);
     }
   };
-  var root_manager_default = new RootManager();
+  var root_manager_default = RootManager;
+
+  // src/modules/initialize.ts
+  var rootManager = new root_manager_default();
+  var interceptor = new interceptor_default();
+  var batch = new batch_default();
+  var reactionManager = new reaction_manager_default();
 
   // src/shared/uid.ts
   function uidGenerator() {
@@ -115,6 +169,23 @@
     return arr1.every((key) => arr2.indexOf(key) !== -1);
   }
 
+  // src/shared/constants.ts
+  var ANNOTATIONS = {
+    observer: {
+      observable: true
+    },
+    value: {
+      observable: true
+    },
+    computed: {
+      observable: true,
+      memoised: true
+    },
+    array: {
+      observable: true
+    }
+  };
+
   // src/modules/observable.ts
   function observable(target, options) {
     if (Array.isArray(target)) {
@@ -131,200 +202,6 @@
     }
     return new value_manager_default(target, options);
   }
-
-  // src/modules/batch.ts
-  var Batch = class {
-    constructor() {
-      __publicField(this, "batches", []);
-    }
-    get hasBatch() {
-      return this.batches.length > 0;
-    }
-    open() {
-      this.batches.push(/* @__PURE__ */ new Set());
-    }
-    action(handler) {
-      if (!this.hasBatch) {
-        return handler();
-      }
-      this.batches[this.batches.length - 1].add(handler);
-    }
-    closeBatch() {
-      const batch2 = this.batches.pop();
-      if (!batch2) {
-        return;
-      }
-      batch2.forEach((handler) => handler());
-    }
-  };
-  var batch = new Batch();
-  var batch_default = batch;
-
-  // src/modules/paths-tree.ts
-  var TreeNode = class {
-    constructor(value, manager) {
-      this.value = value;
-      this.manager = manager;
-      __publicField(this, "children", {});
-      __publicField(this, "listenTypes", []);
-    }
-    get keys() {
-      return Object.keys(this.children);
-    }
-    push([path, ...paths]) {
-      const nextNode = this.children[path] || new TreeNode(path, this.manager.getManager(path));
-      this.children[path] = nextNode;
-      if (!paths.length) {
-        return;
-      }
-      return nextNode.push(paths);
-    }
-  };
-  var PathTree = class {
-    constructor(paths) {
-      __publicField(this, "nodes", {});
-      for (const [path, ...restPath] of paths) {
-        this.nodes[path] = this.nodes[path] || new TreeNode(path, root_manager_default.getManager(path));
-        this.nodes[path].push(restPath);
-      }
-      for (const key in this.nodes) {
-        this.linkingRecursive(this.nodes[key]);
-      }
-    }
-    linkingRecursive(node) {
-      const keys = Object.keys(node.children);
-      if (!keys.length) {
-        return node.listenTypes = ["all"];
-      }
-      node.listenTypes = isEqualArray(keys, node.manager.keys) ? ["add", "change", "remove"] : ["change"];
-      for (const key of keys) {
-        this.linkingRecursive(node.children[key]);
-      }
-    }
-    optimizedManagersRec(node) {
-      let res = [
-        { listenTypes: node.listenTypes, manager: node.manager }
-      ];
-      if (!node.keys.length) {
-        return res;
-      }
-      for (const key in node.children) {
-        res = res.concat(this.optimizedManagersRec(node.children[key]));
-      }
-      return res;
-    }
-    getListenManagers() {
-      let result = [];
-      for (const key in this.nodes) {
-        result = result.concat(this.optimizedManagersRec(this.nodes[key]));
-      }
-      return result;
-    }
-  };
-  var paths_tree_default = PathTree;
-
-  // src/modules/interceptor.ts
-  var Interceptor = class {
-    constructor() {
-      __publicField(this, "batches", /* @__PURE__ */ new Set());
-    }
-    watch(fn, listener) {
-      this.register(listener);
-      const result = fn();
-      this.unregister(listener);
-      return result;
-    }
-    register(listener) {
-      this.batches.add(listener);
-    }
-    unregister(listener) {
-      this.batches.delete(listener);
-    }
-    emit(event) {
-      if (!this.batches.size) {
-        return;
-      }
-      Array.from(this.batches).pop()(event);
-    }
-    getCaptured(fn) {
-      const paths = [];
-      const result = this.watch(fn, ({ path }) => {
-        paths.push(path);
-      });
-      return {
-        result,
-        variables: new paths_tree_default(paths)
-      };
-    }
-    optimizePaths(paths) {
-      return new paths_tree_default(paths);
-    }
-  };
-  var interceptor = new Interceptor();
-  var interceptor_default = interceptor;
-
-  // src/modules/reaction.ts
-  var Reaction = class {
-    constructor(id = `Reaction#${uid()}`) {
-      this.id = id;
-      __publicField(this, "paths", []);
-      __publicField(this, "unsubscribeFns", []);
-      __publicField(this, "listener", ({ path }) => {
-        this.paths.push(path);
-      });
-      __publicField(this, "unlisten", () => {
-        if (!this.unsubscribeFns.length) {
-          return;
-        }
-        this.unsubscribeFns.forEach((unlistener) => unlistener());
-        this.unsubscribeFns = [];
-      });
-      root_manager_default.addReaction(id, this);
-    }
-    getOptimizationTree() {
-      if (!this.paths.length) {
-        return null;
-      }
-      return new paths_tree_default(this.paths);
-    }
-    dispose() {
-      root_manager_default.deleteReaction(this.id);
-      this.paths = [];
-      this.unlisten();
-    }
-    startWatch() {
-      this.paths = [];
-      interceptor_default.register(this.listener);
-    }
-    endWatch() {
-      interceptor_default.unregister(this.listener);
-    }
-    watch(watch2) {
-      const tree = this.getOptimizationTree();
-      if (!tree) {
-        console.warn(
-          `Instances for listen in reaction \`${this.id}\` not found. Reconsider the use of adverse reactions.`
-        );
-        return () => {
-        };
-      }
-      const managers = tree.getListenManagers();
-      const handler = () => watch2(this.unlisten);
-      this.unlisten();
-      this.unsubscribeFns = managers.map(
-        ({ listenTypes, manager }) => manager.listen(listenTypes, () => {
-          batch_default.action(handler);
-        })
-      );
-      return this.unlisten;
-    }
-    syncCaptured(fn) {
-      this.startWatch();
-      const result = fn();
-      this.endWatch();
-      return result;
-    }
-  };
 
   // src/components/observer.ts
   var Observer = class {
@@ -354,8 +231,6 @@
       if (!this.observable) {
         return () => {
         };
-      }
-      if (Array.isArray(type)) {
       }
       const unlisten = [];
       const types = Array.isArray(type) ? type : [type];
@@ -395,13 +270,14 @@
     }
     dispose() {
       this.path = [];
+      this.disposeManagers();
       this.emit("dispose", { prev: this.snapshot });
     }
     reportUsage() {
       if (!this.annotation.observable) {
         return;
       }
-      interceptor_default.emit({ path: this.path });
+      interceptor.emit({ path: this.path });
     }
     joinToPath(key) {
       return [...this.path, String(key)];
@@ -418,28 +294,141 @@
     toString() {
       return String(this.snapshot);
     }
+    disposeManagers() {
+    }
   };
   var manager_default = Manager;
 
-  // src/modules/components/constants.ts
-  var OBSERVER_ANNOTATION = {
-    observable: true
+  // src/modules/paths-tree.ts
+  var PathNode = class {
+    constructor(value, manager) {
+      this.value = value;
+      this.manager = manager;
+      __publicField(this, "children", {});
+      __publicField(this, "listenTypes", []);
+    }
+    get keys() {
+      return Object.keys(this.children);
+    }
+    push([path, ...paths]) {
+      const nextNode = this.children[path] || new PathNode(path, this.manager.manager(path));
+      this.children[path] = nextNode;
+      if (!paths.length) {
+        return;
+      }
+      return nextNode.push(paths);
+    }
   };
-  var VALUE_ANNOTATION = {
-    observable: true
+  var PathTree = class {
+    constructor(paths) {
+      __publicField(this, "nodes", {});
+      for (const [path, ...restPath] of paths) {
+        this.nodes[path] = this.nodes[path] || new PathNode(path, rootManager.get(path));
+        this.nodes[path].push(restPath);
+      }
+      for (const key in this.nodes) {
+        this.linkingRec(this.nodes[key]);
+      }
+    }
+    linkingRec(node) {
+      const keys = Object.keys(node.children);
+      if (!keys.length) {
+        return node.listenTypes = ["all"];
+      }
+      node.listenTypes = isEqualArray(keys, node.manager.keys) ? ["add", "change", "remove"] : ["change"];
+      for (const key of keys) {
+        this.linkingRec(node.children[key]);
+      }
+    }
+    optimizedRec(node) {
+      let result = [
+        { listenTypes: node.listenTypes, manager: node.manager }
+      ];
+      if (!node.keys.length) {
+        return result;
+      }
+      for (const key in node.children) {
+        result = result.concat(this.optimizedRec(node.children[key]));
+      }
+      return result;
+    }
+    getListenManagers() {
+      let result = [];
+      for (const key in this.nodes) {
+        result = result.concat(this.optimizedRec(this.nodes[key]));
+      }
+      return result;
+    }
   };
-  var COMPUTED_ANNOTATION = {
-    observable: true,
-    memoised: true
-  };
-  var ARRAY_ANNOTATION = {
-    observable: true
+  var paths_tree_default = PathTree;
+
+  // src/modules/reaction.ts
+  var Reaction = class {
+    constructor(id = `Reaction#${uid()}`) {
+      this.id = id;
+      __publicField(this, "paths", []);
+      __publicField(this, "unsubscribeFns", []);
+      __publicField(this, "listener", ({ path }) => {
+        this.paths.push(path);
+      });
+      __publicField(this, "unlisten", () => {
+        if (!this.unsubscribeFns.length) {
+          return;
+        }
+        this.unsubscribeFns.forEach((unlistener) => unlistener());
+        this.unsubscribeFns = [];
+      });
+      reactionManager.add(id, this);
+    }
+    getPathTree() {
+      if (!this.paths.length) {
+        return null;
+      }
+      return new paths_tree_default(this.paths);
+    }
+    dispose() {
+      reactionManager.delete(this.id);
+      this.paths = [];
+      this.unlisten();
+    }
+    startWatch() {
+      this.paths = [];
+      interceptor.register(this.listener);
+    }
+    endWatch() {
+      interceptor.unregister(this.listener);
+    }
+    watch(watch2) {
+      const tree = this.getPathTree();
+      if (!tree) {
+        console.warn(
+          `Instances for listen in reaction \`${this.id}\` not found. Reconsider the use of adverse reactions.`
+        );
+        return () => {
+        };
+      }
+      const managers = tree.getListenManagers();
+      const handler = () => watch2(this.unlisten);
+      this.unlisten();
+      this.unsubscribeFns = managers.map(
+        ({ listenTypes, manager }) => manager.listen(listenTypes, () => {
+          batch.action(handler);
+        })
+      );
+      return this.unlisten;
+    }
+    syncCaptured(fn) {
+      this.startWatch();
+      const result = fn();
+      this.endWatch();
+      return result;
+    }
   };
 
-  // src/modules/components/object-manager.ts
+  // src/modules/components/computed-manager.ts
   var ComputedManager = class extends manager_default {
     constructor(target, options) {
-      super(options, COMPUTED_ANNOTATION);
+      super(options, ANNOTATIONS.computed);
       this.target = target;
       __publicField(this, "reaction");
       __publicField(this, "savedResult");
@@ -449,7 +438,7 @@
       this.reaction = new Reaction(`Computed#${this.path.join(".")}`);
       this.emit("define", { current: this.snapshot });
     }
-    getManager() {
+    manager() {
       return null;
     }
     get snapshot() {
@@ -480,7 +469,7 @@
         return this.savedResult;
       };
     }
-    setValue() {
+    set() {
       return false;
     }
     dispose() {
@@ -488,9 +477,12 @@
       super.dispose();
     }
   };
+  var computed_manager_default = ComputedManager;
+
+  // src/modules/components/object-manager.ts
   var ObjectManager = class extends manager_default {
     constructor(target, options) {
-      super(options, OBSERVER_ANNOTATION);
+      super(options, ANNOTATIONS.observer);
       this.target = target;
       __publicField(this, "managers", {});
       __publicField(this, "proxy");
@@ -505,10 +497,10 @@
           return deleteResult;
         },
         defineProperty: (_target, key, prop) => {
-          const result = this.defineProperty(
+          const result = this.defineProp(
             key,
             prop,
-            this.annotationOptions.fields[String(key)]
+            this.annotations.fields[String(key)]
           );
           this.emit("add", {
             current: this.value
@@ -518,14 +510,14 @@
       });
       this.proxy = this.define(target);
     }
-    get annotationOptions() {
+    get annotations() {
       const annotation = this.target.annotation || {};
       return __spreadValues({
         fields: {},
         getters: {}
       }, annotation);
     }
-    defineProperty(key, { value, configurable = true, enumerable = true }, options) {
+    defineProp(key, { value, configurable = true, enumerable = true }, options) {
       this.managers[key] = observable(value, {
         path: this.joinToPath(key),
         annotation: options
@@ -534,22 +526,19 @@
         configurable,
         enumerable,
         get: () => this.managers[key].value,
-        set: (value2) => this.managers[key].setValue(value2)
+        set: (value2) => this.managers[key].set(value2)
       });
       return true;
     }
-    defineComputed(key, _a, options) {
+    defineComp(key, _a, options) {
       var _b = _a, { get } = _b, descriptions = __objRest(_b, ["get"]);
-      this.managers[key] = new ComputedManager(get.bind(this.target), {
+      this.managers[key] = new computed_manager_default(get.bind(this.target), {
         path: this.joinToPath(key),
         annotation: options
       });
       Object.defineProperty(this.target, key, __spreadProps(__spreadValues({}, descriptions), {
         get: this.managers[key].value
       }));
-    }
-    get name() {
-      return this.path[this.path.length - 1];
     }
     get snapshot() {
       return Object.entries(this.managers).reduce(
@@ -564,7 +553,7 @@
     get keys() {
       return Object.keys(this.managers);
     }
-    setValue(value) {
+    set(value) {
       this.target = value;
       const prev = __spreadValues({}, this.target);
       this.proxy = this.define(value);
@@ -574,29 +563,25 @@
       });
       return true;
     }
-    clearManagers() {
+    disposeManagers() {
       for (const key in this.managers) {
         this.managers[key].dispose();
       }
       this.managers = {};
     }
-    dispose() {
-      super.dispose();
-      this.clearManagers();
-    }
-    getManager(key) {
+    manager(key) {
       return this.managers[key];
     }
     define(target) {
-      this.clearManagers();
+      this.disposeManagers();
       const proxy = new Proxy(target, this.handlers);
       const getters = getGetters(target, ["annotation"]);
-      const annotation = this.annotationOptions;
+      const annotation = this.annotations;
       for (const key in target) {
-        this.defineProperty(key, { value: target[key] }, annotation.fields[key]);
+        this.defineProp(key, { value: target[key] }, annotation.fields[key]);
       }
       for (const key in getters) {
-        this.defineComputed(key, getters[key], annotation.getters[key]);
+        this.defineComp(key, getters[key], annotation.getters[key]);
       }
       return proxy;
     }
@@ -606,7 +591,7 @@
   // src/modules/components/value-manager.ts
   var ValueManager = class extends manager_default {
     constructor(target, options) {
-      super(options, VALUE_ANNOTATION);
+      super(options, ANNOTATIONS.value);
       this.target = target;
       this.emit("define", { current: target });
     }
@@ -614,7 +599,7 @@
       this.reportUsage();
       return this.target;
     }
-    setValue(value) {
+    set(value) {
       const prev = this.target;
       this.target = value;
       this.emit("change", {
@@ -623,7 +608,7 @@
       });
       return true;
     }
-    getManager() {
+    manager() {
       return null;
     }
   };
@@ -632,7 +617,7 @@
   // src/modules/components/array-manager.ts
   var ArrayManager = class extends manager_default {
     constructor(target, options) {
-      super(options, ARRAY_ANNOTATION);
+      super(options, ANNOTATIONS.array);
       this.target = target;
       __publicField(this, "managers", []);
       __publicField(this, "proxy");
@@ -653,7 +638,7 @@
           const index = Number(key);
           if (!Number.isNaN(index)) {
             if (index in this.managers) {
-              return this.managers[index].setValue(value);
+              return this.managers[index].set(value);
             }
             try {
               this.managers[index] = observable(value, {
@@ -691,7 +676,7 @@
       this.proxy = this.define(target);
       this.emit("define", { current: this.value });
     }
-    setValue(value) {
+    set(value) {
       const prev = this.value;
       this.target = value;
       this.proxy = this.define(value);
@@ -715,21 +700,17 @@
       this.reportUsage();
       return this.proxy;
     }
-    getManager(key) {
+    manager(key) {
       return this.managers[Number(key)];
     }
-    clearManagers() {
+    disposeManagers() {
       for (const manager of this.managers) {
         manager.dispose();
       }
       this.managers = [];
     }
-    dispose() {
-      super.dispose();
-      this.clearManagers();
-    }
     define(target) {
-      this.clearManagers();
+      this.disposeManagers();
       for (const item of target) {
         this.managers.push(
           observable(item, {
@@ -743,14 +724,13 @@
   var array_manager_default = ArrayManager;
 
   // src/modules/make-observable.ts
-  function observableValue(manager) {
-    root_manager_default.addManager(manager);
+  function register(manager) {
+    rootManager.add(manager);
     return manager.value;
   }
-  console.log(root_manager_default);
   var observable2 = {
-    object: (target) => observableValue(new object_manager_default(target, { path: [createUniqPath()] })),
-    class: (Target) => observableValue(
+    object: (target) => register(new object_manager_default(target, { path: [createUniqPath()] })),
+    class: (Target) => register(
       new object_manager_default(new Target(), { path: [createUniqPath(Target.name)] })
     ),
     array: (target) => new array_manager_default(target, { path: [createUniqPath()] }),
@@ -774,9 +754,9 @@
 
   // src/modules/transaction.ts
   function transaction(callback) {
-    batch_default.open();
+    batch.open();
     callback();
-    batch_default.closeBatch();
+    batch.close();
   }
 
   // src/dev.ts

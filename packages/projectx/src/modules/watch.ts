@@ -13,7 +13,6 @@ function watch<T>(
 ): VoidFunction {
   const reaction = new Reaction();
   let result = reaction.syncCaptured(contextFn);
-
   if (initialCall) {
     callback(result, undefined as T);
   }

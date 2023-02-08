@@ -36,9 +36,6 @@ class ObserverWithType<T, E extends string>
       return () => {};
     }
 
-    if (Array.isArray(type)) {
-    }
-
     const unlisten: Function[] = [];
     const types = Array.isArray(type) ? type : [type];
     for (const eachType of types) {
@@ -71,5 +68,4 @@ class ObserverWithType<T, E extends string>
   }
 }
 
-export default Observer;
 export { ObserverWithType };

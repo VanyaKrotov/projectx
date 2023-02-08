@@ -4,8 +4,8 @@ import {
   RequiredManagerInstance,
   ValueAnnotation,
 } from "shared/types";
+import { ANNOTATIONS } from "shared/constants";
 
-import { VALUE_ANNOTATION } from "./constants";
 import Manager from "./manager";
 
 class ValueManager<T>
@@ -13,7 +13,7 @@ class ValueManager<T>
   implements RequiredManagerInstance<T>
 {
   constructor(public target: T, options: ManagerOptions) {
-    super(options, VALUE_ANNOTATION);
+    super(options, ANNOTATIONS.value);
 
     this.emit("define", { current: target });
   }
@@ -24,7 +24,7 @@ class ValueManager<T>
     return this.target;
   }
 
-  public setValue(value: any): boolean {
+  public set(value: any): boolean {
     const prev = this.target;
 
     this.target = value;
@@ -37,7 +37,7 @@ class ValueManager<T>
     return true;
   }
 
-  public getManager(): ManagerInstance | null {
+  public manager(): ManagerInstance | null {
     return null;
   }
 }

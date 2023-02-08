@@ -6,17 +6,15 @@ import {
 } from "shared/types";
 import { uid } from "shared/uid";
 
-import batch from "./batch";
-import interceptor from "./interceptor";
-import PathTree from "./paths-tree";
-import rootManager from "./root-manager";
+import PathTree from "modules/paths-tree";
+import { batch, interceptor, reactionManager } from "modules/initialize";
 
 class Reaction implements ReactionInstance {
   private paths: string[][] = [];
   private unsubscribeFns: (() => void)[] = [];
 
   constructor(public readonly id: string = `Reaction#${uid()}`) {
-    rootManager.addReaction(id, this);
+    reactionManager.add(id, this);
   }
 
   private listener = ({ path }: InterceptorEvent) => {
@@ -32,7 +30,7 @@ class Reaction implements ReactionInstance {
     this.unsubscribeFns = [];
   };
 
-  public getOptimizationTree(): PathsTreeInstance | null {
+  public getPathTree(): PathsTreeInstance | null {
     if (!this.paths.length) {
       return null;
     }
@@ -41,7 +39,7 @@ class Reaction implements ReactionInstance {
   }
 
   public dispose(): void {
-    rootManager.deleteReaction(this.id);
+    reactionManager.delete(this.id);
 
     this.paths = [];
     this.unlisten();
@@ -57,7 +55,7 @@ class Reaction implements ReactionInstance {
   }
 
   public watch(watch: WatchCallback): VoidFunction {
-    const tree = this.getOptimizationTree();
+    const tree = this.getPathTree();
     if (!tree) {
       console.warn(
         `Instances for listen in reaction \`${this.id}\` not found. Reconsider the use of adverse reactions.`

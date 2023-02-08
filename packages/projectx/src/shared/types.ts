@@ -1,18 +1,21 @@
 //#region Manager
 
 export interface RootManagerInstance {
-  addManager(manager: ManagerInstance): void;
-  getManager(name: string): ManagerInstance | null;
-  getManagerByPath(path: string[]): ManagerInstance | null;
-  addReaction(id: string, reaction: ReactionInstance): void;
-  getReaction(id: string): ReactionInstance | null;
-  deleteReaction(id: string): boolean;
+  add(manager: ManagerInstance): void;
+  get(name: string): ManagerInstance | null;
+  getByPath(path: string[]): ManagerInstance | null;
+}
+
+export interface ReactionManagerInstance {
+  add(id: string, reaction: ReactionInstance): void;
+  get(id: string): ReactionInstance | null;
+  delete(id: string): boolean;
 }
 
 export interface RequiredManagerInstance<T> {
   get value(): T;
-  setValue(value: T): boolean;
-  getManager(key: string | symbol): ManagerInstance | null;
+  set(value: T): boolean;
+  manager(key: string | symbol): ManagerInstance | null;
 }
 
 export type ObserverTypes =
@@ -31,9 +34,10 @@ export interface ManagerInstance<T = any, M = any>
   get name(): string;
   get keys(): string[];
   get snapshot(): T;
-  setValue(value: T): boolean;
-  getManager(key: string | symbol): ManagerInstance | null;
+  set(value: T): boolean;
+  manager(key: string | symbol): ManagerInstance | null;
   dispose(): void;
+  disposeManagers(): void;
   toString(): string;
 }
 
@@ -102,13 +106,8 @@ export interface InterceptorListener {
 
 export interface InterceptorInstance {
   emit(event: InterceptorEvent): void;
-  getCaptured<T>(fn: () => T): {
-    result: T;
-    variables: PathsTreeInstance;
-  };
   register(listener: InterceptorListener): void;
   unregister(listener: InterceptorListener): void;
-  optimizePaths(paths: string[][]): PathsTreeInstance;
 }
 
 //#endregion
@@ -116,10 +115,9 @@ export interface InterceptorInstance {
 //#region Batch
 
 export interface BatchInstance {
-  get hasBatch(): boolean;
   open(): void;
   action(handler: VoidFunction): void;
-  closeBatch(): void;
+  close(): void;
 }
 
 //#endregion
@@ -153,7 +151,7 @@ export interface ReactionInstance {
   dispose(): void;
   startWatch(): void;
   endWatch(): void;
-  getOptimizationTree(): PathsTreeInstance | null;
+  getPathTree(): PathsTreeInstance | null;
   syncCaptured<T>(fn: () => T): T;
   watch(watch: WatchCallback): VoidFunction;
 }

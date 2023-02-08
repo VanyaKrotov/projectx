@@ -1,11 +1,11 @@
-import batch from "./batch";
+import { batch } from "modules/initialize";
 
 function transaction(callback: VoidFunction): void {
   batch.open();
 
   callback();
 
-  batch.closeBatch();
+  batch.close();
 }
 
 export { transaction };

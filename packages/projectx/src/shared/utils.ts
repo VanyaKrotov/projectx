@@ -4,35 +4,10 @@ export function isObject<T>(target: T) {
   return target && typeof target === "object" && !Array.isArray(target);
 }
 
-export function isPrimitive<T>(target: T) {
-  return !isObject(target) && !Array.isArray(target);
-}
-
-export function isClass<T>(v: T) {
-  return typeof v === "function" && /^\s*class\s+/.test(v.toString());
-}
-
 export function isFunction(functionToCheck: Function) {
   return (
     functionToCheck && {}.toString.call(functionToCheck) === "[object Function]"
   );
-}
-
-export function getProperties<T extends object>(target: T): string[] {
-  return Object.keys(target).filter((key) => !isFunction((target as any)[key]));
-}
-
-export function createPrivateProp<T>(
-  target: T,
-  key: string | symbol,
-  value: unknown
-) {
-  Object.defineProperty(target, key, {
-    enumerable: false,
-    writable: false,
-    configurable: false,
-    value,
-  });
 }
 
 export function createUniqPath(path = "ObservableState"): string {

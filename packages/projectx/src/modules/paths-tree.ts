@@ -7,9 +7,9 @@ import {
 } from "shared/types";
 import { isEqualArray } from "shared/utils";
 
-import rootManager from "./root-manager";
+import { rootManager } from "modules/initialize";
 
-class TreeNode implements PathNodeInstance {
+class PathNode implements PathNodeInstance {
   public children: Record<string, PathNodeInstance> = {};
   public listenTypes: ObserverTypes[] = [];
 
@@ -22,7 +22,7 @@ class TreeNode implements PathNodeInstance {
   public push([path, ...paths]: string[]): void {
     const nextNode =
       this.children[path] ||
-      new TreeNode(path, this.manager!.getManager(path)!);
+      new PathNode(path, this.manager!.manager(path)!);
 
     this.children[path] = nextNode;
 
@@ -40,17 +40,17 @@ class PathTree implements PathsTreeInstance {
   constructor(paths: string[][]) {
     for (const [path, ...restPath] of paths) {
       this.nodes[path] =
-        this.nodes[path] || new TreeNode(path, rootManager.getManager(path));
+        this.nodes[path] || new PathNode(path, rootManager.get(path));
 
       this.nodes[path].push(restPath);
     }
 
     for (const key in this.nodes) {
-      this.linkingRecursive(this.nodes[key]);
+      this.linkingRec(this.nodes[key]);
     }
   }
 
-  private linkingRecursive(node: PathNodeInstance) {
+  private linkingRec(node: PathNodeInstance) {
     const keys = Object.keys(node.children);
     if (!keys.length) {
       return (node.listenTypes = ["all"]);
@@ -61,29 +61,29 @@ class PathTree implements PathsTreeInstance {
       : ["change"];
 
     for (const key of keys) {
-      this.linkingRecursive(node.children[key]);
+      this.linkingRec(node.children[key]);
     }
   }
 
-  private optimizedManagersRec(node: PathNodeInstance): ListenManagersResult[] {
-    let res: ListenManagersResult[] = [
+  private optimizedRec(node: PathNodeInstance): ListenManagersResult[] {
+    let result: ListenManagersResult[] = [
       { listenTypes: node.listenTypes, manager: node.manager! },
     ];
     if (!node.keys.length) {
-      return res;
+      return result;
     }
 
     for (const key in node.children) {
-      res = res.concat(this.optimizedManagersRec(node.children[key]));
+      result = result.concat(this.optimizedRec(node.children[key]));
     }
 
-    return res;
+    return result;
   }
 
   public getListenManagers(): ListenManagersResult[] {
     let result: ListenManagersResult[] = [];
     for (const key in this.nodes) {
-      result = result.concat(this.optimizedManagersRec(this.nodes[key]));
+      result = result.concat(this.optimizedRec(this.nodes[key]));
     }
 
     return result;

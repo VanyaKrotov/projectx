@@ -1,4 +1,3 @@
-import { observable } from "modules/observable";
 import {
   ArrayAnnotation,
   ManagerInstance,
@@ -6,8 +5,10 @@ import {
   RequiredManagerInstance,
 } from "shared/types";
 import { isFunction } from "shared/utils";
+import { ANNOTATIONS } from "shared/constants";
 
-import { ARRAY_ANNOTATION } from "./constants";
+import { observable } from "modules/observable";
+
 import Manager from "./manager";
 
 class ArrayManager<T>
@@ -18,7 +19,7 @@ class ArrayManager<T>
   private proxy: Array<T>;
 
   constructor(private target: Array<T>, options: ManagerOptions) {
-    super(options, ARRAY_ANNOTATION);
+    super(options, ANNOTATIONS.array);
 
     this.proxy = this.define(target);
 
@@ -35,8 +36,8 @@ class ArrayManager<T>
       }
 
       const value = this.target[key as keyof Array<T>];
-      if (isFunction(value as any)) {
-        return (...args: any[]) =>
+      if (isFunction(value as never)) {
+        return (...args: never[]) =>
           (value as Function).call(this.proxy, ...args);
       }
 
@@ -46,7 +47,7 @@ class ArrayManager<T>
       const index = Number(key);
       if (!Number.isNaN(index)) {
         if (index in this.managers) {
-          return this.managers[index].setValue(value);
+          return this.managers[index].set(value);
         }
 
         try {
@@ -90,7 +91,7 @@ class ArrayManager<T>
     },
   };
 
-  public setValue(value: Array<T>): boolean {
+  public set(value: Array<T>): boolean {
     const prev = this.value;
 
     this.target = value;
@@ -123,11 +124,11 @@ class ArrayManager<T>
     return this.proxy;
   }
 
-  public getManager(key: string | symbol): ManagerInstance | null {
+  public manager(key: string | symbol): ManagerInstance | null {
     return this.managers[Number(key)];
   }
 
-  private clearManagers() {
+  public disposeManagers() {
     for (const manager of this.managers) {
       manager.dispose();
     }
@@ -135,13 +136,8 @@ class ArrayManager<T>
     this.managers = [];
   }
 
-  public dispose(): void {
-    super.dispose();
-    this.clearManagers();
-  }
-
   private define(target: Array<T>): Array<T> {
-    this.clearManagers();
+    this.disposeManagers();
 
     for (const item of target) {
       this.managers.push(
