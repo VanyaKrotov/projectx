@@ -18,8 +18,5 @@
   "devDependencies": {
     "@types/node": "^18.11.18",
     "esbuild": "0.17.5"
-  },
-  "dependencies": {
-    "nanoid": "^4.0.0"
   }
 }

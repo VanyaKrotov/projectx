@@ -9,12 +9,14 @@ const ENTRY_POINTS = {
 
 function getConfig({ mode = "development", minify = false }) {
   const isDevelopment = mode === "development";
-  const outDir = isDevelopment ? "dist" : "build";
   const versionPOstfix = isDevelopment ? "" : `.v${version}`;
+  const outfile = isDevelopment
+    ? `dist/index.js`
+    : `build/${name}${minify ? ".min" : ""}${versionPOstfix}.js`;
 
   return {
     entryPoints: ENTRY_POINTS[mode],
-    outfile: `${outDir}/${name}${minify ? ".min" : ""}${versionPOstfix}.js`,
+    outfile,
     target: "es2015",
     bundle: true,
     sourcemap: isDevelopment,

@@ -1,11 +1,10 @@
-import { nanoid } from "nanoid";
-
 import {
   InterceptorEvent,
   PathsTreeInstance,
   ReactionInstance,
   WatchCallback,
 } from "shared/types";
+import { uid } from "shared/uid";
 
 import batch from "./batch";
 import interceptor from "./interceptor";
@@ -16,7 +15,7 @@ class Reaction implements ReactionInstance {
   private paths: string[][] = [];
   private unsubscribeFns: (() => void)[] = [];
 
-  constructor(public readonly id: string = `Reaction#${nanoid(4)}`) {
+  constructor(public readonly id: string = `Reaction#${uid()}`) {
     rootManager.addReaction(id, this);
   }
 

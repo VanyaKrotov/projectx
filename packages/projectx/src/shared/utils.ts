@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { uid } from "shared/uid";
 
 export function isObject<T>(target: T) {
   return target && typeof target === "object" && !Array.isArray(target);
@@ -35,12 +35,8 @@ export function createPrivateProp<T>(
   });
 }
 
-export function createEventUId(objectId: string, key: string | symbol): string {
-  return `${objectId}#${key.toString()}`;
-}
-
 export function createUniqPath(path = "ObservableState"): string {
-  return `${path}$${nanoid(4)}`;
+  return `${path}$${uid()}`;
 }
 
 export function runAfterScript(fn: VoidFunction): Promise<void> {

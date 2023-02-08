@@ -17,14 +17,14 @@ import Manager from "./manager";
 import { COMPUTED_ANNOTATION, OBSERVER_ANNOTATION } from "./constants";
 
 class ComputedManager<T>
-  extends Manager<T, ComputedAnnotation, unknown>
+  extends Manager<T, ComputedAnnotation, null>
   implements RequiredManagerInstance<T>
 {
   private reaction: ReactionInstance;
   private savedResult?: T;
   private isMemoized = false;
   private isChanged = false;
-  public managers: unknown;
+  public managers = null;
 
   constructor(private readonly target: T, options: ManagerOptions) {
     super(options, COMPUTED_ANNOTATION);
@@ -92,7 +92,7 @@ class ObjectManager<T extends object | Annotated>
   >
   implements RequiredManagerInstance<T>
 {
-  public managers: Record<string | symbol, ManagerInstance<any>> = {};
+  public managers: Record<string | symbol, ManagerInstance> = {};
 
   private proxy: T;
 
