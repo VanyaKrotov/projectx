@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node ./scripts/build.js",
     "dev": "node ./scripts/dev.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --config=config/jest.config.ts"
   },
   "author": "vanyakrotov3059@gmail.com",
   "license": "ISC",
@@ -16,7 +16,11 @@
     "reactive"
   ],
   "devDependencies": {
+    "@jest/globals": "^29.4.2",
     "@types/node": "^18.11.18",
-    "esbuild": "0.17.5"
+    "esbuild": "0.17.5",
+    "jest": "^29.4.2",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1"
   }
 }

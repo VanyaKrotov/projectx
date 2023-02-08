@@ -5,19 +5,18 @@ export function isObject<T>(target: T) {
 }
 
 export function isFunction(functionToCheck: Function) {
-  return (
-    functionToCheck && {}.toString.call(functionToCheck) === "[object Function]"
-  );
+  return typeof functionToCheck === "function";
 }
 
 export function createUniqPath(path = "ObservableState"): string {
-  return `${path}$${uid()}`;
+  return `${path}#${uid()}`;
 }
 
 export function runAfterScript(fn: VoidFunction): Promise<void> {
   return Promise.resolve().then(fn);
 }
 
+// TODO
 export function getGetters<T extends object>(
   obj: T,
   ignoredKeys: string[] = []
