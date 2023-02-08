@@ -1,17 +1,5 @@
 //#region Manager
 
-export interface RootManagerInstance {
-  add(manager: ManagerInstance): void;
-  get(name: string): ManagerInstance | null;
-  getByPath(path: string[]): ManagerInstance | null;
-}
-
-export interface ReactionManagerInstance {
-  add(id: string, reaction: ReactionInstance): void;
-  get(id: string): ReactionInstance | null;
-  delete(id: string): boolean;
-}
-
 export interface RequiredManagerInstance<T> {
   get value(): T;
   set(value: T): boolean;

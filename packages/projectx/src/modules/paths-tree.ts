@@ -7,7 +7,7 @@ import {
 } from "shared/types";
 import { isEqualArray } from "shared/utils";
 
-import { rootManager } from "modules/initialize";
+import { managers } from "modules/initialize";
 
 class PathNode implements PathNodeInstance {
   public children: Record<string, PathNodeInstance> = {};
@@ -40,7 +40,7 @@ class PathTree implements PathsTreeInstance {
   constructor(paths: string[][]) {
     for (const [path, ...restPath] of paths) {
       this.nodes[path] =
-        this.nodes[path] || new PathNode(path, rootManager.get(path));
+        this.nodes[path] || new PathNode(path, managers.get(path)!);
 
       this.nodes[path].push(restPath);
     }

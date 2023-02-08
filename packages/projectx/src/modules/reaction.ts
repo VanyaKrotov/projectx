@@ -7,14 +7,14 @@ import {
 import { uid } from "shared/uid";
 
 import PathTree from "modules/paths-tree";
-import { batch, interceptor, reactionManager } from "modules/initialize";
+import { batch, interceptor, reactions } from "modules/initialize";
 
 class Reaction implements ReactionInstance {
   private paths: string[][] = [];
   private unsubscribeFns: (() => void)[] = [];
 
   constructor(public readonly id: string = `Reaction#${uid()}`) {
-    reactionManager.add(id, this);
+    reactions.set(id, this);
   }
 
   private listener = ({ path }: InterceptorEvent) => {
@@ -39,7 +39,7 @@ class Reaction implements ReactionInstance {
   }
 
   public dispose(): void {
-    reactionManager.delete(this.id);
+    reactions.delete(this.id);
 
     this.paths = [];
     this.unlisten();

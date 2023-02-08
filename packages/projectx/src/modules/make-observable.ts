@@ -1,4 +1,4 @@
-import { rootManager } from "modules/initialize";
+import { managers } from "modules/initialize";
 
 import type { ManagerInstance, Constructable, Annotated } from "shared/types";
 import { createUniqPath } from "shared/utils";
@@ -6,7 +6,7 @@ import { createUniqPath } from "shared/utils";
 import { ArrayManager, ObjectManager } from "./components";
 
 function register<T>(manager: ManagerInstance<T>): T {
-  rootManager.add(manager);
+  managers.set(manager.name, manager);
 
   return manager.value;
 }

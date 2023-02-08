@@ -80,54 +80,11 @@
   };
   var interceptor_default = Interceptor;
 
-  // src/components/reaction-manager.ts
-  var ReactionManager = class {
-    constructor() {
-      __publicField(this, "reactions", {});
-    }
-    add(id, reaction) {
-      this.reactions[id] = reaction;
-    }
-    delete(id) {
-      return delete this.reactions[id];
-    }
-    get(id) {
-      return this.reactions[id];
-    }
-  };
-  var reaction_manager_default = ReactionManager;
-
-  // src/components/root-manager.ts
-  var RootManager = class {
-    constructor() {
-      __publicField(this, "managers", {});
-    }
-    add(manager) {
-      this.managers[manager.name] = manager;
-    }
-    get(id) {
-      return this.managers[id];
-    }
-    getByPathRec(root, [path, ...rest]) {
-      if (root.name === path) {
-        return root;
-      }
-      if (!rest.length) {
-        return root.managers[path];
-      }
-      return this.getByPathRec(root.managers[path], rest);
-    }
-    getByPath([rootPath, ...restPath]) {
-      return this.getByPathRec(this.managers[rootPath], restPath);
-    }
-  };
-  var root_manager_default = RootManager;
-
   // src/modules/initialize.ts
-  var rootManager = new root_manager_default();
+  var managers = /* @__PURE__ */ new Map();
   var interceptor = new interceptor_default();
   var batch = new batch_default();
-  var reactionManager = new reaction_manager_default();
+  var reactions = /* @__PURE__ */ new Map();
 
   // src/shared/uid.ts
   function uidGenerator() {
@@ -141,10 +98,10 @@
     return target && typeof target === "object" && !Array.isArray(target);
   }
   function isFunction(functionToCheck) {
-    return functionToCheck && {}.toString.call(functionToCheck) === "[object Function]";
+    return typeof functionToCheck === "function";
   }
   function createUniqPath(path = "ObservableState") {
-    return `${path}$${uid()}`;
+    return `${path}#${uid()}`;
   }
   function runAfterScript(fn) {
     return Promise.resolve().then(fn);
@@ -323,7 +280,7 @@
     constructor(paths) {
       __publicField(this, "nodes", {});
       for (const [path, ...restPath] of paths) {
-        this.nodes[path] = this.nodes[path] || new PathNode(path, rootManager.get(path));
+        this.nodes[path] = this.nodes[path] || new PathNode(path, managers.get(path));
         this.nodes[path].push(restPath);
       }
       for (const key in this.nodes) {
@@ -378,7 +335,7 @@
         this.unsubscribeFns.forEach((unlistener) => unlistener());
         this.unsubscribeFns = [];
       });
-      reactionManager.add(id, this);
+      reactions.set(id, this);
     }
     getPathTree() {
       if (!this.paths.length) {
@@ -387,7 +344,7 @@
       return new paths_tree_default(this.paths);
     }
     dispose() {
-      reactionManager.delete(this.id);
+      reactions.delete(this.id);
       this.paths = [];
       this.unlisten();
     }
@@ -407,10 +364,10 @@
         return () => {
         };
       }
-      const managers = tree.getListenManagers();
+      const managers2 = tree.getListenManagers();
       const handler = () => watch2(this.unlisten);
       this.unlisten();
-      this.unsubscribeFns = managers.map(
+      this.unsubscribeFns = managers2.map(
         ({ listenTypes, manager }) => manager.listen(listenTypes, () => {
           batch.action(handler);
         })
@@ -725,7 +682,7 @@
 
   // src/modules/make-observable.ts
   function register(manager) {
-    rootManager.add(manager);
+    managers.set(manager.name, manager);
     return manager.value;
   }
   var observable2 = {
