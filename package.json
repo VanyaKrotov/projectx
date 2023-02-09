@@ -7,7 +7,6 @@
     "dev:react": "node scripts/dev.react.js",
     "test": "jest --config=config/jest.config.ts"
   },
-  "dependencies": {},
   "devDependencies": {
     "typescript": "^4.9.3",
     "esbuild": "^0.17.6",

@@ -14,16 +14,6 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "paths": {
-      "project_1": ["./packages/project_1"],
-      "project_1-react": ["./packages/project_1"]
-    }
-  },
-  "include": ["src"],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ]
+    "jsx": "react-jsx"
+  }
 }
