@@ -1,13 +1,11 @@
-const path = require("path");
+function getConfig({
+  mode = "development",
+  minify = false,
+  path = "..",
+  entryPoints,
+}) {
+  const { name, version } = require(`${path}/package.json`);
 
-const { name, version } = require("../package.json");
-
-const ENTRY_POINTS = {
-  development: ["./src/dev.tsx"],
-  production: ["./src/index.ts"],
-};
-
-function getConfig({ mode = "development", minify = false }) {
   const isDevelopment = mode === "development";
   const versionPOstfix = isDevelopment ? "" : `.v${version}`;
   const outfile = isDevelopment
@@ -15,13 +13,13 @@ function getConfig({ mode = "development", minify = false }) {
     : `build/${name}${minify ? ".min" : ""}${versionPOstfix}.js`;
 
   return {
-    entryPoints: ENTRY_POINTS[mode],
+    entryPoints: [`${path}/${entryPoints[mode]}`],
     outfile,
     target: "es2015",
     bundle: true,
     sourcemap: isDevelopment,
     minify,
-    tsconfig: path.resolve(__dirname, "../tsconfig.json"),
+    tsconfig: `${path}/tsconfig.json`,
   };
 }
 

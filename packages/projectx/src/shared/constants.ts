@@ -3,7 +3,7 @@ import {
   ComputedAnnotation,
   ObserverAnnotation,
   ValueAnnotation,
-} from "shared/types";
+} from "./types";
 
 export const ANNOTATIONS = {
   observer: {

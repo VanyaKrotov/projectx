@@ -1,6 +1,6 @@
 import { test, expect } from "@jest/globals";
 
-import { uid } from "shared/uid";
+import { uid } from "../uid";
 
 test("uid", () => {
   expect(uid()).toBe(0);

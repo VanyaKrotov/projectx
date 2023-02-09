@@ -1,6 +1,6 @@
 import { describe, test, expect } from "@jest/globals";
 
-import Batch from "components/batch";
+import Batch from "../batch";
 
 describe("Batch", () => {
   const batch = new Batch();

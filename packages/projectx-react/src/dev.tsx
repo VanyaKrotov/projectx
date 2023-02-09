@@ -22,7 +22,6 @@ class State {
 
 const state = observable.class(State);
 const state2 = observable.class(State);
-const state3 = observable.class(State);
 
 const Info = observer(({ state, i }: { state: State; i: string }) => {
   console.log(`render [Info-${i}]`);
@@ -50,15 +49,23 @@ const Increment = ({
 
 console.log(state);
 
-const App = observer(() => {
+const App = () => {
   console.log("render [App]");
 
   return (
     <div>
       <Increment state={state} postfix="1" />
-      {/* {state.counter > 2 && state.counter < 5 && <Increment state={state2} postfix="2" />} */}
+      {state.counter > 2 && state2.counter > -1 && (
+        <Increment state={state2} postfix="2" />
+      )}
     </div>
   );
-});
+};
 
-root.render(<App />);
+const App_ = observer(App);
+
+const app = <App_ />;
+
+state.increment();
+
+root.render(app);

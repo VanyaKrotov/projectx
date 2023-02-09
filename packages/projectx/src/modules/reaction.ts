@@ -12,9 +12,12 @@ import { batch, interceptor, reactions } from "./initialize";
 class Reaction implements ReactionInstance {
   private paths: string[][] = [];
   private unsubscribeFns: (() => void)[] = [];
+  public readonly id: string;
 
-  constructor(public readonly id: string = `Reaction#${uid()}`) {
-    reactions.set(id, this);
+  constructor(id: string = "Reaction") {
+    this.id = `${id}#${uid()}`;
+
+    reactions.set(this.id, this);
   }
 
   private listener = ({ path }: InterceptorEvent) => {

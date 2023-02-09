@@ -1,12 +1,20 @@
 {
   "name": "projectx",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {},
+  "version": "0.0.1",
+  "scripts": {
+    "dev:store": "node scripts/dev.store.js",
+    "dev:react": "node scripts/dev.react.js",
+    "test": "jest --config=config/jest.config.ts"
+  },
   "dependencies": {},
   "devDependencies": {
     "typescript": "^4.9.3",
-    "vite": "^4.0.0"
+    "esbuild": "^0.17.6",
+    "@jest/globals": "^29.4.2",
+    "@types/node": "^18.11.18",
+    "jest": "^29.4.2",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1"
   }
 }

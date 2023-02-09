@@ -1,8 +1,8 @@
 import { describe, test, expect } from "@jest/globals";
 
-import { Event } from "shared/types";
+import { Event } from "../../shared/types";
 
-import { Observer, ObserverWithType } from "components/observer";
+import { Observer, ObserverWithType } from "../observer";
 
 test("Observer", () => {
   const observer = new Observer<number>();

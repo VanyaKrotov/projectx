@@ -18,7 +18,8 @@
     "noEmit": true,
     "jsx": "react",
     "paths": {
-      "projectx": ["../projectx/src"]
+      "projectx": ["../projectx/src"],
+      "projectx/client": ["../projectx/src/client.ts"]
     }
   },
   "include": ["src/**/*"]

@@ -6,7 +6,7 @@ import {
   isFunction,
   isObject,
   runAfterScript,
-} from "shared/utils";
+} from "../utils";
 
 test("isObject", () => {
   class Test {}

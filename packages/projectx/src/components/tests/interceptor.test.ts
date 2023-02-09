@@ -1,5 +1,5 @@
 import { test, expect } from "@jest/globals";
-import Interceptor from "components/interceptor";
+import Interceptor from "../interceptor";
 
 test("Interceptor", () => {
   const interceptor = new Interceptor();
