@@ -15,10 +15,11 @@ class ArrayManager<T>
   extends Manager<Array<T>, ArrayAnnotation, Array<ManagerInstance<T>>>
   implements RequiredManagerInstance<Array<T>>
 {
-  private managers: Array<ManagerInstance> = [];
+  public managers: Array<ManagerInstance> = [];
+
   private proxy: Array<T>;
 
-  constructor(private target: Array<T>, options: ManagerOptions) {
+  constructor(private target: Array<T>, options?: ManagerOptions) {
     super(options, ANNOTATIONS.array);
 
     this.proxy = this.define(target);

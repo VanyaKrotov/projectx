@@ -1,3 +1,7 @@
+export type FieldType = "action" | "computed" | "property";
+
+export type PropertiesInfo = Record<string, PropertyDescriptor>;
+
 //#region Manager
 
 export interface RequiredManagerInstance<T> {
@@ -30,7 +34,7 @@ export interface ManagerInstance<T = any, M = any>
 }
 
 export interface ManagerOptions {
-  path: string[];
+  path?: string[];
   annotation?: Annotation;
 }
 
@@ -113,7 +117,7 @@ export interface BatchInstance {
 //#region Common
 
 export interface Constructable<T extends object> {
-  new (...args: any[]): T;
+  new (...args: unknown[]): T;
   prototype: T;
   name: string;
 }
@@ -150,7 +154,9 @@ export interface WatchCallback {
 
 //#endregion
 
-export interface Annotation {
+export interface Annotation {}
+
+export interface ConfigAnnotation extends Annotation {
   observable?: boolean;
 }
 
@@ -165,12 +171,11 @@ export interface ValueAnnotation extends Annotation {}
 export interface ArrayAnnotation extends Annotation {}
 
 export interface EntryAnnotation {
-  fields: Record<string, ObserverAnnotation>;
-  getters: Record<string, ComputedAnnotation>;
+  [k: string]: ConfigAnnotation;
 }
 
 export interface Annotated {
-  get annotation(): Partial<EntryAnnotation>;
+  get annotation(): EntryAnnotation;
 }
 
 //#region Annotation

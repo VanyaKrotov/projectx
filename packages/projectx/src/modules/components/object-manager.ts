@@ -1,16 +1,15 @@
 import type {
   Annotated,
-  ComputedAnnotation,
   ManagerInstance,
   ManagerOptions,
   EntryAnnotation,
   ObserverAnnotation,
   RequiredManagerInstance,
 } from "../../shared/types";
-import { getGetters } from "../../shared/utils";
-import { ANNOTATIONS } from "../../shared/constants";
+import { getFieldsOfObject, getFieldType } from "../../shared/utils";
+import { ANNOTATIONS, RESERVED_FIELDS } from "../../shared/constants";
 
-import { observable } from "../observable";
+import { observable as observableValue } from "../observable";
 
 import Manager from "./manager";
 import ComputedManager from "./computed-manager";
@@ -25,87 +24,64 @@ class ObjectManager<T extends object | Annotated>
 {
   public managers: Record<string | symbol, ManagerInstance> = {};
 
-  private proxy: T;
-
-  private get annotations(): EntryAnnotation {
-    const annotation = (this.target as Annotated).annotation || {};
-
-    return {
-      fields: {},
-      getters: {},
-      ...annotation,
-    };
+  protected get annotations(): EntryAnnotation {
+    return (this.target as Annotated).annotation || {};
   }
 
-  private handlers: Required<
-    Pick<ProxyHandler<T>, "deleteProperty" | "defineProperty">
-  > = {
-    deleteProperty: (_target, key) => {
-      const manager = this.managers[key];
-      const deleteResult = delete this.managers[key];
-
-      if (deleteResult) {
-        manager.dispose();
-        this.emit("remove", { prev: manager.value });
-      }
-
-      return deleteResult;
-    },
-    defineProperty: (_target, key, prop) => {
-      const result = this.defineProp(
-        key,
-        prop,
-        this.annotations.fields[String(key)]
-      );
-
-      this.emit("add", {
-        current: this.value,
-      });
-
-      return result;
-    },
-  };
-
-  private defineProp(
+  protected defineField(
     key: string | symbol,
-    { value, configurable = true, enumerable = true }: PropertyDescriptor,
-    options?: ObserverAnnotation
+    description: PropertyDescriptor
   ): boolean {
-    this.managers[key] = observable(value, {
-      path: this.joinToPath(key),
-      annotation: options,
-    });
+    if (RESERVED_FIELDS.includes(key as string)) {
+      throw new Error(`Name \`${String(key)}\` reserved for [projectx]!`);
+    }
 
-    Object.defineProperty(this.target, key, {
+    const type = getFieldType(description);
+    const { observable = true, ...restAnnotation } =
+      this.annotations[key as string] || {};
+    if (type === "action" || !observable) {
+      return Boolean(Object.defineProperty(this.target, key, description));
+    }
+
+    const options = {
+      path: this.joinToPath(key),
+      annotation: restAnnotation,
+    };
+    const {
+      get,
+      value,
+      configurable = true,
+      enumerable = true,
+      ...restDesc
+    } = description;
+    let createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
-      get: () => this.managers[key].value,
-      set: (value) => this.managers[key].set(value),
-    });
+    };
+    if (type === "computed") {
+      this.managers[key] = new ComputedManager(get!.bind(this.target), options);
+      createDescription = {
+        ...createDescription,
+        ...restDesc,
+        get: this.managers[key].value,
+      };
+    } else {
+      this.managers[key] = observableValue(value, options);
 
-    return true;
+      createDescription = {
+        ...createDescription,
+        get: () => this.managers[key].value,
+        set: (value) => this.managers[key].set(value),
+      };
+    }
+
+    return Boolean(Object.defineProperty(this.target, key, createDescription));
   }
 
-  private defineComp(
-    key: string,
-    { get, ...descriptions }: PropertyDescriptor,
-    options?: ComputedAnnotation
-  ): void {
-    this.managers[key] = new ComputedManager(get!.bind(this.target), {
-      path: this.joinToPath(key),
-      annotation: options,
-    });
-
-    Object.defineProperty(this.target, key, {
-      ...descriptions,
-      get: this.managers[key].value,
-    });
-  }
-
-  constructor(private target: T, options: ManagerOptions) {
+  constructor(protected target: T, options?: ManagerOptions) {
     super(options, ANNOTATIONS.observer);
 
-    this.proxy = this.define(target);
+    this.define(target);
   }
 
   public get snapshot(): T {
@@ -118,7 +94,7 @@ class ObjectManager<T extends object | Annotated>
   public get value(): T {
     this.reportUsage();
 
-    return this.proxy;
+    return this.target;
   }
 
   public get keys() {
@@ -129,7 +105,7 @@ class ObjectManager<T extends object | Annotated>
     this.target = value;
     const prev = { ...this.target };
 
-    this.proxy = this.define(value);
+    this.define(value);
 
     this.emit("change", {
       current: value,
@@ -151,23 +127,15 @@ class ObjectManager<T extends object | Annotated>
     return this.managers[key];
   }
 
-  private define(target: T): T {
+  protected define(target: T): boolean {
     this.disposeManagers();
 
-    const proxy = new Proxy(target, this.handlers);
-    const getters = getGetters(target, ["annotation"]);
-
-    const annotation = this.annotations;
-
-    for (const key in target) {
-      this.defineProp(key, { value: target[key] }, annotation.fields[key]);
+    const fieldsInfo = getFieldsOfObject(target);
+    for (const key in fieldsInfo) {
+      this.defineField(key, fieldsInfo[key]);
     }
 
-    for (const key in getters) {
-      this.defineComp(key, getters[key], annotation.getters[key]);
-    }
-
-    return proxy;
+    return true;
   }
 }
 

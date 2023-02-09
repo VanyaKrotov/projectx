@@ -4,6 +4,7 @@ import {
   ManagerOptions,
   ObserverTypes,
 } from "../../shared/types";
+import { createUniqPath } from "../../shared/utils";
 
 import { ObserverWithType } from "../../components/observer";
 
@@ -16,12 +17,14 @@ abstract class Manager<T, A extends Annotation, M>
   protected annotation: A = {} as A;
   public path: string[] = [];
 
-  constructor({ path, annotation }: ManagerOptions, defaultAnnotation: A) {
+  constructor(
+    { path = [createUniqPath()], annotation }: ManagerOptions = {},
+    defaultAnnotation: A
+  ) {
     super();
 
     this.path = path;
     this.annotation = { ...defaultAnnotation, ...annotation };
-    this.observable = this.annotation.observable!;
   }
 
   public dispose(): void {
@@ -31,10 +34,6 @@ abstract class Manager<T, A extends Annotation, M>
   }
 
   protected reportUsage(): void {
-    if (!this.annotation.observable) {
-      return;
-    }
-
     interceptor.emit({ path: this.path });
   }
 

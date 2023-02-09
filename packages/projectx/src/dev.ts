@@ -39,12 +39,16 @@ const obj = {
   dec() {
     this.counter--;
   },
+  get test() {
+    return this.counter;
+  },
 };
 
 const state = observable.class(State);
 const stateObj = observable.object(obj);
 
 console.log(state);
+console.log(stateObj);
 
 const div = document.createElement("div");
 const div1 = document.createElement("div");
@@ -70,7 +74,7 @@ autorun(() => {
 
 autorun(() => {
   console.log("trigger stateObj");
-  div1.innerText = `stateObj: ${stateObj.counter}`;
+  div1.innerText = `stateObj: ${stateObj.test}`;
 });
 
 autorun(() => {

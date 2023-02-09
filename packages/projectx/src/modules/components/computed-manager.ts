@@ -16,8 +16,8 @@ class ComputedManager<T>
   implements RequiredManagerInstance<T>
 {
   private reaction: ReactionInstance;
-  private savedResult?: T;
-  private isMemoized = false;
+  private memo?: T;
+  private memoized = false;
   private isChanged = false;
   public managers = null;
 
@@ -46,12 +46,12 @@ class ComputedManager<T>
     return (() => {
       this.reportUsage();
 
-      if (this.isMemoized && !this.isChanged) {
-        return this.savedResult!;
+      if (this.memoized && !this.isChanged) {
+        return this.memo!;
       }
 
-      this.savedResult = this.reaction.syncCaptured(this.target as () => T);
-      this.isMemoized = true;
+      this.memo = this.reaction.syncCaptured(this.target as () => T);
+      this.memoized = true;
       this.isChanged = false;
 
       this.reaction.watch(() => {
@@ -60,12 +60,12 @@ class ComputedManager<T>
         runAfterScript(() => {
           this.emit("change", {
             current: undefined as T,
-            prev: this.savedResult!,
+            prev: this.memo!,
           });
         });
       });
 
-      return this.savedResult;
+      return this.memo;
     }) as T;
   }
 

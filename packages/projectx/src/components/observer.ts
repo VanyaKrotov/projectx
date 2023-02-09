@@ -29,13 +29,8 @@ class ObserverWithType<T, E extends string>
   implements ObserverWithTypeInstance<T, E>
 {
   private readonly listenerMap = new Map<E | "all", ObserverInstance<T>>();
-  protected observable = true;
 
   public listen(type: E | E[], callback: Listener<T>): VoidFunction {
-    if (!this.observable) {
-      return () => {};
-    }
-
     const unlisten: Function[] = [];
     const types = Array.isArray(type) ? type : [type];
     for (const eachType of types) {
@@ -52,7 +47,7 @@ class ObserverWithType<T, E extends string>
   }
 
   public emit(type: Exclude<E, "all">, event: Event<T>): void {
-    if (!this.observable || event.current === event.prev) {
+    if (event.current === event.prev) {
       return;
     }
 
