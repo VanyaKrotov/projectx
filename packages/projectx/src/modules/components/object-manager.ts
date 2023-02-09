@@ -24,6 +24,12 @@ class ObjectManager<T extends object | Annotated>
 {
   public managers: Record<string | symbol, ManagerInstance> = {};
 
+  constructor(protected target: T, options?: ManagerOptions) {
+    super(options, ANNOTATIONS.observer);
+
+    this.define(target);
+  }
+
   protected get annotations(): EntryAnnotation {
     return (this.target as Annotated).annotation || {};
   }
@@ -76,12 +82,6 @@ class ObjectManager<T extends object | Annotated>
     }
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));
-  }
-
-  constructor(protected target: T, options?: ManagerOptions) {
-    super(options, ANNOTATIONS.observer);
-
-    this.define(target);
   }
 
   public get snapshot(): T {
