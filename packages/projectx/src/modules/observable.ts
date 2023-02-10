@@ -1,39 +1,36 @@
-import { isObject } from "../shared/utils";
+import { isObject, isObjectOfClass } from "../shared/utils";
 import type { ManagerInstance, ManagerOptions } from "../shared/types";
 
-import { ArrayManager, ObjectManager, ValueManager } from "./components";
-
-export function observable<T extends object>(
-  target: T,
-  options: ManagerOptions
-): ManagerInstance<T>;
-
-export function observable<T>(
-  target: Array<T>,
-  options: ManagerOptions
-): ManagerInstance<T>;
+import {
+  ArrayManager,
+  DynamicObjectManager,
+  ObjectManager,
+  ValueManager,
+} from "./components";
 
 export function observable<T>(
   target: T,
   options: ManagerOptions
-): ManagerInstance<T>;
-
-export function observable<T>(target: T, options: ManagerOptions) {
+): ManagerInstance {
   if (Array.isArray(target)) {
     return new ArrayManager(target, options);
   }
 
-  if (isObject(target)) {
+  if (isObjectOfClass(target)) {
     return new ObjectManager(target as object, options);
   }
 
-  if (target instanceof Set) {
-    return target;
+  if (isObject(target)) {
+    return new DynamicObjectManager(target as object, options);
   }
 
-  if (target instanceof Map) {
-    return target;
-  }
+  // if (target instanceof Set) {
+  //   return target;
+  // }
+
+  // if (target instanceof Map) {
+  //   return target;
+  // }
 
   return new ValueManager(target, options);
 }

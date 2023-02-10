@@ -130,9 +130,9 @@ class ObjectManager<T extends object | Annotated>
   protected define(target: T): boolean {
     this.disposeManagers();
 
-    const fieldsInfo = getFieldsOfObject(target);
-    for (const key in fieldsInfo) {
-      this.defineField(key, fieldsInfo[key]);
+    const fields = getFieldsOfObject(target);
+    for (const key in fields) {
+      this.defineField(key, fields[key]);
     }
 
     return true;

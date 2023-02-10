@@ -9,9 +9,11 @@ import { ANNOTATIONS } from "../../shared/constants";
 import Manager from "./manager";
 
 class ValueManager<T>
-  extends Manager<T, ValueAnnotation, unknown>
+  extends Manager<T, ValueAnnotation, null>
   implements RequiredManagerInstance<T>
 {
+  public managers = null;
+
   constructor(public target: T, options: ManagerOptions) {
     super(options, ANNOTATIONS.value);
 

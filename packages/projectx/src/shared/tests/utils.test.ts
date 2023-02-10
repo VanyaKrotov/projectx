@@ -5,6 +5,7 @@ import {
   isEqualArray,
   isFunction,
   isObject,
+  isObjectOfClass,
   runAfterScript,
 } from "../utils";
 
@@ -61,4 +62,23 @@ test("runAfterScript", async () => {
     "script after",
     "script after 2",
   ]);
+});
+
+test("isObjectOfClass", async () => {
+  const obj = { value: 10 };
+
+  class A {
+    val = 10;
+  }
+
+  class B extends A {}
+
+  expect(isObjectOfClass(obj)).toBe(false);
+  expect(isObjectOfClass({})).toBe(false);
+  expect(isObjectOfClass(new A())).toBe(true);
+  expect(isObjectOfClass(new B())).toBe(true);
+  expect(isObjectOfClass(undefined as any)).toBe(false);
+  expect(isObjectOfClass(null as any)).toBe(false);
+  expect(isObjectOfClass(1 as any)).toBe(false);
+  expect(isObjectOfClass("1" as any)).toBe(false);
 });

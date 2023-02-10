@@ -24,3 +24,5 @@ export const ANNOTATIONS = {
 export const __DEV__ = process.env.NODE_ENV === "development";
 
 export const RESERVED_FIELDS = ["annotation"];
+
+export const OBJ_PROPERTIES = Object.getPrototypeOf({});

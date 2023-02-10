@@ -10,6 +10,8 @@ class BaseState {
 }
 
 class State extends BaseState {
+  base = new BaseState();
+
   increment() {
     this.counter++;
   }
@@ -23,24 +25,21 @@ class State extends BaseState {
   }
 
   push() {
-    transaction(() => {
-      this.counter++;
-      this.array.push(this.array.length * this.counter);
-      this.counter++;
-    });
+    this.base.counter++;
   }
 }
 
 const obj = {
   counter: 1,
+  base: new BaseState(),
   inc() {
-    this.counter++;
+    this.base.counter++;
   },
   dec() {
-    this.counter--;
+    this.base.counter--;
   },
   get test() {
-    return this.counter;
+    return this.base.counter;
   },
 };
 
@@ -78,9 +77,8 @@ autorun(() => {
 });
 
 autorun(() => {
-  console.log("trigger array");
-  div2.innerText = `arr: ${JSON.stringify(state.array)}`;
-  div.innerText = `state: ${state.counter}`;
+  console.log("trigger base.counter");
+  div2.innerText = `base: ${state.base.counter}`;
 });
 
 buttonPlus.addEventListener("click", () => {

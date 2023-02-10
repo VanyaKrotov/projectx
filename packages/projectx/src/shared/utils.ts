@@ -1,4 +1,6 @@
-import { FieldType, PropertiesInfo } from "./types";
+import type { FieldType, PropertiesInfo } from "./types";
+
+import { OBJ_PROPERTIES } from "./constants";
 import { uid } from "./uid";
 
 export function isObject<T>(target: T) {
@@ -17,43 +19,25 @@ export function runAfterScript(fn: VoidFunction): Promise<void> {
   return Promise.resolve().then(fn);
 }
 
-function isComputed({ get, set }: PropertyDescriptor) {
-  return get && !set;
-}
-
-function getAllProperties<T extends object>(
-  object: T
-): Record<string, PropertyDescriptor> {
+export function getFieldsOfObject<T extends object>(object: T): PropertiesInfo {
   const prototypes = Object.getPrototypeOf(object);
-  if (!prototypes) {
+  if (!prototypes || prototypes === OBJ_PROPERTIES) {
     return Object.getOwnPropertyDescriptors(object);
   }
 
   return Object.assign(
-    getAllProperties(prototypes),
+    getFieldsOfObject(prototypes),
     Object.getOwnPropertyDescriptors(prototypes),
     Object.getOwnPropertyDescriptors(object)
   );
 }
 
-const filterNativePrototypes = (
-  prototypes: Record<string, PropertyDescriptor>
-): Record<string, PropertyDescriptor> => {
-  const objPrototypes = Object.getOwnPropertyDescriptors(
-    Object.getPrototypeOf({})
-  );
-  const result: Record<string, PropertyDescriptor> = {};
-  for (const key in prototypes) {
-    if (!(key in objPrototypes)) {
-      result[key] = prototypes[key];
-    }
-  }
-
-  return result;
-};
-
 function isFunctionDesc({ value }: PropertyDescriptor): boolean {
   return isFunction(value);
+}
+
+function isComputed({ get, set }: PropertyDescriptor) {
+  return get && !set;
 }
 
 export function getFieldType(description: PropertyDescriptor): FieldType {
@@ -68,16 +52,18 @@ export function getFieldType(description: PropertyDescriptor): FieldType {
   return "property";
 }
 
-export function getFieldsOfObject<T extends object>(object: T): PropertiesInfo {
-  const properties = getAllProperties(object);
-
-  return filterNativePrototypes(properties);
-}
-
 export function isEqualArray<T>(arr1: T[], arr2: T[]): boolean {
   if (arr1.length !== arr2.length) {
     return false;
   }
 
   return arr1.every((key) => arr2.indexOf(key) !== -1);
+}
+
+export function isObjectOfClass<T>(target: T): boolean {
+  return Boolean(
+    target &&
+      typeof target === "object" &&
+      Object.getPrototypeOf(target) !== OBJ_PROPERTIES
+  );
 }
