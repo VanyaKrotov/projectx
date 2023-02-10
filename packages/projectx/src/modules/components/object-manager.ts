@@ -6,14 +6,18 @@ import type {
   ObserverAnnotation,
   RequiredManagerInstance,
 } from "../../shared/types";
-import { getFieldsOfObject, getFieldType } from "../../shared/utils";
+import {
+  findManager,
+  getFieldsOfObject,
+  getFieldType,
+} from "../../shared/utils";
 import { ANNOTATIONS, RESERVED_FIELDS } from "../../shared/constants";
 
 import { observable as observableValue } from "../observable";
 
 import Manager from "./manager";
 import ComputedManager from "./computed-manager";
-import { managers } from "../initialize";
+import { managers } from "../../components/initialize";
 
 class ObjectManager<T extends object | Annotated>
   extends Manager<
@@ -35,16 +39,6 @@ class ObjectManager<T extends object | Annotated>
     return (this.target as Annotated).annotation || {};
   }
 
-  private hasInManagers(value: T): boolean {
-    for (const [, manager] of managers) {
-      if (manager.target === value) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   protected defineField(
     key: string | symbol,
     description: PropertyDescriptor
@@ -58,7 +52,10 @@ class ObjectManager<T extends object | Annotated>
     const type = getFieldType(description);
     const { observable = true, ...restAnnotation } =
       this.annotations[key as string] || {};
-    if (!observable || this.hasInManagers(description.value)) {
+    if (
+      !observable ||
+      findManager(managers, (manager) => manager.target === description.value)
+    ) {
       return false;
     }
 

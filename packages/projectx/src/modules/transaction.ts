@@ -1,4 +1,4 @@
-import { batch } from "./initialize";
+import { batch } from "../components";
 
 function transaction(callback: VoidFunction): void {
   batch.open();

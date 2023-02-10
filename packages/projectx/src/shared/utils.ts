@@ -1,4 +1,4 @@
-import type { FieldType, PropertiesInfo } from "./types";
+import type { FieldType, ManagerInstance, PropertiesInfo } from "./types";
 
 import { OBJ_PROPERTIES } from "./constants";
 import { uid } from "./uid";
@@ -66,4 +66,17 @@ export function isObjectOfClass<T>(target: T): boolean {
       typeof target === "object" &&
       Object.getPrototypeOf(target) !== OBJ_PROPERTIES
   );
+}
+
+export function findManager(
+  connection: Map<string, ManagerInstance>,
+  resolver: (e: ManagerInstance) => boolean
+): ManagerInstance | null {
+  for (const [, source] of connection) {
+    if (resolver(source)) {
+      return source;
+    }
+  }
+
+  return null;
 }

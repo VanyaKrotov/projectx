@@ -1,5 +1,5 @@
 export * from "./shared/types";
 
-export * from "./modules/initialize";
+export * from "./components";
 
 export { Reaction } from "./modules";

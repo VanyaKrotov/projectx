@@ -1,5 +1,5 @@
-import { isObject, isObjectOfClass } from "../shared/utils";
-import type { ManagerInstance, ManagerOptions } from "../shared/types";
+import type { ManagerInstance, ManagerOptions } from "../shared";
+import { isObject, isObjectOfClass } from "../shared";
 
 import {
   ArrayManager,

@@ -1,14 +1,14 @@
-import {
+import type {
   Annotation,
   ManagerInstance,
   ManagerOptions,
   ObserverTypes,
-} from "../../shared/types";
-import { createUniqPath } from "../../shared/utils";
+} from "../../shared";
+import { createUniqPath } from "../../shared";
 
-import { ObserverWithType } from "../../components/observer";
+import { ObserverWithType } from "./observer";
 
-import { interceptor } from "../initialize";
+import { interceptor } from "../../components";
 
 abstract class Manager<T, A extends Annotation, M>
   extends ObserverWithType<T, ObserverTypes>

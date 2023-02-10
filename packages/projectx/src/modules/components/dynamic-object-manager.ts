@@ -3,7 +3,7 @@ import type {
   ManagerInstance,
   ManagerOptions,
   RequiredManagerInstance,
-} from "../../shared/types";
+} from "../../shared";
 
 import ObjectManager from "./object-manager";
 

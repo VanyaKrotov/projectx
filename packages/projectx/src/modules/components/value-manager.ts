@@ -1,10 +1,10 @@
-import {
+import type {
   ManagerInstance,
   ManagerOptions,
   RequiredManagerInstance,
   ValueAnnotation,
-} from "../../shared/types";
-import { ANNOTATIONS } from "../../shared/constants";
+} from "../../shared";
+import { ANNOTATIONS } from "../../shared";
 
 import Manager from "./manager";
 

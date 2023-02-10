@@ -1,4 +1,4 @@
-import { Configuration, ConfigurationManagerInstance } from "../shared/types";
+import type { Configuration, ConfigurationManagerInstance } from "../shared";
 
 const DEFAULT: Configuration = {
   equalResolver: (a, b) => a === b,

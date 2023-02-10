@@ -1,9 +1,9 @@
-import {
+import type {
   Event,
   Listener,
   ObserverInstance,
   ObserverWithTypeInstance,
-} from "../shared/types";
+} from "../../shared";
 
 export class Observer<T> implements ObserverInstance<T> {
   private listeners = new Set<Listener<T>>();

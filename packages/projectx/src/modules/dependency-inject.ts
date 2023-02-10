@@ -1,18 +1,20 @@
-import { Constructable, GetConstructorArgs } from "../shared/types";
+import { Constructable, findManager, GetConstructorArgs } from "../shared";
 
-import { managers } from "./initialize";
+import { managers } from "../components";
 
 function dependencyInject<T>(
   Target: Constructable<T, T>,
   ...args: GetConstructorArgs<T>
 ): T {
-  for (const [, source] of managers) {
-    if (source.target instanceof Target) {
-      return source.target;
-    }
+  const manager = findManager(
+    managers,
+    (manager) => manager.target instanceof Target
+  );
+  if (!manager) {
+    return new Target(...args);
   }
 
-  return new Target(...args);
+  return manager.target;
 }
 
 export { dependencyInject };

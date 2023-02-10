@@ -1,11 +1,10 @@
-import {
+import type {
   ArrayAnnotation,
   ManagerInstance,
   ManagerOptions,
   RequiredManagerInstance,
-} from "../../shared/types";
-import { isFunction } from "../../shared/utils";
-import { ANNOTATIONS } from "../../shared/constants";
+} from "../../shared";
+import { isFunction, ANNOTATIONS } from "../../shared";
 
 import { observable } from "../observable";
 

@@ -3,10 +3,10 @@ import type {
   Constructable,
   Annotated,
   GetConstructorArgs,
-} from "../shared/types";
-import { createUniqPath, isObjectOfClass } from "../shared/utils";
+} from "../shared";
+import { createUniqPath, isObjectOfClass } from "../shared";
 
-import { managers } from "./initialize";
+import { managers } from "../components";
 import {
   ArrayManager,
   DynamicObjectManager,

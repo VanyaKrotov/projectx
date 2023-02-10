@@ -1,13 +1,13 @@
-import {
+import type {
   ListenManagersResult,
   ManagerInstance,
   ObserverTypes,
   PathNodeInstance,
   PathsTreeInstance,
-} from "../shared/types";
-import { isEqualArray } from "../shared/utils";
+} from "../shared";
+import { isEqualArray } from "../shared";
 
-import { managers } from "../modules/initialize";
+import { managers } from "../components";
 
 class PathNode implements PathNodeInstance {
   public children: Record<string, PathNodeInstance> = {};

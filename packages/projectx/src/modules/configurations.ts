@@ -1,6 +1,6 @@
-import { Configuration } from "../shared/types";
+import type { Configuration } from "../shared";
 
-import { configuration } from "./initialize";
+import { configuration } from "../components/initialize";
 
 function configurations(config: Partial<Configuration>): void {
   configuration.change(config);
