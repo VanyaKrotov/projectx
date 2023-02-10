@@ -16,7 +16,7 @@ import {
 function registerManager<T>(manager: ManagerInstance<T>): T {
   managers.set(manager.name, manager);
 
-  return manager.value;
+  return manager.target;
 }
 
 function obsClass<T extends object | Annotated, A = T>(

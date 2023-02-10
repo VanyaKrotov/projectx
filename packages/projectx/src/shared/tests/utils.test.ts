@@ -81,4 +81,5 @@ test("isObjectOfClass", async () => {
   expect(isObjectOfClass(null as any)).toBe(false);
   expect(isObjectOfClass(1 as any)).toBe(false);
   expect(isObjectOfClass("1" as any)).toBe(false);
+  expect(isObjectOfClass((() => {}) as any)).toBe(false);
 });

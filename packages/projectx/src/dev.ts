@@ -52,7 +52,8 @@ const obj = {
     this.counter--;
   },
   get test() {
-    return this.counter;
+    console.log("test");
+    return this.counter * 2;
   },
 };
 
@@ -88,6 +89,7 @@ autorun(() => {
 autorun(() => {
   console.log("trigger stateObj");
   div1.innerText = `stateObj: ${stateObj.test}`;
+
 });
 
 autorun(() => {

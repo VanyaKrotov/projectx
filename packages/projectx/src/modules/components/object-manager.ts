@@ -5,19 +5,19 @@ import type {
   EntryAnnotation,
   ObserverAnnotation,
   RequiredManagerInstance,
-} from "../../shared/types";
+} from "../../shared";
 import {
   findManager,
   getFieldsOfObject,
-  getFieldType,
-} from "../../shared/utils";
-import { ANNOTATIONS, RESERVED_FIELDS } from "../../shared/constants";
+  isFunctionDescriptor,
+  ANNOTATIONS,
+  RESERVED_FIELDS,
+} from "../../shared";
 
 import { observable as observableValue } from "../observable";
 
 import Manager from "./manager";
-import ComputedManager from "./computed-manager";
-import { managers } from "../../components/initialize";
+import { managers } from "../../components";
 
 class ObjectManager<T extends object | Annotated>
   extends Manager<
@@ -43,57 +43,48 @@ class ObjectManager<T extends object | Annotated>
     key: string | symbol,
     description: PropertyDescriptor
   ): boolean {
-    if (RESERVED_FIELDS.includes(key as string)) {
-      console.log(`Name \`${String(key)}\` reserved for [projectx]!`);
-
-      return false;
-    }
-
-    const type = getFieldType(description);
     const { observable = true, ...restAnnotation } =
       this.annotations[key as string] || {};
+    let isReservedName;
     if (
       !observable ||
-      findManager(managers, (manager) => manager.target === description.value)
+      findManager(managers, ({ target }) => target === description.value) ||
+      (isReservedName = RESERVED_FIELDS.includes(String(key)))
     ) {
+      console.assert(
+        !isReservedName,
+        `Name \`${String(key)}\` reserved for [projectx]!`
+      );
+
       return false;
     }
 
-    if (type === "action") {
+    if (isFunctionDescriptor(description)) {
       return Boolean(Object.defineProperty(this.target, key, description));
     }
 
-    const options = {
-      path: this.joinToPath(key),
-      annotation: restAnnotation,
-    };
     const {
       get,
-      value,
+      value = get!.bind(this.target),
       configurable = true,
       enumerable = true,
-      ...restDesc
     } = description;
-    let createDescription: PropertyDescriptor = {
+
+    this.managers[key] = observableValue(
+      value,
+      {
+        path: this.joinToPath(key),
+        annotation: restAnnotation,
+      },
+      description
+    );
+
+    const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
+      get: () => this.managers[key].value,
+      set: (value) => this.managers[key].set(value),
     };
-    if (type === "computed") {
-      this.managers[key] = new ComputedManager(get!.bind(this.target), options);
-      createDescription = {
-        ...createDescription,
-        ...restDesc,
-        get: this.managers[key].value,
-      };
-    } else {
-      this.managers[key] = observableValue(value, options);
-
-      createDescription = {
-        ...createDescription,
-        get: () => this.managers[key].value,
-        set: (value) => this.managers[key].set(value),
-      };
-    }
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));
   }

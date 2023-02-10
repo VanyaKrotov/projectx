@@ -32,24 +32,12 @@ export function getFieldsOfObject<T extends object>(object: T): PropertiesInfo {
   );
 }
 
-function isFunctionDesc({ value }: PropertyDescriptor): boolean {
+export function isFunctionDescriptor({ value }: PropertyDescriptor): boolean {
   return isFunction(value);
 }
 
-function isComputed({ get, set }: PropertyDescriptor) {
+export function isComputed({ get, set }: PropertyDescriptor) {
   return get && !set;
-}
-
-export function getFieldType(description: PropertyDescriptor): FieldType {
-  if (isComputed(description)) {
-    return "computed";
-  }
-
-  if (isFunctionDesc(description)) {
-    return "action";
-  }
-
-  return "property";
 }
 
 export function isEqualArray<T>(arr1: T[], arr2: T[]): boolean {

@@ -36,36 +36,38 @@ class ComputedManager<T>
     return (this.target as Function)();
   }
 
+  private targetHandler = () => {
+    this.reportUsage();
+
+    if (this.memoized && !this.isChanged) {
+      return this.memo!;
+    }
+
+    this.memo = this.reaction.syncCaptured(this.target as () => T);
+    this.memoized = true;
+    this.isChanged = false;
+
+    this.reaction.watch(() => {
+      this.isChanged = true;
+
+      runAfterScript(() => {
+        this.emit("change", {
+          current: undefined as T,
+          prev: this.memo!,
+        });
+      });
+    });
+
+    return this.memo;
+  };
+
   public get value(): T {
     const { memoised } = this.annotation;
     if (!memoised) {
-      return this.target;
+      return (this.target as Function)();
     }
 
-    return (() => {
-      this.reportUsage();
-
-      if (this.memoized && !this.isChanged) {
-        return this.memo!;
-      }
-
-      this.memo = this.reaction.syncCaptured(this.target as () => T);
-      this.memoized = true;
-      this.isChanged = false;
-
-      this.reaction.watch(() => {
-        this.isChanged = true;
-
-        runAfterScript(() => {
-          this.emit("change", {
-            current: undefined as T,
-            prev: this.memo!,
-          });
-        });
-      });
-
-      return this.memo;
-    }) as T;
+    return this.targetHandler();
   }
 
   public set(): boolean {

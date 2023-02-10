@@ -1,8 +1,14 @@
-import type { ManagerInstance, ManagerOptions } from "../shared";
+import {
+  isComputed,
+  isFunction,
+  ManagerInstance,
+  ManagerOptions,
+} from "../shared";
 import { isObject, isObjectOfClass } from "../shared";
 
 import {
   ArrayManager,
+  ComputedManager,
   DynamicObjectManager,
   ObjectManager,
   ValueManager,
@@ -10,7 +16,8 @@ import {
 
 export function observable<T>(
   target: T,
-  options: ManagerOptions
+  options: ManagerOptions,
+  description: PropertyDescriptor = {}
 ): ManagerInstance {
   if (Array.isArray(target)) {
     return new ArrayManager(target, options);
@@ -22,6 +29,10 @@ export function observable<T>(
 
   if (isObject(target)) {
     return new DynamicObjectManager(target as object, options);
+  }
+
+  if (isComputed(description)) {
+    return new ComputedManager(target, options);
   }
 
   // if (target instanceof Set) {
