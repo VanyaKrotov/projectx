@@ -19,7 +19,7 @@ function registerManager<T>(manager: ManagerInstance<T>): T {
   return manager.target;
 }
 
-function obsClass<T extends object | Annotated, A = T>(
+export function fromClass<T extends object | Annotated, A = T>(
   Target: Constructable<T, A>,
   ...args: GetConstructorArgs<A>
 ): T {
@@ -30,7 +30,7 @@ function obsClass<T extends object | Annotated, A = T>(
   );
 }
 
-function obsObject<T extends object | Annotated>(target: T) {
+export function fromObject<T extends object | Annotated>(target: T) {
   if (isObjectOfClass(target)) {
     return registerManager(
       new ObjectManager(target, {
@@ -42,14 +42,6 @@ function obsObject<T extends object | Annotated>(target: T) {
   return registerManager(new DynamicObjectManager(target));
 }
 
-function obsArray<T>(target: Array<T>): Array<T> {
+export function fromArray<T>(target: Array<T>): Array<T> {
   return registerManager(new ArrayManager(target));
 }
-
-export const observable = {
-  object: obsObject,
-  class: obsClass,
-  array: obsArray,
-  map: <K, T>(target: Map<K, T>) => target,
-  set: <T>(target: Set<T>) => target,
-};

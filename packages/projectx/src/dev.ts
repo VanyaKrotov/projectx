@@ -17,7 +17,7 @@ class Account {
   }
 }
 
-const account = observable.class(Account);
+const account = observable.fromClass(Account);
 
 console.log(account);
 
@@ -57,8 +57,8 @@ const obj = {
   },
 };
 
-const state = observable.class(State);
-const stateObj = observable.object(obj);
+const state = observable.fromClass(State);
+const stateObj = observable.fromObject(obj);
 
 console.log(state);
 console.log(stateObj);
