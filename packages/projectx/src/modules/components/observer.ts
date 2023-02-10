@@ -1,8 +1,9 @@
-import type {
+import {
   Event,
   Listener,
   ObserverInstance,
   ObserverWithTypeInstance,
+  runAfterScript,
 } from "../../shared";
 
 export class Observer<T> implements ObserverInstance<T> {
@@ -18,9 +19,7 @@ export class Observer<T> implements ObserverInstance<T> {
 
   public emit(event: Event<T>): void {
     for (const listener of this.listeners) {
-      if (listener(event)) {
-        break;
-      }
+      runAfterScript(() => listener(event));
     }
   }
 }

@@ -1,5 +1,4 @@
 import type { WatchOptions } from "../shared";
-import { runAfterScript } from "../shared";
 
 import { Reaction } from "./reaction";
 
@@ -24,7 +23,7 @@ function watch<T>(
       result = value;
     }
 
-    runAfterScript(() => reaction.watch(watch));
+    reaction.watch(watch);
   };
 
   reaction.watch(watch);

@@ -50,11 +50,9 @@ class ComputedManager<T>
     this.reaction.watch(() => {
       this.isChanged = true;
 
-      runAfterScript(() => {
-        this.emit("change", {
-          current: undefined as T,
-          prev: this.memo!,
-        });
+      this.emit("change", {
+        current: undefined as T,
+        prev: this.memo!,
       });
     });
 
