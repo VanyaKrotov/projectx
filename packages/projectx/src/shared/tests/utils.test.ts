@@ -2,6 +2,7 @@ import { test, expect, describe } from "@jest/globals";
 
 import {
   createUniqPath,
+  getFieldsOfObject,
   isEqualArray,
   isFunction,
   isObject,
@@ -82,4 +83,28 @@ test("isObjectOfClass", async () => {
   expect(isObjectOfClass(1 as any)).toBe(false);
   expect(isObjectOfClass("1" as any)).toBe(false);
   expect(isObjectOfClass((() => {}) as any)).toBe(false);
+});
+
+test("getFieldsOfObject", () => {
+  class A {
+    value = 10;
+  }
+
+  class B extends A {
+    get r() {
+      return 12;
+    }
+  }
+
+  expect(Object.keys(getFieldsOfObject(new A()))).toEqual([
+    "constructor",
+    "value",
+  ]);
+  expect(Object.keys(getFieldsOfObject(new B()))).toEqual([
+    "constructor",
+    "r",
+    "value",
+  ]);
+  expect(Object.keys(getFieldsOfObject({}))).toEqual([]);
+  expect(Object.keys(getFieldsOfObject({ test: 10 }))).toEqual(["test"]);
 });

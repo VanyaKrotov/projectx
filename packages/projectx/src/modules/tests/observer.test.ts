@@ -4,7 +4,7 @@ import type { Event } from "../../shared";
 
 import { Observer, ObserverWithType } from "../components/observer";
 
-test("Observer", () => {
+test("Observer", async () => {
   const observer = new Observer<number>();
   const events: Event<number>[] = [];
 
@@ -20,12 +20,16 @@ test("Observer", () => {
   observer.emit({ current: 1, prev: 2 });
   observer.emit({ current: 2, prev: 3 });
 
+  await Promise.resolve();
+
   expect(events.length).toBe(2);
 
   unlisten();
 
   observer.emit({ current: 3, prev: 4 });
   observer.emit({ current: 4, prev: 5 });
+
+  await Promise.resolve();
 
   expect(events.length).toBe(2);
   expect(events).toEqual([
@@ -37,7 +41,7 @@ test("Observer", () => {
 describe("ObserverWithType<'change' | 'add'>", () => {
   const observer = new ObserverWithType<number, "change" | "add" | "all">();
 
-  test("type 'change'", () => {
+  test("type 'change'", async () => {
     const events: Event<number>[] = [];
 
     expect(events.length).toBe(0);
@@ -50,6 +54,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
 
     observer.emit("change", { current: 1, prev: 0 });
 
+    await Promise.resolve();
+
     expect(events.length).toBe(1);
 
     observer.emit("change", { current: 2, prev: 1 });
@@ -59,6 +65,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
 
     unlisten();
 
+    await Promise.resolve();
+
     expect(events.length).toBe(2);
     expect(events).toEqual([
       { current: 1, prev: 0 },
@@ -66,7 +74,7 @@ describe("ObserverWithType<'change' | 'add'>", () => {
     ]);
   });
 
-  test("type 'add'", () => {
+  test("type 'add'", async () => {
     const events: Event<number>[] = [];
 
     expect(events.length).toBe(0);
@@ -80,6 +88,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
     observer.emit("add", { current: 3, prev: 2 });
     observer.emit("change", { current: 3 });
 
+    await Promise.resolve();
+
     expect(events.length).toBe(1);
 
     observer.emit("add", { current: 4, prev: 3 });
@@ -91,6 +101,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
 
     observer.emit("add", { current: 5, prev: 4 });
 
+    await Promise.resolve();
+
     expect(events.length).toBe(2);
     expect(events).toEqual([
       { current: 3, prev: 2 },
@@ -98,7 +110,7 @@ describe("ObserverWithType<'change' | 'add'>", () => {
     ]);
   });
 
-  test("type 'all'", () => {
+  test("type 'all'", async () => {
     const events: Event<number>[] = [];
 
     expect(events.length).toBe(0);
@@ -112,6 +124,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
     observer.emit("add", { current: 3, prev: 2 });
     observer.emit("change", { current: 3 });
 
+    await Promise.resolve();
+
     expect(events.length).toBe(2);
 
     observer.emit("add", { current: 4, prev: 3 });
@@ -122,6 +136,8 @@ describe("ObserverWithType<'change' | 'add'>", () => {
     unlisten();
 
     observer.emit("change", { current: 5, prev: 4 });
+
+    await Promise.resolve();
 
     expect(events.length).toBe(3);
     expect(events).toEqual([
