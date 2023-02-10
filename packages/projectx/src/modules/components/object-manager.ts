@@ -13,6 +13,7 @@ import { observable as observableValue } from "../observable";
 
 import Manager from "./manager";
 import ComputedManager from "./computed-manager";
+import { managers } from "../initialize";
 
 class ObjectManager<T extends object | Annotated>
   extends Manager<
@@ -24,7 +25,7 @@ class ObjectManager<T extends object | Annotated>
 {
   public managers: Record<string | symbol, ManagerInstance> = {};
 
-  constructor(protected target: T, options?: ManagerOptions) {
+  constructor(public target: T, options?: ManagerOptions) {
     super(options, ANNOTATIONS.observer);
 
     this.define(target);
@@ -34,18 +35,34 @@ class ObjectManager<T extends object | Annotated>
     return (this.target as Annotated).annotation || {};
   }
 
+  private hasInManagers(value: T): boolean {
+    for (const [, manager] of managers) {
+      if (manager.target === value) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   protected defineField(
     key: string | symbol,
     description: PropertyDescriptor
   ): boolean {
     if (RESERVED_FIELDS.includes(key as string)) {
-      throw new Error(`Name \`${String(key)}\` reserved for [projectx]!`);
+      console.log(`Name \`${String(key)}\` reserved for [projectx]!`);
+
+      return false;
     }
 
     const type = getFieldType(description);
     const { observable = true, ...restAnnotation } =
       this.annotations[key as string] || {};
-    if (type === "action" || !observable) {
+    if (!observable || this.hasInManagers(description.value)) {
+      return false;
+    }
+
+    if (type === "action") {
       return Boolean(Object.defineProperty(this.target, key, description));
     }
 

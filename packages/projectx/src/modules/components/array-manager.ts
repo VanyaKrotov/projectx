@@ -19,7 +19,7 @@ class ArrayManager<T>
 
   private proxy: Array<T>;
 
-  constructor(private target: Array<T>, options?: ManagerOptions) {
+  constructor(public target: Array<T>, options?: ManagerOptions) {
     super(options, ANNOTATIONS.array);
 
     this.proxy = this.define(target);

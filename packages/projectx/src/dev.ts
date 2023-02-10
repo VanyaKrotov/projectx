@@ -1,4 +1,4 @@
-import { autorun, observable, transaction } from "./index";
+import { autorun, observable, dependencyInject } from "./index";
 
 class BaseState {
   counter = 1;
@@ -9,11 +9,25 @@ class BaseState {
   }
 }
 
+class Account {
+  public isAuthorized = true;
+
+  changeAuth(auth: boolean) {
+    this.isAuthorized = auth;
+  }
+}
+
+const account = observable.class(Account);
+
+console.log(account);
+
 class State extends BaseState {
-  base = new BaseState();
+  private readonly account = dependencyInject(Account);
 
   increment() {
     this.counter++;
+
+    this.account.changeAuth(false);
   }
 
   decrement() {
@@ -25,21 +39,20 @@ class State extends BaseState {
   }
 
   push() {
-    this.base.counter++;
+    this.counter++;
   }
 }
 
 const obj = {
   counter: 1,
-  base: new BaseState(),
   inc() {
-    this.base.counter++;
+    this.counter++;
   },
   dec() {
-    this.base.counter--;
+    this.counter--;
   },
   get test() {
-    return this.base.counter;
+    return this.counter;
   },
 };
 
@@ -52,6 +65,7 @@ console.log(stateObj);
 const div = document.createElement("div");
 const div1 = document.createElement("div");
 const div2 = document.createElement("div");
+const div3 = document.createElement("div");
 const buttonPlus = document.createElement("button");
 const buttonMinus = document.createElement("button");
 const buttonPlus2 = document.createElement("button");
@@ -77,8 +91,13 @@ autorun(() => {
 });
 
 autorun(() => {
-  console.log("trigger base.counter");
-  div2.innerText = `base: ${state.base.counter}`;
+  console.log("trigger auth");
+  div3.innerText = `auth: ${account.isAuthorized}`;
+});
+
+autorun(() => {
+  console.log("trigger counter");
+  div2.innerText = `base: ${state.counter}`;
 });
 
 buttonPlus.addEventListener("click", () => {
@@ -108,6 +127,7 @@ buttonPush.addEventListener("click", () => {
 document.body.appendChild(div);
 document.body.appendChild(div1);
 document.body.appendChild(div2);
+document.body.appendChild(div3);
 document.body.appendChild(buttonPlus);
 document.body.appendChild(buttonMinus);
 document.body.appendChild(buttonPlus2);

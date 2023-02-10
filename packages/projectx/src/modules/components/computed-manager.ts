@@ -21,7 +21,7 @@ class ComputedManager<T>
   private isChanged = false;
   public managers = null;
 
-  constructor(private readonly target: T, options: ManagerOptions) {
+  constructor(public readonly target: T, options: ManagerOptions) {
     super(options, ANNOTATIONS.computed);
 
     this.reaction = new Reaction(`Computed#${this.path.join(".")}`);

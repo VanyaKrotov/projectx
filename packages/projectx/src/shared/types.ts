@@ -23,6 +23,7 @@ export interface ManagerInstance<T = any, M = any>
     RequiredManagerInstance<T> {
   path: string[];
   managers: M;
+  target: T;
   get name(): string;
   get keys(): string[];
   get snapshot(): T;
@@ -116,8 +117,22 @@ export interface BatchInstance {
 
 //#region Common
 
-export interface Constructable<T extends object> {
-  new (...args: unknown[]): T;
+export interface ConfigurationManagerInstance {
+  get config(): Configuration;
+  reset(): void;
+  change(config: Partial<Configuration>): void;
+}
+
+export interface Configuration {
+  equalResolver: IsEqualFunction<never>;
+}
+
+export type GetConstructorArgs<T> = T extends new (...args: infer U) => unknown
+  ? U
+  : never;
+
+export interface Constructable<T, A> {
+  new (...args: GetConstructorArgs<A>): T;
   prototype: T;
   name: string;
 }

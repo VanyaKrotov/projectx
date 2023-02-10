@@ -2,8 +2,9 @@ import type {
   ManagerInstance,
   Constructable,
   Annotated,
+  GetConstructorArgs,
 } from "../shared/types";
-import { createUniqPath } from "../shared/utils";
+import { createUniqPath, isObjectOfClass } from "../shared/utils";
 
 import { managers } from "./initialize";
 import {
@@ -18,9 +19,9 @@ function registerManager<T>(manager: ManagerInstance<T>): T {
   return manager.value;
 }
 
-function obsClass<T extends object | Annotated>(
-  Target: Constructable<T>,
-  ...args: unknown[]
+function obsClass<T extends object | Annotated, A = T>(
+  Target: Constructable<T, A>,
+  ...args: GetConstructorArgs<A>
 ): T {
   return registerManager(
     new ObjectManager(new Target(...args), {
@@ -30,6 +31,14 @@ function obsClass<T extends object | Annotated>(
 }
 
 function obsObject<T extends object | Annotated>(target: T) {
+  if (isObjectOfClass(target)) {
+    return registerManager(
+      new ObjectManager(target, {
+        path: [createUniqPath(target.constructor.name)],
+      })
+    );
+  }
+
   return registerManager(new DynamicObjectManager(target));
 }
 
