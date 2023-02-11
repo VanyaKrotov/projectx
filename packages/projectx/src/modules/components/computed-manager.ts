@@ -59,6 +59,10 @@ class ComputedManager<T>
     return this.memo;
   };
 
+  public getTarget(): T {
+    return this.target;
+  }
+
   public get value(): T {
     const { memoised } = this.annotation;
     if (!memoised) {

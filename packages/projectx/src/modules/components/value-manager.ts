@@ -39,6 +39,10 @@ class ValueManager<T>
     return true;
   }
 
+  public getTarget(): T {
+    return this.target;
+  }
+
   public manager(): ManagerInstance | null {
     return null;
   }

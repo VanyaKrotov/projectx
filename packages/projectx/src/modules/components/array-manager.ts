@@ -136,6 +136,10 @@ class ArrayManager<T>
     this.managers = [];
   }
 
+  public getTarget(): T[] {
+    return this.proxy;
+  }
+
   private define(target: Array<T>): Array<T> {
     this.disposeManagers();
 

@@ -132,6 +132,10 @@ class ObjectManager<T extends object | Annotated>
     return this.managers[key];
   }
 
+  public getTarget(): T {
+    return this.target;
+  }
+
   protected define(target: T): boolean {
     this.disposeManagers();
 

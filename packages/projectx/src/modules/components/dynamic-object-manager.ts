@@ -63,6 +63,10 @@ class DynamicObjectManager<T extends object | Annotated>
     return this.define(value);
   }
 
+  public getTarget(): T {
+    return this.proxy;
+  }
+
   public manager(key: string | symbol): ManagerInstance {
     return this.managers[key];
   }

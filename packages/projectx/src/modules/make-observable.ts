@@ -16,7 +16,7 @@ import {
 function registerManager<T>(manager: ManagerInstance<T>): T {
   managers.set(manager.name, manager);
 
-  return manager.target;
+  return manager.getTarget();
 }
 
 export function fromClass<T extends object | Annotated, A = T>(

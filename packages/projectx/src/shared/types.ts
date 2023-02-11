@@ -8,6 +8,7 @@ export interface RequiredManagerInstance<T> {
   get value(): T;
   set(value: T): boolean;
   manager(key: string | symbol): ManagerInstance | null;
+  getTarget(): T;
 }
 
 export type ObserverTypes =
