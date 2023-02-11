@@ -1,9 +1,4 @@
-import {
-  isComputed,
-  isFunction,
-  ManagerInstance,
-  ManagerOptions,
-} from "../shared";
+import { ManagerInstance, isComputed, ManagerOptions } from "../shared";
 import { isObject, isObjectOfClass } from "../shared";
 
 import {
@@ -32,7 +27,7 @@ export function observable<T>(
   }
 
   if (isComputed(description)) {
-    return new ComputedManager(target, options);
+    return new ComputedManager(target as () => never, options);
   }
 
   // if (target instanceof Set) {

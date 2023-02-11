@@ -1,10 +1,11 @@
 import type {
   Annotated,
-  ManagerInstance,
   ManagerOptions,
   EntryAnnotation,
+  ObjectManagerInstance,
+  ManagerPath,
+  ManagerInstance,
   ObserverAnnotation,
-  RequiredManagerInstance,
 } from "../../shared";
 import {
   findManager,
@@ -16,18 +17,24 @@ import {
 
 import { observable as observableValue } from "../observable";
 
-import Manager from "./manager";
 import { managers } from "../../components";
+import ContainerManager from "./container-manager";
 
 class ObjectManager<T extends object | Annotated>
-  extends Manager<T, ObserverAnnotation, Map<any, ManagerInstance>>
-  implements RequiredManagerInstance<T>
+  extends ContainerManager<T, Map<ManagerPath, ManagerInstance>>
+  implements
+    ObjectManagerInstance<
+      T,
+      ObserverAnnotation,
+      Map<ManagerPath, ManagerInstance>
+    >
 {
-  public values = new Map<any, ManagerInstance>();
+  public annotation = ANNOTATIONS.observer;
 
-  constructor(public target: T, options?: ManagerOptions) {
-    super(options, ANNOTATIONS.observer);
+  constructor(target: T, options?: ManagerOptions<ObserverAnnotation>) {
+    super(target, new Map<ManagerPath, ManagerInstance>(), options);
 
+    this.annotation = { ...this.annotation, ...options?.annotation };
     this.define(target);
   }
 
@@ -35,17 +42,14 @@ class ObjectManager<T extends object | Annotated>
     return (this.target as Annotated).annotation || {};
   }
 
-  protected defineField(
-    key: string | symbol,
-    description: PropertyDescriptor
-  ): boolean {
+  protected defineField(key: string, description: PropertyDescriptor): boolean {
     const { observable = true, ...restAnnotation } =
-      this.annotations[key as string] || {};
+      this.annotations[key] || {};
     let isReservedName;
     if (
       !observable ||
       findManager(managers, ({ target }) => target === description.value) ||
-      (isReservedName = RESERVED_FIELDS.includes(String(key)))
+      (isReservedName = RESERVED_FIELDS.includes(key))
     ) {
       console.assert(
         !isReservedName,
@@ -85,7 +89,7 @@ class ObjectManager<T extends object | Annotated>
     const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
-      get: () => this.values.get(key)!.value,
+      get: () => this.values.get(key)!.get(),
       set: (value) => this.values.get(key)!.set(value),
     };
 
@@ -97,12 +101,6 @@ class ObjectManager<T extends object | Annotated>
       (acc, [key, manager]) => Object.assign(acc, { [key]: manager.snapshot }),
       {} as T
     );
-  }
-
-  public get value(): T {
-    this.reportUsage();
-
-    return this.target;
   }
 
   public get keys() {
@@ -124,25 +122,19 @@ class ObjectManager<T extends object | Annotated>
   }
 
   public disposeManagers() {
-    for (const [key, manager] of this.values) {
+    for (const [, manager] of this.values) {
       manager.dispose();
     }
 
     this.values.clear();
   }
 
-  public manager(key: string | symbol): ManagerInstance | null {
+  public manager(key: string): ManagerInstance | null {
     return this.values.get(key) || null;
-  }
-
-  public getTarget(): T {
-    return this.target;
   }
 
   protected define(target: T): boolean {
     this.disposeManagers();
-
-    this.registerManager();
 
     const fields = getFieldsOfObject(target);
     for (const key in fields) {

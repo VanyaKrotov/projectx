@@ -1,48 +1,43 @@
 import type {
-  ComputedAnnotation,
-  ManagerInstance,
+  ComputedManagerInstance,
   ManagerOptions,
   ReactionInstance,
-  RequiredManagerInstance,
 } from "../../shared";
 import { ANNOTATIONS } from "../../shared";
 
 import { Reaction } from "../reaction";
-import Manager from "./manager";
 
-class ComputedManager<T>
-  extends Manager<T, ComputedAnnotation, null>
-  implements RequiredManagerInstance<T>
+import BasicManager from "./basic-manager";
+
+class ComputedManager<T extends () => T>
+  extends BasicManager<T>
+  implements ComputedManagerInstance<T>
 {
+  public annotation = ANNOTATIONS.computed;
   private reaction: ReactionInstance;
   private memo?: T;
   private memoized = false;
   private isChanged = false;
 
-  constructor(public readonly target: T, options: ManagerOptions) {
-    super(options, ANNOTATIONS.computed);
+  constructor(target: T, options: ManagerOptions) {
+    super(target, options);
 
+    this.annotation = { ...this.annotation, ...options.annotation };
     this.reaction = new Reaction(`Computed#${this.path.join(".")}`);
-
-    this.emit("define", { current: this.snapshot });
-  }
-
-  public manager(): ManagerInstance | null {
-    return null;
   }
 
   public get snapshot(): T {
-    return (this.target as Function)();
+    return this.target();
   }
 
-  private targetHandler = () => {
+  private targetHandler = (): T => {
     this.reportUsage();
 
     if (this.memoized && !this.isChanged) {
       return this.memo!;
     }
 
-    this.memo = this.reaction.syncCaptured(this.target as () => T);
+    this.memo = this.reaction.syncCaptured(this.target);
     this.memoized = true;
     this.isChanged = false;
 
@@ -50,7 +45,6 @@ class ComputedManager<T>
       this.isChanged = true;
 
       this.emit("change", {
-        current: undefined as T,
         prev: this.memo!,
       });
     });
@@ -58,26 +52,17 @@ class ComputedManager<T>
     return this.memo;
   };
 
-  public getTarget(): T {
-    return this.target;
-  }
-
-  public get value(): T {
-    const { memoised } = this.annotation;
-    if (!memoised) {
-      return (this.target as Function)();
-    }
-
-    return this.targetHandler();
-  }
-
-  public set(): boolean {
-    return false;
-  }
-
   public dispose(): void {
     this.reaction.dispose();
     super.dispose();
+  }
+
+  public get(): T {
+    if (!this.annotation.memoised) {
+      return this.snapshot;
+    }
+
+    return this.targetHandler();
   }
 }
 

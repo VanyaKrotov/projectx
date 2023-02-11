@@ -2,14 +2,21 @@ import type {
   Annotated,
   ManagerInstance,
   ManagerOptions,
-  RequiredManagerInstance,
+  ManagerPath,
+  ObjectManagerInstance,
+  ObserverAnnotation,
 } from "../../shared";
 
 import ObjectManager from "./object-manager";
 
 class DynamicObjectManager<T extends object | Annotated>
   extends ObjectManager<T>
-  implements RequiredManagerInstance<T>
+  implements
+    ObjectManagerInstance<
+      T,
+      ObserverAnnotation,
+      Map<ManagerPath, ManagerInstance>
+    >
 {
   protected proxy: T;
 
@@ -22,29 +29,29 @@ class DynamicObjectManager<T extends object | Annotated>
 
       if (deleteResult && manager) {
         manager.dispose();
-        this.emit("remove", { prev: manager.value });
+        this.emit("compression", { prev: this.target });
       }
 
       return deleteResult;
     },
     defineProperty: (_target, key, prop) => {
-      const result = super.defineField(key, prop);
+      const result = super.defineField(key as string, prop);
 
-      this.emit("add", {
-        current: this.value,
+      this.emit("expansion", {
+        current: this.target,
       });
 
       return result;
     },
   };
 
-  constructor(target: T, options?: ManagerOptions) {
+  constructor(target: T, options?: ManagerOptions<ObserverAnnotation>) {
     super(target, options);
 
     this.proxy = this.defineProxy(target);
   }
 
-  public get value(): T {
+  public get(): T {
     this.reportUsage();
 
     return this.proxy;
@@ -57,7 +64,7 @@ class DynamicObjectManager<T extends object | Annotated>
     return this.define(value);
   }
 
-  public getTarget(): T {
+  public source(): T {
     return this.proxy;
   }
 

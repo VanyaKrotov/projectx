@@ -1,4 +1,5 @@
-import { ManagerInstance, ReactionInstance, __DEV__ } from "../shared";
+import type { ManagerInstance, ManagerPath, ReactionInstance } from "../shared";
+import { __DEV__ } from "../shared";
 
 import Batch from "./batch";
 import Interceptor from "./interceptor";
@@ -8,7 +9,7 @@ export const interceptor = new Interceptor();
 
 export const batch = new Batch();
 
-export const managers = new Map<string, ManagerInstance>();
+export const managers = new Map<ManagerPath, ManagerInstance>();
 
 export const reactions = new Map<string, ReactionInstance>();
 

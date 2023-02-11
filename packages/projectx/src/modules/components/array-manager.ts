@@ -1,29 +1,25 @@
 import type {
-  ArrayAnnotation,
+  ArrayManagerInstance,
   ManagerInstance,
   ManagerOptions,
-  RequiredManagerInstance,
 } from "../../shared";
 import { isFunction, ANNOTATIONS } from "../../shared";
 
 import { observable } from "../observable";
-
-import Manager from "./manager";
+import ContainerManager from "./container-manager";
 
 class ArrayManager<T>
-  extends Manager<Array<T>, ArrayAnnotation, Array<ManagerInstance<T>>>
-  implements RequiredManagerInstance<Array<T>>
+  extends ContainerManager<Array<T>, Array<ManagerInstance<T>>>
+  implements ArrayManagerInstance<Array<T>, Array<ManagerInstance<T>>>
 {
-  public values: Array<ManagerInstance> = [];
+  public annotation = ANNOTATIONS.array;
 
   private proxy: Array<T>;
 
-  constructor(public target: Array<T>, options?: ManagerOptions) {
-    super(options, ANNOTATIONS.array);
+  constructor(target: Array<T>, options?: Omit<ManagerOptions, "annotation">) {
+    super(target, [], options);
 
     this.proxy = this.define(target);
-
-    this.emit("define", { current: this.value });
   }
 
   private handlers: Required<
@@ -32,7 +28,7 @@ class ArrayManager<T>
     get: (_target, key) => {
       const index = Number(key);
       if (!Number.isNaN(index)) {
-        return this.values[index]?.value;
+        return this.values[index]?.get();
       }
 
       const value = this.target[key as keyof Array<T>];
@@ -56,7 +52,7 @@ class ArrayManager<T>
           });
           this.target[index] = value;
 
-          this.emit("add", { current: this.value });
+          this.emit("expansion", { current: this.target });
 
           return true;
         } catch {
@@ -92,7 +88,7 @@ class ArrayManager<T>
   };
 
   public set(value: Array<T>): boolean {
-    const prev = this.value;
+    const prev = this.target;
 
     this.target = value;
     this.proxy = this.define(value);
@@ -118,36 +114,27 @@ class ArrayManager<T>
     return result;
   }
 
-  public get value(): Array<T> {
-    this.reportUsage();
-
+  public source(): T[] {
     return this.proxy;
   }
 
-  public manager(key: string | symbol): ManagerInstance | null {
+  public manager(key: string): ManagerInstance | null {
     return this.values[Number(key)];
   }
 
   public disposeManagers() {
-    for (const manager of this.values) {
-      manager.dispose();
-    }
+    this.values.forEach((manager) => manager.dispose());
 
     this.values = [];
   }
 
-  public getTarget(): T[] {
-    return this.proxy;
-  }
-
   private define(target: Array<T>): Array<T> {
     this.disposeManagers();
-    this.registerManager();
 
-    for (const item of target) {
+    for (let i = 0; i < target.length; i++) {
       this.values.push(
-        observable<T>(item, {
-          path: this.joinToPath(String(this.values.length)),
+        observable<T>(target[i], {
+          path: this.joinToPath(i),
         })
       );
     }

@@ -1,46 +1,56 @@
-export type FieldType = "action" | "computed" | "property";
-
 export type PropertiesInfo = Record<string, PropertyDescriptor>;
 
 //#region Manager
 
-export interface RequiredManagerInstance<T> {
-  get value(): T;
+export type ManagerPath = string | number | symbol | never;
+
+export interface ManagerInstance<T = any> {
+  path: ManagerPath[];
+  target: T;
+  get name(): ManagerPath;
+  get snapshot(): T;
+  get(): T;
   set(value: T): boolean;
-  getTarget(): T;
+  source(): T;
+  dispose(): void;
+  toString(): string;
 }
 
-export interface FreeManagerInstance<T> {
-  path: any[];
-  target: T;
-  get name(): any;
-  get keys(): any[];
-  get snapshot(): T;
-  dispose(): void;
-  disposeManagers(): void;
+export interface ValueManagerInstance<T> extends ManagerInstance<T> {}
+
+export interface ComputedManagerInstance<T>
+  extends ManagerInstance<T>,
+    AnnotatedManagerInstance<ComputedAnnotation> {}
+
+export interface AnnotatedManagerInstance<A> {
+  annotation: A;
 }
+
+export interface ContainerManagerInstance<T, V> extends ManagerInstance<T> {
+  values: V;
+  get keys(): ManagerPath[];
+  disposeManagers(): void;
+  manager(key: string): ManagerInstance | null;
+}
+
+export interface ObjectManagerInstance<T, A, V>
+  extends ContainerManagerInstance<T, V>,
+    AnnotatedManagerInstance<A> {}
+
+export interface ArrayManagerInstance<T, V>
+  extends ContainerManagerInstance<T, V> {}
 
 export type ObserverTypes =
   | "change"
-  | "add"
-  | "remove"
+  | "expansion"
+  | "compression"
   | "define"
   | "dispose"
   | "all";
 
-export interface ManagerInstance<T = any, M = any>
-  extends ObserverWithTypeInstance<T, ObserverTypes>,
-    RequiredManagerInstance<T>,
-    FreeManagerInstance<T> {
-  values: M;
-  set(value: T): boolean;
-  manager(key: string | symbol): ManagerInstance | null;
-  toString(): string;
-}
-
-export interface ManagerOptions {
-  path?: any[];
-  annotation?: Annotation;
+export interface ManagerOptions<A extends Annotation = Annotation> {
+  path?: ManagerPath[];
+  annotation?: A;
 }
 
 //#endregion
@@ -94,7 +104,7 @@ export interface PathsTreeInstance {
 //#region Interceptor
 
 export interface InterceptorEvent {
-  path: string[];
+  path: ManagerPath[];
 }
 
 export interface InterceptorListener {

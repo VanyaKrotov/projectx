@@ -1,30 +1,16 @@
-import type {
-  ManagerInstance,
-  ManagerOptions,
-  RequiredManagerInstance,
-  ValueAnnotation,
-} from "../../shared";
-import { ANNOTATIONS } from "../../shared";
+import type { ManagerOptions, ValueManagerInstance } from "../../shared";
 
-import Manager from "./manager";
+import BasicManager from "./basic-manager";
 
 class ValueManager<T>
-  extends Manager<T, ValueAnnotation, null>
-  implements RequiredManagerInstance<T>
+  extends BasicManager<T>
+  implements ValueManagerInstance<T>
 {
-  constructor(public target: T, options: ManagerOptions) {
-    super(options, ANNOTATIONS.value);
-
-    this.emit("define", { current: target });
+  constructor(target: T, options: ManagerOptions) {
+    super(target, options);
   }
 
-  get value(): T {
-    this.reportUsage();
-
-    return this.target;
-  }
-
-  public set(value: any): boolean {
+  public set(value: T): boolean {
     const prev = this.target;
 
     this.target = value;
@@ -35,14 +21,6 @@ class ValueManager<T>
     });
 
     return true;
-  }
-
-  public getTarget(): T {
-    return this.target;
-  }
-
-  public manager(): ManagerInstance | null {
-    return null;
   }
 }
 

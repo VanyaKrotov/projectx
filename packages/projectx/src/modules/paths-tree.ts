@@ -57,7 +57,7 @@ class PathTree implements PathsTreeInstance {
     }
 
     node.listenTypes = isEqualArray(keys, node.manager!.keys)
-      ? ["add", "change", "remove"]
+      ? ["expansion", "change", "compression"]
       : ["change"];
 
     for (const key of keys) {
