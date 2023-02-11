@@ -3,9 +3,11 @@ import { batch } from "../components";
 function transaction(callback: VoidFunction): void {
   batch.open();
 
-  callback();
-
-  batch.close();
+  try {
+    callback();
+  } finally {
+    batch.close();
+  }
 }
 
 export { transaction };
