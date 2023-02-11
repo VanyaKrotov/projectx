@@ -5,7 +5,7 @@ import type {
   ReactionInstance,
   RequiredManagerInstance,
 } from "../../shared";
-import { runAfterScript, ANNOTATIONS } from "../../shared";
+import { ANNOTATIONS } from "../../shared";
 
 import { Reaction } from "../reaction";
 import Manager from "./manager";

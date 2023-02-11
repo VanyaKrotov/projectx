@@ -6,19 +6,12 @@ import {
 } from "./types";
 
 export const ANNOTATIONS = {
-  observer: {
-    observable: true,
-  } as ObserverAnnotation,
-  value: {
-    observable: true,
-  } as ValueAnnotation,
+  observer: {} as ObserverAnnotation,
+  value: {} as ValueAnnotation,
   computed: {
-    observable: true,
     memoised: true,
   } as ComputedAnnotation,
-  array: {
-    observable: true,
-  } as ArrayAnnotation,
+  array: {} as ArrayAnnotation,
 };
 
 export const __DEV__ = process.env.NODE_ENV === "development";
