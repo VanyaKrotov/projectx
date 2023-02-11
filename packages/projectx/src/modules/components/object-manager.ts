@@ -20,14 +20,10 @@ import Manager from "./manager";
 import { managers } from "../../components";
 
 class ObjectManager<T extends object | Annotated>
-  extends Manager<
-    T,
-    ObserverAnnotation,
-    Record<string | symbol, ManagerInstance<any>>
-  >
+  extends Manager<T, ObserverAnnotation, Map<any, ManagerInstance>>
   implements RequiredManagerInstance<T>
 {
-  public managers: Record<string | symbol, ManagerInstance> = {};
+  public values = new Map<any, ManagerInstance>();
 
   constructor(public target: T, options?: ManagerOptions) {
     super(options, ANNOTATIONS.observer);
@@ -70,28 +66,35 @@ class ObjectManager<T extends object | Annotated>
       enumerable = true,
     } = description;
 
-    this.managers[key] = observableValue(
-      value,
-      {
-        path: this.joinToPath(key),
-        annotation: restAnnotation,
-      },
-      description
+    if (this.values.has(key)) {
+      this.values.get(key)!.dispose();
+    }
+
+    this.values.set(
+      key,
+      observableValue(
+        value,
+        {
+          path: this.joinToPath(key),
+          annotation: restAnnotation,
+        },
+        description
+      )
     );
 
     const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
-      get: () => this.managers[key].value,
-      set: (value) => this.managers[key].set(value),
+      get: () => this.values.get(key)!.value,
+      set: (value) => this.values.get(key)!.set(value),
     };
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));
   }
 
   public get snapshot(): T {
-    return Object.entries(this.managers).reduce(
-      (acc, [key, value]) => Object.assign(acc, { [key]: value.snapshot }),
+    return Array.from(this.values.entries()).reduce(
+      (acc, [key, manager]) => Object.assign(acc, { [key]: manager.snapshot }),
       {} as T
     );
   }
@@ -103,12 +106,12 @@ class ObjectManager<T extends object | Annotated>
   }
 
   public get keys() {
-    return Object.keys(this.managers);
+    return Array.from(this.values.keys());
   }
 
   public set(value: T): boolean {
+    const prev = this.target;
     this.target = value;
-    const prev = { ...this.target };
 
     this.define(value);
 
@@ -121,15 +124,15 @@ class ObjectManager<T extends object | Annotated>
   }
 
   public disposeManagers() {
-    for (const key in this.managers) {
-      this.managers[key].dispose();
+    for (const [key, manager] of this.values) {
+      manager.dispose();
     }
 
-    this.managers = {};
+    this.values.clear();
   }
 
-  public manager(key: string | symbol): ManagerInstance {
-    return this.managers[key];
+  public manager(key: string | symbol): ManagerInstance | null {
+    return this.values.get(key) || null;
   }
 
   public getTarget(): T {
@@ -138,6 +141,8 @@ class ObjectManager<T extends object | Annotated>
 
   protected define(target: T): boolean {
     this.disposeManagers();
+
+    this.registerManager();
 
     const fields = getFieldsOfObject(target);
     for (const key in fields) {

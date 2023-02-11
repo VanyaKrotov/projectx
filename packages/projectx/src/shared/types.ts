@@ -7,8 +7,17 @@ export type PropertiesInfo = Record<string, PropertyDescriptor>;
 export interface RequiredManagerInstance<T> {
   get value(): T;
   set(value: T): boolean;
-  manager(key: string | symbol): ManagerInstance | null;
   getTarget(): T;
+}
+
+export interface FreeManagerInstance<T> {
+  path: any[];
+  target: T;
+  get name(): any;
+  get keys(): any[];
+  get snapshot(): T;
+  dispose(): void;
+  disposeManagers(): void;
 }
 
 export type ObserverTypes =
@@ -21,22 +30,16 @@ export type ObserverTypes =
 
 export interface ManagerInstance<T = any, M = any>
   extends ObserverWithTypeInstance<T, ObserverTypes>,
-    RequiredManagerInstance<T> {
-  path: string[];
-  managers: M;
-  target: T;
-  get name(): string;
-  get keys(): string[];
-  get snapshot(): T;
+    RequiredManagerInstance<T>,
+    FreeManagerInstance<T> {
+  values: M;
   set(value: T): boolean;
   manager(key: string | symbol): ManagerInstance | null;
-  dispose(): void;
-  disposeManagers(): void;
   toString(): string;
 }
 
 export interface ManagerOptions {
-  path?: string[];
+  path?: any[];
   annotation?: Annotation;
 }
 

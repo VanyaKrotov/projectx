@@ -17,10 +17,10 @@ class DynamicObjectManager<T extends object | Annotated>
     Pick<ProxyHandler<T>, "deleteProperty" | "defineProperty">
   > = {
     deleteProperty: (_target, key) => {
-      const manager = this.managers[key];
-      const deleteResult = delete this.managers[key];
+      const manager = this.values.get(key);
+      const deleteResult = this.values.delete(key);
 
-      if (deleteResult) {
+      if (deleteResult && manager) {
         manager.dispose();
         this.emit("remove", { prev: manager.value });
       }
@@ -44,13 +44,6 @@ class DynamicObjectManager<T extends object | Annotated>
     this.proxy = this.defineProxy(target);
   }
 
-  public get snapshot(): T {
-    return Object.entries(this.managers).reduce(
-      (acc, [key, value]) => Object.assign(acc, { [key]: value.snapshot }),
-      {} as T
-    );
-  }
-
   public get value(): T {
     this.reportUsage();
 
@@ -59,16 +52,13 @@ class DynamicObjectManager<T extends object | Annotated>
 
   public set(value: T): boolean {
     this.proxy = this.defineProxy(value);
+    this.target = value;
 
     return this.define(value);
   }
 
   public getTarget(): T {
     return this.proxy;
-  }
-
-  public manager(key: string | symbol): ManagerInstance {
-    return this.managers[key];
   }
 
   protected defineProxy(target: T): T {

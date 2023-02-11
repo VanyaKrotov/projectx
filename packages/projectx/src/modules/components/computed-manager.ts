@@ -18,7 +18,6 @@ class ComputedManager<T>
   private memo?: T;
   private memoized = false;
   private isChanged = false;
-  public managers = null;
 
   constructor(public readonly target: T, options: ManagerOptions) {
     super(options, ANNOTATIONS.computed);

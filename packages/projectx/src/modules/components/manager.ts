@@ -1,5 +1,6 @@
 import type {
   Annotation,
+  FreeManagerInstance,
   ManagerInstance,
   ManagerOptions,
   ObserverTypes,
@@ -12,10 +13,11 @@ import { interceptor } from "../../components";
 
 abstract class Manager<T, A extends Annotation, M>
   extends ObserverWithType<T, ObserverTypes>
-  implements Partial<ManagerInstance<T, M>>
+  implements FreeManagerInstance<T>
 {
   protected annotation: A = {} as A;
-  public path: string[] = [];
+  public path: any[] = [];
+  public target: T = null as T;
 
   constructor(
     { path = [createUniqPath()], annotation }: ManagerOptions = {},
@@ -37,8 +39,20 @@ abstract class Manager<T, A extends Annotation, M>
     interceptor.emit({ path: this.path });
   }
 
-  protected joinToPath(key: string | symbol): string[] {
-    return [...this.path, String(key)];
+  protected joinToPath(key: any): any[] {
+    return [...this.path, key];
+  }
+
+  protected registerManager() {
+    if (typeof this.target !== "object") {
+      return;
+    }
+
+    Object.defineProperty(this.target, Symbol("[manager]"), {
+      enumerable: false,
+      value: this,
+      writable: false,
+    });
   }
 
   public get name(): string {
@@ -46,7 +60,6 @@ abstract class Manager<T, A extends Annotation, M>
   }
 
   public get snapshot(): T {
-    // @ts-ignore
     return this.target;
   }
 

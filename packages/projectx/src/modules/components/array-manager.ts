@@ -14,7 +14,7 @@ class ArrayManager<T>
   extends Manager<Array<T>, ArrayAnnotation, Array<ManagerInstance<T>>>
   implements RequiredManagerInstance<Array<T>>
 {
-  public managers: Array<ManagerInstance> = [];
+  public values: Array<ManagerInstance> = [];
 
   private proxy: Array<T>;
 
@@ -32,7 +32,7 @@ class ArrayManager<T>
     get: (_target, key) => {
       const index = Number(key);
       if (!Number.isNaN(index)) {
-        return this.managers[index]?.value;
+        return this.values[index]?.value;
       }
 
       const value = this.target[key as keyof Array<T>];
@@ -46,12 +46,12 @@ class ArrayManager<T>
     set: (_target, key, value) => {
       const index = Number(key);
       if (!Number.isNaN(index)) {
-        if (index in this.managers) {
-          return this.managers[index].set(value);
+        if (index in this.values) {
+          return this.values[index].set(value);
         }
 
         try {
-          this.managers[index] = observable(value, {
+          this.values[index] = observable(value, {
             path: this.joinToPath(key),
           });
           this.target[index] = value;
@@ -78,11 +78,11 @@ class ArrayManager<T>
         return false;
       }
 
-      const manager = this.managers[index];
+      const manager = this.values[index];
       const deleteResult = this.target.splice(index, 1).length === 1;
       if (deleteResult) {
         if (manager) {
-          this.managers.splice(index, 1);
+          this.values.splice(index, 1);
           manager.dispose();
         }
       }
@@ -125,15 +125,15 @@ class ArrayManager<T>
   }
 
   public manager(key: string | symbol): ManagerInstance | null {
-    return this.managers[Number(key)];
+    return this.values[Number(key)];
   }
 
   public disposeManagers() {
-    for (const manager of this.managers) {
+    for (const manager of this.values) {
       manager.dispose();
     }
 
-    this.managers = [];
+    this.values = [];
   }
 
   public getTarget(): T[] {
@@ -142,11 +142,12 @@ class ArrayManager<T>
 
   private define(target: Array<T>): Array<T> {
     this.disposeManagers();
+    this.registerManager();
 
     for (const item of target) {
-      this.managers.push(
+      this.values.push(
         observable<T>(item, {
-          path: this.joinToPath(String(this.managers.length)),
+          path: this.joinToPath(String(this.values.length)),
         })
       );
     }
