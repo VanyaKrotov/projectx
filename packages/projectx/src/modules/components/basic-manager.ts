@@ -1,8 +1,8 @@
 import type {
   ManagerInstance,
   ManagerOptions,
-  ManagerPath,
-  ObserverTypes,
+  Path,
+  ActionTypes,
 } from "../../shared";
 import { createUniqPath } from "../../shared";
 
@@ -11,10 +11,10 @@ import { interceptor } from "../../components";
 import { ObserverWithType } from "./observer";
 
 abstract class BasicManager<T>
-  extends ObserverWithType<T, ObserverTypes>
+  extends ObserverWithType<T, ActionTypes>
   implements ManagerInstance<T>
 {
-  public path: ManagerPath[];
+  public path: Path[];
 
   constructor(
     public target: T,
@@ -33,7 +33,7 @@ abstract class BasicManager<T>
     interceptor.emit({ path: this.path });
   }
 
-  protected joinToPath(key: ManagerPath): ManagerPath[] {
+  protected joinToPath(key: Path): Path[] {
     return this.path.concat(key);
   }
 
@@ -47,7 +47,7 @@ abstract class BasicManager<T>
     return this.source();
   }
 
-  public get name(): ManagerPath {
+  public get name(): Path {
     return this.path[this.path.length - 1];
   }
 

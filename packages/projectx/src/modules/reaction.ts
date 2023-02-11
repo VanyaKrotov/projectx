@@ -1,6 +1,5 @@
 import type {
   InterceptorEvent,
-  PathsTreeInstance,
   ReactionInstance,
   WatchCallback,
 } from "../shared";
@@ -10,8 +9,9 @@ import PathTree from "./paths-tree";
 import { batch, interceptor, reactions } from "../components";
 
 class Reaction implements ReactionInstance {
-  private paths: string[][] = [];
   private unsubscribeFns: (() => void)[] = [];
+  private tree = new PathTree();
+
   public readonly id: string;
 
   constructor(id: string = "Reaction") {
@@ -21,7 +21,7 @@ class Reaction implements ReactionInstance {
   }
 
   private listener = ({ path }: InterceptorEvent) => {
-    this.paths.push(path);
+    this.tree.push(path);
   };
 
   private unlisten = () => {
@@ -33,23 +33,15 @@ class Reaction implements ReactionInstance {
     this.unsubscribeFns = [];
   };
 
-  public getPathTree(): PathsTreeInstance | null {
-    if (!this.paths.length) {
-      return null;
-    }
-
-    return new PathTree(this.paths);
-  }
-
   public dispose(): void {
     reactions.delete(this.id);
 
-    this.paths = [];
+    this.tree.clear();
     this.unlisten();
   }
 
   public startWatch(): void {
-    this.paths = [];
+    this.tree.clear();
     interceptor.register(this.listener);
   }
 
@@ -58,8 +50,7 @@ class Reaction implements ReactionInstance {
   }
 
   public watch(watch: WatchCallback): VoidFunction {
-    const tree = this.getPathTree();
-    if (!tree) {
+    if (this.tree.isEmpty) {
       console.warn(
         `Instances for listen in reaction \`${this.id}\` not found. Reconsider the use of adverse reactions.`
       );
@@ -67,7 +58,7 @@ class Reaction implements ReactionInstance {
       return () => {};
     }
 
-    const managers = tree.getListenManagers();
+    const managers = this.tree.getListenManagers();
     const handler = () => watch(this.unlisten);
     this.unlisten();
     this.unsubscribeFns = managers.map(({ listenTypes, manager }) =>

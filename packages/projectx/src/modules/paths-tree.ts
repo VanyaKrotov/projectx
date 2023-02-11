@@ -1,30 +1,33 @@
-import type {
+import {
+  getManagerOf,
   ListenManagersResult,
   ManagerInstance,
-  ObserverTypes,
+  Path,
+  ActionTypes,
   PathNodeInstance,
   PathsTreeInstance,
+  getKeysOfManager,
 } from "../shared";
 import { isEqualArray } from "../shared";
 
 import { managers } from "../components";
 
 class PathNode implements PathNodeInstance {
-  public children: Record<string, PathNodeInstance> = {};
-  public listenTypes: ObserverTypes[] = [];
+  public children = new Map<Path, PathNodeInstance>();
+  public listenTypes: ActionTypes[] = [];
 
-  constructor(public value: string, public manager: ManagerInstance) {}
+  constructor(public value: Path, public manager: ManagerInstance | null) {}
 
   public get keys() {
-    return Object.keys(this.children);
+    return Array.from(this.children.keys());
   }
 
-  public push([path, ...paths]: string[]): void {
+  public push([path, ...paths]: Path[]): void {
     const nextNode =
-      this.children[path] ||
-      new PathNode(path, this.manager!.manager(path)!);
+      this.children.get(path) ||
+      new PathNode(path, getManagerOf(this.manager, path));
 
-    this.children[path] = nextNode;
+    this.children.set(path, nextNode);
 
     if (!paths.length) {
       return;
@@ -35,46 +38,51 @@ class PathNode implements PathNodeInstance {
 }
 
 class PathTree implements PathsTreeInstance {
-  private nodes: Record<string, PathNodeInstance> = {};
+  private nodes = new Map<Path, PathNodeInstance>();
 
-  constructor(paths: string[][]) {
+  public static fromPaths(paths: Path[][]): PathTree {
+    const tree = new PathTree();
     for (const [path, ...restPath] of paths) {
-      this.nodes[path] =
-        this.nodes[path] || new PathNode(path, managers.get(path)!);
+      const node =
+        tree.nodes.get(path) || new PathNode(path, managers.get(path) || null);
 
-      this.nodes[path].push(restPath);
+      node.push(restPath);
+
+      tree.nodes.set(path, node);
     }
 
-    for (const key in this.nodes) {
-      this.linkingRec(this.nodes[key]);
+    return tree;
+  }
+
+  public push([path, ...restPath]: Path[]): void {
+    let node = this.nodes.get(path);
+    if (!node) {
+      node = new PathNode(path, managers.get(path) || null);
+
+      this.nodes.set(path, node);
+    }
+
+    if (restPath.length) {
+      node.push(restPath);
     }
   }
 
-  private linkingRec(node: PathNodeInstance) {
-    const keys = Object.keys(node.children);
+  private linking(node: PathNodeInstance): ListenManagersResult[] {
+    const keys = node.keys;
     if (!keys.length) {
-      return (node.listenTypes = ["all"]);
+      return [{ listenTypes: ["all"], manager: node.manager! }];
     }
 
-    node.listenTypes = isEqualArray(keys, node.manager!.keys)
-      ? ["expansion", "change", "compression"]
-      : ["change"];
-
-    for (const key of keys) {
-      this.linkingRec(node.children[key]);
-    }
-  }
-
-  private optimizedRec(node: PathNodeInstance): ListenManagersResult[] {
+    const isEqualKeys = isEqualArray(keys, getKeysOfManager(node.manager));
+    const listenTypes = ["change"].concat(
+      isEqualKeys ? ["expansion", "compression"] : []
+    ) as ActionTypes[];
     let result: ListenManagersResult[] = [
-      { listenTypes: node.listenTypes, manager: node.manager! },
+      { listenTypes, manager: node.manager! },
     ];
-    if (!node.keys.length) {
-      return result;
-    }
 
-    for (const key in node.children) {
-      result = result.concat(this.optimizedRec(node.children[key]));
+    for (const [, children] of node.children) {
+      result = result.concat(this.linking(children));
     }
 
     return result;
@@ -82,11 +90,19 @@ class PathTree implements PathsTreeInstance {
 
   public getListenManagers(): ListenManagersResult[] {
     let result: ListenManagersResult[] = [];
-    for (const key in this.nodes) {
-      result = result.concat(this.optimizedRec(this.nodes[key]));
+    for (const [, node] of this.nodes) {
+      result = result.concat(this.linking(node));
     }
 
     return result;
+  }
+
+  public clear(): void {
+    this.nodes.clear();
+  }
+
+  public get isEmpty(): boolean {
+    return !this.nodes.size;
   }
 }
 

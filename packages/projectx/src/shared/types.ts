@@ -2,12 +2,13 @@ export type PropertiesInfo = Record<string, PropertyDescriptor>;
 
 //#region Manager
 
-export type ManagerPath = string | number | symbol | never;
+export type Path = string | number | symbol | never;
 
-export interface ManagerInstance<T = any> {
-  path: ManagerPath[];
+export interface ManagerInstance<T = any>
+  extends ObserverWithTypeInstance<T, ActionTypes> {
+  path: Path[];
   target: T;
-  get name(): ManagerPath;
+  get name(): Path;
   get snapshot(): T;
   get(): T;
   set(value: T): boolean;
@@ -26,11 +27,12 @@ export interface AnnotatedManagerInstance<A> {
   annotation: A;
 }
 
-export interface ContainerManagerInstance<T, V> extends ManagerInstance<T> {
+export interface ContainerManagerInstance<T = any, V = any>
+  extends ManagerInstance<T> {
   values: V;
-  get keys(): ManagerPath[];
+  get keys(): Path[];
   disposeManagers(): void;
-  manager(key: string): ManagerInstance | null;
+  manager(key: Path): ManagerInstance | null;
 }
 
 export interface ObjectManagerInstance<T, A, V>
@@ -40,7 +42,7 @@ export interface ObjectManagerInstance<T, A, V>
 export interface ArrayManagerInstance<T, V>
   extends ContainerManagerInstance<T, V> {}
 
-export type ObserverTypes =
+export type ActionTypes =
   | "change"
   | "expansion"
   | "compression"
@@ -49,7 +51,7 @@ export type ObserverTypes =
   | "all";
 
 export interface ManagerOptions<A extends Annotation = Annotation> {
-  path?: ManagerPath[];
+  path?: Path[];
   annotation?: A;
 }
 
@@ -82,21 +84,24 @@ export interface ObserverWithTypeInstance<T, E> {
 //#region PathTree
 
 export interface PathNodeInstance {
-  value: string;
+  value: Path;
   manager: ManagerInstance | null;
-  listenTypes: ObserverTypes[];
-  children: Record<string, PathNodeInstance>;
-  get keys(): string[];
-  push(paths: string[]): void;
+  listenTypes: ActionTypes[];
+  children: Map<Path, PathNodeInstance>;
+  get keys(): Path[];
+  push(paths: Path[]): void;
 }
 
 export type ListenManagersResult = {
   manager: ManagerInstance;
-  listenTypes: ObserverTypes[];
+  listenTypes: ActionTypes[];
 };
 
 export interface PathsTreeInstance {
   getListenManagers(): ListenManagersResult[];
+  push(path: Path[]): void;
+  clear(): void;
+  get isEmpty(): boolean;
 }
 
 //#endregion
@@ -104,7 +109,7 @@ export interface PathsTreeInstance {
 //#region Interceptor
 
 export interface InterceptorEvent {
-  path: ManagerPath[];
+  path: Path[];
 }
 
 export interface InterceptorListener {
@@ -172,7 +177,6 @@ export interface ReactionInstance {
   dispose(): void;
   startWatch(): void;
   endWatch(): void;
-  getPathTree(): PathsTreeInstance | null;
   syncCaptured<T>(fn: () => T): T;
   watch(watch: WatchCallback): VoidFunction;
 }

@@ -3,7 +3,7 @@ import type {
   ManagerOptions,
   EntryAnnotation,
   ObjectManagerInstance,
-  ManagerPath,
+  Path,
   ManagerInstance,
   ObserverAnnotation,
 } from "../../shared";
@@ -21,18 +21,18 @@ import { managers } from "../../components";
 import ContainerManager from "./container-manager";
 
 class ObjectManager<T extends object | Annotated>
-  extends ContainerManager<T, Map<ManagerPath, ManagerInstance>>
+  extends ContainerManager<T, Map<Path, ManagerInstance>>
   implements
     ObjectManagerInstance<
       T,
       ObserverAnnotation,
-      Map<ManagerPath, ManagerInstance>
+      Map<Path, ManagerInstance>
     >
 {
   public annotation = ANNOTATIONS.observer;
 
   constructor(target: T, options?: ManagerOptions<ObserverAnnotation>) {
-    super(target, new Map<ManagerPath, ManagerInstance>(), options);
+    super(target, new Map<Path, ManagerInstance>(), options);
 
     this.annotation = { ...this.annotation, ...options?.annotation };
     this.define(target);

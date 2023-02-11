@@ -2,7 +2,7 @@ import type {
   ManagerInstance,
   ContainerManagerInstance,
   ManagerOptions,
-  ManagerPath,
+  Path,
 } from "../../shared";
 
 import BasicManager from "./basic-manager";
@@ -24,13 +24,13 @@ abstract class ContainerManager<T, V>
     super.dispose();
   }
 
-  public get keys(): ManagerPath[] {
+  public get keys(): Path[] {
     return [];
   }
 
   public disposeManagers(): void {}
 
-  public manager(key: string): ManagerInstance | null {
+  public manager(key: Path): ManagerInstance | null {
     throw new Error("Method is not implemented!");
   }
 }

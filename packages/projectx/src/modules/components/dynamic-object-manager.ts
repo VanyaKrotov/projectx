@@ -2,7 +2,7 @@ import type {
   Annotated,
   ManagerInstance,
   ManagerOptions,
-  ManagerPath,
+  Path,
   ObjectManagerInstance,
   ObserverAnnotation,
 } from "../../shared";
@@ -15,7 +15,7 @@ class DynamicObjectManager<T extends object | Annotated>
     ObjectManagerInstance<
       T,
       ObserverAnnotation,
-      Map<ManagerPath, ManagerInstance>
+      Map<Path, ManagerInstance>
     >
 {
   protected proxy: T;
@@ -49,12 +49,6 @@ class DynamicObjectManager<T extends object | Annotated>
     super(target, options);
 
     this.proxy = this.defineProxy(target);
-  }
-
-  public get(): T {
-    this.reportUsage();
-
-    return this.proxy;
   }
 
   public set(value: T): boolean {
