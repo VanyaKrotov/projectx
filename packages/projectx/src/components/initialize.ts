@@ -3,7 +3,6 @@ import type {
   Path,
   ReactionInstance,
 } from "../shared";
-import { __DEV__ } from "../shared";
 
 import Batch from "./batch";
 import Interceptor from "./interceptor";
@@ -22,7 +21,7 @@ export const configuration = new ConfigurationManager();
 
 export const diManager = new DIManager();
 
-if (__DEV__) {
+if (configuration.config.develop) {
   console.log("ProjectX data: ", {
     interceptor,
     batch,

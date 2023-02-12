@@ -156,6 +156,7 @@ export interface ConfigurationManagerInstance {
 
 export interface Configuration {
   equalResolver: IsEqualFunction<never>;
+  develop: boolean;
 }
 
 export type GetConstructorArgs<T> = T extends new (...args: infer U) => unknown

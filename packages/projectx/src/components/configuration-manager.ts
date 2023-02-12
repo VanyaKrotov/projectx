@@ -2,6 +2,7 @@ import type { Configuration, ConfigurationManagerInstance } from "../shared";
 
 const DEFAULT: Configuration = {
   equalResolver: (a, b) => a === b,
+  develop: false,
 };
 
 class ConfigurationManager implements ConfigurationManagerInstance {
