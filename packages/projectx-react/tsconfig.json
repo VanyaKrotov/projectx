@@ -16,11 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "noEmit": true,
-    "jsx": "react",
-    "paths": {
-      "projectx": ["../projectx/src"],
-      "projectx/client": ["../projectx/src/client.ts"]
-    }
+    "jsx": "react"
   },
   "include": ["src/**/*"]
 }

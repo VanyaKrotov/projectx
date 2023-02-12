@@ -1,15 +1,26 @@
 {
-  "name": "projectx-react",
-  "version": "0.0.1",
+  "name": "projectx.react",
+  "version": "0.0.1-beta",
   "description": "",
   "main": "src/index.ts",
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10"
   },
+  "author": {
+    "name": "Ivan Krotov",
+    "email": "vanyakrotov3059@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/projectx-react"
+  },
   "dependencies": {
+    "i": "^0.3.7",
+    "npm": "^9.4.2",
+    "projectx.store": "^0.0.1-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

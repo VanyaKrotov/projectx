@@ -1,13 +1,23 @@
 {
-  "name": "projectx-store",
-  "version": "0.0.1",
+  "name": "projectx.store",
+  "version": "0.0.1-beta",
   "description": "Lightweight reactive storage",
   "main": "src/index.ts",
-  "author": "vanyakrotov3059@gmail.com",
+  "author": {
+    "name": "Ivan Krotov",
+    "email": "vanyakrotov3059@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/projectx"
+  },
   "license": "ISC",
   "keywords": [
     "store",
     "observe",
-    "reactive"
+    "reactive",
+    "state",
+    "store manager"
   ]
 }
