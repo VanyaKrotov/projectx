@@ -1,27 +1,39 @@
 import type {
+  ContainerManagerInstance,
   InterceptorEvent,
+  Path,
   ReactionInstance,
   WatchCallback,
 } from "../shared";
 import { uid } from "../shared/uid";
 
 import PathTree from "./paths-tree";
-import { batch, interceptor, reactions } from "../components";
+import { batch, interceptor, managers, reactions } from "../components";
 
 class Reaction implements ReactionInstance {
   private unsubscribeFns: (() => void)[] = [];
-  private tree = new PathTree();
 
   public readonly id: string;
+  private tree: PathTree;
 
-  constructor(id: string = "Reaction") {
+  constructor(
+    id: string = "Reaction",
+    private scope: Map<Path, ContainerManagerInstance> = managers
+  ) {
     this.id = `${id}#${uid()}`;
+
+    this.tree = new PathTree(scope);
 
     reactions.set(this.id, this);
   }
 
   private listener = ({ path }: InterceptorEvent) => {
-    this.tree.push(path);
+    const has = this.scope?.has(path[0]);
+    if (has) {
+      this.tree.push(path);
+    }
+
+    return !has;
   };
 
   private unlisten = () => {

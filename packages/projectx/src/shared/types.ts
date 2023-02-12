@@ -125,7 +125,7 @@ export interface InterceptorEvent {
 }
 
 export interface InterceptorListener {
-  (event: InterceptorEvent): void;
+  (event: InterceptorEvent): void | boolean;
 }
 
 export interface InterceptorInstance {

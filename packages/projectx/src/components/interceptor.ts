@@ -20,7 +20,12 @@ class Interceptor implements InterceptorInstance {
       return;
     }
 
-    Array.from(this.listeners).pop()!(event);
+    const reversedListeners = Array.from(this.listeners).reverse();
+    for (const listener of reversedListeners) {
+      if (!listener(event)) {
+        return;
+      }
+    }
   }
 }
 

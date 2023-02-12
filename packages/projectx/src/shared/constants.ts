@@ -1,4 +1,5 @@
 import {
+  ActionTypes,
   ArrayAnnotation,
   ComputedAnnotation,
   ObserverAnnotation,
@@ -19,3 +20,7 @@ export const __DEV__ = process.env.NODE_ENV === "development";
 export const RESERVED_FIELDS = ["annotation"];
 
 export const OBJ_PROPERTIES = Object.getPrototypeOf({});
+
+export const OBJECT_TYPES: ActionTypes[] = ["expansion", "compression"];
+
+export const DEFAULT_TYPES: ActionTypes[] = ["change", "reinstall"];

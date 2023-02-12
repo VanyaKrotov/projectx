@@ -1,16 +1,20 @@
-import {
-  getManagerOf,
+import type {
   ListenManagersResult,
   ManagerInstance,
   Path,
   ActionTypes,
   PathNodeInstance,
   PathsTreeInstance,
-  getKeysOfManager,
+  ContainerManagerInstance,
 } from "../shared";
-import { isEqualArray } from "../shared";
 
-import { managers } from "../components";
+import {
+  isEqualArray,
+  getManagerOf,
+  getKeysOfManager,
+  DEFAULT_TYPES,
+  OBJECT_TYPES,
+} from "../shared";
 
 class PathNode implements PathNodeInstance {
   public children = new Map<Path, PathNodeInstance>();
@@ -37,30 +41,15 @@ class PathNode implements PathNodeInstance {
   }
 }
 
-const DEFAULT_TYPES = ["change", "reinstall"];
-const OBJECT_TYPES = ["expansion", "compression"];
-
 class PathTree implements PathsTreeInstance {
   private nodes = new Map<Path, PathNodeInstance>();
 
-  public static fromPaths(paths: Path[][]): PathTree {
-    const tree = new PathTree();
-    for (const [path, ...restPath] of paths) {
-      const node =
-        tree.nodes.get(path) || new PathNode(path, managers.get(path) || null);
-
-      node.push(restPath);
-
-      tree.nodes.set(path, node);
-    }
-
-    return tree;
-  }
+  constructor(private scope: Map<Path, ContainerManagerInstance>) {}
 
   public push([path, ...restPath]: Path[]): void {
     let node = this.nodes.get(path);
     if (!node) {
-      node = new PathNode(path, managers.get(path) || null);
+      node = new PathNode(path, this.scope.get(path) || null);
 
       this.nodes.set(path, node);
     }

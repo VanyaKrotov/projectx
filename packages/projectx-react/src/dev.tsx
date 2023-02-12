@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
-import { observer } from "./modules";
+import { LocalObserver, observer, useLocalObservable } from "./modules";
 
 //@ts-ignore
 import { observable } from "projectx";
@@ -51,6 +51,12 @@ const Increment = ({ state, postfix }: { state: State; postfix: string }) => {
   );
 };
 
+const Test = () => {
+  const data = useLocalObservable(() => new State());
+
+  return <Increment state={data} postfix="state" />;
+};
+
 const App = () => {
   console.log("render [App]");
 
@@ -60,8 +66,9 @@ const App = () => {
 
   return (
     <div>
+      <Test />
       <Increment state={state1} postfix="1" />
-      {/* <LocalObserver>
+      <LocalObserver>
         {() => (
           <>
             {state1.counter > 2 && state2.counter > -1 && (
@@ -69,7 +76,7 @@ const App = () => {
             )}
           </>
         )}
-      </LocalObserver> */}
+      </LocalObserver>
     </div>
   );
 };

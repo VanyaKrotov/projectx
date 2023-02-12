@@ -1,23 +1,39 @@
-import { useEffect, useId, useRef } from "react";
+import { useRef } from "react";
 
-import { ManagerInstance, observableValue } from "projectx/client";
+import {
+  ContainerManagerInstance,
+  createUniqPath,
+  ManagerInstance,
+  observableValue,
+  Reaction,
+  ReactionInstance,
+} from "projectx/client";
+
+import { useHandleReaction } from "../shared";
 
 function useLocalObservable<T>(getState: () => T): T {
-  const ref = useRef<ManagerInstance<T>>();
-  if (!ref.current) {
-    ref.current = observableValue(getState(), {
-      path: [`LocalState#${useId()}`],
+  const manager = useRef<ManagerInstance<T>>();
+  const reaction = useRef<ReactionInstance>();
+  if (!manager.current) {
+    manager.current = observableValue(getState(), {
+      path: [createUniqPath("LocalState")],
     });
+
+    reaction.current = new Reaction(
+      "LocalReaction",
+      new Map([
+        [manager.current.name, manager.current as ContainerManagerInstance<T>],
+      ])
+    );
   }
 
-  useEffect(() => {
-    return () => {
-      ref.current?.dispose();
-      ref.current = undefined;
-    };
-  }, []);
+  useHandleReaction(reaction.current!, () => {
+    manager.current?.dispose();
+    manager.current = undefined;
+    reaction.current = undefined;
+  });
 
-  return ref.current.snapshot;
+  return manager.current.source();
 }
 
 export default useLocalObservable;
