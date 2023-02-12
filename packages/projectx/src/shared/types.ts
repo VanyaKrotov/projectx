@@ -14,7 +14,6 @@ export interface ManagerInstance<T = any>
   set(value: T): boolean;
   source(): T;
   dispose(): void;
-  toString(): string;
 }
 
 export interface ValueManagerInstance<T> extends ManagerInstance<T> {}
@@ -41,6 +40,12 @@ export interface ObjectManagerInstance<T, A, V>
 
 export interface ArrayManagerInstance<T, V>
   extends ContainerManagerInstance<T, V> {}
+
+export interface MapManagerInstance<K, T>
+  extends ContainerManagerInstance<Map<K, T>, Map<K, ManagerInstance<T>>> {}
+
+export interface SetManagerInstance<T>
+  extends ContainerManagerInstance<Set<T>, Set<ManagerInstance<T>>> {}
 
 export type ActionTypes =
   | "change"

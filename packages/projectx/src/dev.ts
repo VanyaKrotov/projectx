@@ -1,14 +1,5 @@
 import { autorun, observable, dependencyInject } from "./index";
 
-class BaseState {
-  counter = 1;
-  array = [10, 23];
-
-  get mul() {
-    return this.counter * 2;
-  }
-}
-
 class Account {
   public isAuthorized = true;
 
@@ -17,9 +8,30 @@ class Account {
   }
 }
 
+class BaseState {
+  counter = 1;
+  array = [10, 23];
+
+  map = new Map<number, Account>();
+  set = new Set<Account>();
+
+  get mul() {
+    return this.counter * 2;
+  }
+
+  pushAccount(id: number, account: Account) {
+    this.map.set(id, account);
+    this.set.add(account);
+  }
+}
+
 const account = observable.fromClass(Account);
 
+const map = observable.fromMap(new Map<number, Account>([[1, new Account()]]));
+const set = observable.fromSet(new Set<Account>([new Account()]));
+
 console.log(account);
+console.log(map);
 
 class State extends BaseState {
   private readonly account = dependencyInject(Account);
@@ -89,17 +101,16 @@ autorun(() => {
 autorun(() => {
   console.log("trigger stateObj");
   div1.innerText = `stateObj: ${stateObj.test}`;
-
 });
 
 autorun(() => {
-  console.log("trigger auth");
-  div3.innerText = `auth: ${account.isAuthorized}`;
+  console.log("trigger map");
+  div3.innerText = `map: ${JSON.stringify(Array.from(state.map.entries()))}`;
 });
 
 autorun(() => {
-  console.log("trigger counter");
-  div2.innerText = `base: ${state.counter}`;
+  console.log("trigger set");
+  div2.innerText = `set: ${JSON.stringify(Array.from(state.set))}`;
 });
 
 buttonPlus.addEventListener("click", () => {
@@ -111,15 +122,30 @@ buttonMinus.addEventListener("click", () => {
 });
 
 buttonPlus2.addEventListener("click", () => {
-  stateObj.inc();
+  // stateObj.inc();
+
+  // map.get(1)?.changeAuth(false);
+
+  state.pushAccount(1, new Account());
+
+  // set.forEach((e) => e.changeAuth(false));
+
+  // map.set(map.size + 1, "test " + map.size);
 });
 
 buttonMinus2.addEventListener("click", () => {
-  stateObj.dec();
+  // stateObj.dec();
+  // set.clear();
+  // map.delete(map.size);
+
+  state.set.clear();
+  state.map.clear();
 });
 
 buttonFetch.addEventListener("click", () => {
   state.fetch();
+  map.set(1, new Account());
+  set.add(new Account());
 });
 
 buttonPush.addEventListener("click", () => {

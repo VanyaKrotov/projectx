@@ -29,11 +29,11 @@ abstract class BasicManager<T>
     this.emit("define", { current: this.target });
   }
 
-  protected reportUsage(): void {
+  public reportUsage(): void {
     interceptor.emit({ path: this.path });
   }
 
-  protected joinToPath(key: Path): Path[] {
+  public joinToPath(key: Path): Path[] {
     return this.path.concat(key);
   }
 
@@ -61,10 +61,6 @@ abstract class BasicManager<T>
 
   public source(): T {
     return this.target;
-  }
-
-  public toString(): string {
-    return String(this.target);
   }
 }
 
