@@ -1,20 +1,27 @@
-import { Constructable, findManager, GetConstructorArgs } from "../shared";
+import type { AsyncInjector, Constructable } from "../shared";
+import { findManager } from "../shared";
 
-import { managers } from "../components";
+import { diManager, managers } from "../components";
 
-function dependencyInject<T>(
-  Target: Constructable<T, T>,
-  ...args: GetConstructorArgs<T>
-): T {
+const inject = <T>(target: Constructable<T, T>): T | null => {
   const manager = findManager(
     managers,
-    (manager) => manager.target instanceof Target
+    (manager) => manager.target instanceof target
   );
-  if (!manager) {
-    return new Target(...args);
+
+  return manager && manager.source();
+};
+
+const asyncInjector = async <T>(target: Constructable<T, T>) =>
+  inject(target) ||
+  new Promise<T>((resolve) => diManager.watch(target, (t: T) => resolve(t)));
+
+abstract class DependencyInjector {
+  constructor() {
+    this.inject(asyncInjector);
   }
 
-  return manager.target;
+  protected abstract inject(asyncInject: AsyncInjector): void;
 }
 
-export { dependencyInject };
+export { DependencyInjector, inject };

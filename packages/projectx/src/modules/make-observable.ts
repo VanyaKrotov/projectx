@@ -6,7 +6,7 @@ import type {
 } from "../shared";
 import { createUniqPath, isObjectOfClass, isObject } from "../shared";
 
-import { managers } from "../components";
+import { diManager, managers } from "../components";
 import {
   ArrayManager,
   DynamicObjectManager,
@@ -17,8 +17,9 @@ import {
 
 function registerManager<T>(manager: ContainerManagerInstance<T>): T {
   managers.set(manager.name, manager);
+  diManager.push(manager.target as object);
 
-  return manager.source();
+  return manager.target;
 }
 
 export function fromClass<T extends object | Annotated, A = T>(

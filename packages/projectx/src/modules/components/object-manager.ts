@@ -23,11 +23,7 @@ import ContainerManager from "./container-manager";
 class ObjectManager<T extends object | Annotated>
   extends ContainerManager<T, Map<Path, ManagerInstance>>
   implements
-    ObjectManagerInstance<
-      T,
-      ObserverAnnotation,
-      Map<Path, ManagerInstance>
-    >
+    ObjectManagerInstance<T, ObserverAnnotation, Map<Path, ManagerInstance>>
 {
   public annotation = ANNOTATIONS.observer;
 
@@ -63,9 +59,9 @@ class ObjectManager<T extends object | Annotated>
       return Boolean(Object.defineProperty(this.target, key, description));
     }
 
-    const {
+    let {
       get,
-      value = get!.bind(this.target),
+      value = get?.bind(this.target),
       configurable = true,
       enumerable = true,
     } = description;
