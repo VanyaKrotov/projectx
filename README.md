@@ -2,7 +2,7 @@
     <div style="font-size: 34px;">ProjectX</div>
 </div>
 
-<div style="font-size: 22px; padding-bottom: 10px;">
+<div style="font-size: 22px; padding-bottom: 20px;">
     <i style=" color: silver;">Просто управляй состоянием </i>🧑‍🔧
 </div>
 
