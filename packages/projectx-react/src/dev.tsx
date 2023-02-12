@@ -3,8 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { LocalObserver, observer, useLocalObservable } from "./modules";
 
-//@ts-ignore
-import { observable } from "projectx";
+import { observable } from "projectx.store";
 
 const root = createRoot(document.getElementById("root")!);
 

@@ -1,8 +1,6 @@
 import { useRef, ReactElement } from "react";
 
-// TODO: заменить на либу из npm
-// @ts-ignore
-import { Reaction, ReactionInstance } from "projectx/client";
+import { Reaction, ReactionInstance } from "projectx.store/src/client";
 
 import { useHandleReaction } from "../shared/hooks";
 

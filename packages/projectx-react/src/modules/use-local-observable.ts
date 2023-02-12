@@ -7,7 +7,7 @@ import {
   observableValue,
   Reaction,
   ReactionInstance,
-} from "projectx/client";
+} from "projectx.store/src/client";
 
 import { useHandleReaction } from "../shared";
 

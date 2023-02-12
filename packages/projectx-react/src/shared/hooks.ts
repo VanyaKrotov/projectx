@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-//@ts-ignore
-import { ReactionInstance } from "projectx/client";
+import { ReactionInstance } from "projectx.store/src/client";
 
 export function useForceUpdate(): VoidFunction {
   const [_, setState] = useState([]);
