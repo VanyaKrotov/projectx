@@ -1,4 +1,5 @@
 import type {
+  Annotation,
   ManagerInstance,
   ManagerOptions,
   MapManagerInstance,
@@ -53,22 +54,7 @@ const MapTraps = new (class {
   };
 
   public set = <K, T>(key: K, value: T, self: MapManager<K, T>) => {
-    const manager = self.values.get(key);
-    if (manager) {
-      manager.set(value);
-      self.target.set(key, value);
-
-      return self.proxy;
-    }
-
-    const prev = self.snapshot;
-    self.target.set(key, value);
-    self.values.set(
-      key,
-      observable(value, { path: self.joinToPath(key as Path) })
-    );
-
-    self.emit("expansion", { current: self.target, prev });
+    self.changeField(key as Path, value);
 
     return self.proxy;
   };
@@ -106,7 +92,7 @@ const MapTraps = new (class {
 })();
 
 class MapManager<K, T>
-  extends ContainerManager<Map<K, T>, Map<K, ManagerInstance<T>>>
+  extends ContainerManager<Map<K, T>, Map<K, ManagerInstance<T>>, T>
   implements MapManagerInstance<K, T>
 {
   public proxy: Map<K, T>;
@@ -152,6 +138,37 @@ class MapManager<K, T>
     return this.values.get(key as K) || null;
   }
 
+  public changeField(key: Path, value: T): boolean {
+    const typedKey = key as K;
+    const manager = this.values.get(typedKey);
+    const isSupportType = manager?.support(value);
+    if (isSupportType) {
+      this.target.set(typedKey, value);
+
+      return manager!.set(value);
+    }
+
+    const prev = this.snapshot;
+    this.target.set(typedKey, value);
+    const newManager = observable(value, {
+      path: this.joinToPath(key as Path),
+    });
+
+    this.values.set(typedKey, newManager);
+
+    if (manager) {
+      newManager.receiveListeners(manager.shareListeners());
+      newManager.emit("reinstall", { current: value, prev: manager.target });
+    } else {
+      this.emit("expansion", {
+        current: this.target,
+        prev,
+      });
+    }
+
+    return true;
+  }
+
   public set(value: Map<K, T>): boolean {
     const prev = this.target;
     this.target = value;
@@ -189,6 +206,10 @@ class MapManager<K, T>
     }
 
     return new Proxy(target, this.handlers);
+  }
+
+  public support(value: Map<K, T>): boolean {
+    return value instanceof Map;
   }
 }
 

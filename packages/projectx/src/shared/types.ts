@@ -16,6 +16,7 @@ export interface ManagerInstance<T = any>
   set(value: T): boolean;
   source(): T;
   dispose(): void;
+  support(value: T): boolean;
 }
 
 export interface ValueManagerInstance<T> extends ManagerInstance<T> {}
@@ -55,7 +56,8 @@ export type ActionTypes =
   | "compression"
   | "define"
   | "dispose"
-  | "all";
+  | "all"
+  | "reinstall";
 
 export interface ManagerOptions<A extends Annotation = Annotation> {
   path?: Path[];
@@ -84,6 +86,9 @@ export interface ObserverWithTypeInstance<T, E> {
   listen(type: E, callback: Listener<T>): VoidFunction;
   listen(type: E[], callback: Listener<T>): VoidFunction;
   emit(type: E, event: Event<T>): void;
+  shareListeners(): Map<E | "all", ObserverInstance<T>>;
+  receiveListeners(listeners: Map<E | "all", ObserverInstance<T>>): void;
+  dispose(): void;
 }
 
 //#endregion

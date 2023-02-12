@@ -1,4 +1,5 @@
 import type {
+  Annotation,
   ManagerInstance,
   ManagerOptions,
   Path,
@@ -139,6 +140,10 @@ class SetManager<T>
     this.proxy = this.define(target);
   }
 
+  public changeField(key: Path, value: Set<T>): boolean {
+    return true;
+  }
+
   public getByIndex(index: number): ManagerInstance<T> | null {
     if (index >= this.target.size) {
       return null;
@@ -216,6 +221,10 @@ class SetManager<T>
     }
 
     return new Proxy(target, this.handlers);
+  }
+
+  public support(value: Set<T>): boolean {
+    return value instanceof Set;
   }
 }
 

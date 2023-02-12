@@ -39,6 +39,7 @@ abstract class BasicManager<T>
 
   public dispose(): void {
     this.path = [];
+    super.dispose();
   }
 
   public get(): T {
@@ -51,9 +52,7 @@ abstract class BasicManager<T>
     return this.path[this.path.length - 1];
   }
 
-  public set(_value: T): boolean {
-    return false;
-  }
+  public abstract set(_value: T): boolean;
 
   public get snapshot(): T {
     return this.target;
@@ -62,6 +61,8 @@ abstract class BasicManager<T>
   public source(): T {
     return this.target;
   }
+
+  public abstract support(value: T): boolean;
 }
 
 export default BasicManager;

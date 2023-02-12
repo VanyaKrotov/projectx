@@ -6,17 +6,14 @@ import type {
   ObjectManagerInstance,
   ObserverAnnotation,
 } from "../../shared";
+import { isObject } from "../../shared";
 
 import ObjectManager from "./object-manager";
 
 class DynamicObjectManager<T extends object | Annotated>
   extends ObjectManager<T>
   implements
-    ObjectManagerInstance<
-      T,
-      ObserverAnnotation,
-      Map<Path, ManagerInstance>
-    >
+    ObjectManagerInstance<T, ObserverAnnotation, Map<Path, ManagerInstance>>
 {
   protected proxy: T;
 
@@ -64,6 +61,10 @@ class DynamicObjectManager<T extends object | Annotated>
 
   protected defineProxy(target: T): T {
     return new Proxy(target, this.handlers);
+  }
+
+  public support(value: T): boolean {
+    return isObject(value);
   }
 }
 

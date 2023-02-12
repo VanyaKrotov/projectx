@@ -37,6 +37,9 @@ class PathNode implements PathNodeInstance {
   }
 }
 
+const DEFAULT_TYPES = ["change", "reinstall"];
+const OBJECT_TYPES = ["expansion", "compression"];
+
 class PathTree implements PathsTreeInstance {
   private nodes = new Map<Path, PathNodeInstance>();
 
@@ -74,8 +77,8 @@ class PathTree implements PathsTreeInstance {
     }
 
     const isEqualKeys = isEqualArray(keys, getKeysOfManager(node.manager));
-    const listenTypes = ["change"].concat(
-      isEqualKeys ? ["expansion", "compression"] : []
+    const listenTypes = DEFAULT_TYPES.concat(
+      isEqualKeys ? OBJECT_TYPES : []
     ) as ActionTypes[];
     let result: ListenManagersResult[] = [
       { listenTypes, manager: node.manager! },

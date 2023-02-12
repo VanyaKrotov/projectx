@@ -1,4 +1,4 @@
-import type {
+import {
   Annotated,
   ManagerOptions,
   EntryAnnotation,
@@ -6,6 +6,8 @@ import type {
   Path,
   ManagerInstance,
   ObserverAnnotation,
+  Annotation,
+  isObjectOfClass,
 } from "../../shared";
 import {
   findManager,
@@ -38,6 +40,49 @@ class ObjectManager<T extends object | Annotated>
     return (this.target as Annotated).annotation || {};
   }
 
+  protected createManager(
+    key: Path,
+    value: T,
+    description?: PropertyDescriptor,
+    annotation?: Annotation
+  ): ManagerInstance<T> {
+    const created = observableValue(
+      value,
+      {
+        path: this.joinToPath(key),
+        annotation,
+      },
+      description
+    );
+
+    const manager = this.values.get(key);
+    if (manager) {
+      created.receiveListeners(manager.shareListeners());
+      created.emit("reinstall", { current: value, prev: manager?.target });
+    }
+
+    return created;
+  }
+
+  public changeField(
+    key: Path,
+    value: T,
+    description?: PropertyDescriptor | undefined,
+    annotation?: Annotation | undefined
+  ): boolean {
+    const manager = this.values.get(key)!;
+    if (manager.support(value)) {
+      return manager.set(value);
+    }
+
+    return Boolean(
+      this.values.set(
+        key,
+        this.createManager(key, value, description, annotation)
+      )
+    );
+  }
+
   protected defineField(key: string, description: PropertyDescriptor): boolean {
     const { observable = true, ...restAnnotation } =
       this.annotations[key] || {};
@@ -66,27 +111,16 @@ class ObjectManager<T extends object | Annotated>
       enumerable = true,
     } = description;
 
-    if (this.values.has(key)) {
-      this.values.get(key)!.dispose();
-    }
-
     this.values.set(
       key,
-      observableValue(
-        value,
-        {
-          path: this.joinToPath(key),
-          annotation: restAnnotation,
-        },
-        description
-      )
+      this.createManager(key, value, description, restAnnotation)
     );
 
     const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
       get: () => this.values.get(key)!.get(),
-      set: (value) => this.values.get(key)!.set(value),
+      set: (value) => this.changeField(key, value, description, restAnnotation),
     };
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));
@@ -138,6 +172,10 @@ class ObjectManager<T extends object | Annotated>
     }
 
     return true;
+  }
+
+  public support(value: T): boolean {
+    return isObjectOfClass(value);
   }
 }
 

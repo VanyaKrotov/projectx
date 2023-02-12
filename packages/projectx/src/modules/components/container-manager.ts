@@ -3,11 +3,12 @@ import type {
   ContainerManagerInstance,
   ManagerOptions,
   Path,
+  Annotation,
 } from "../../shared";
 
 import BasicManager from "./basic-manager";
 
-abstract class ContainerManager<T, V>
+abstract class ContainerManager<T, V, E = T>
   extends BasicManager<T>
   implements ContainerManagerInstance<T, V>
 {
@@ -24,15 +25,18 @@ abstract class ContainerManager<T, V>
     super.dispose();
   }
 
-  public get keys(): Path[] {
-    return [];
-  }
+  public abstract changeField(
+    key: Path,
+    value: E,
+    description?: PropertyDescriptor,
+    annotation?: Annotation
+  ): boolean;
 
-  public disposeManagers(): void {}
+  public abstract get keys(): Path[];
 
-  public manager(key: Path): ManagerInstance | null {
-    throw new Error("Method is not implemented!");
-  }
+  public abstract disposeManagers(): void;
+
+  public abstract manager(key: Path): ManagerInstance | null;
 }
 
 export default ContainerManager;

@@ -27,7 +27,7 @@ export class Observer<T> implements ObserverInstance<T> {
 class ObserverWithType<T, E extends string>
   implements ObserverWithTypeInstance<T, E>
 {
-  private readonly listenerMap = new Map<E | "all", ObserverInstance<T>>();
+  private listenerMap = new Map<E | "all", ObserverInstance<T>>();
 
   public listen(type: E | E[], callback: Listener<T>): VoidFunction {
     const unlisten: Function[] = [];
@@ -59,6 +59,20 @@ class ObserverWithType<T, E extends string>
     if (allListeners) {
       allListeners.emit(event);
     }
+  }
+
+  public shareListeners(): Map<E | "all", ObserverInstance<T>> {
+    return this.listenerMap;
+  }
+
+  public receiveListeners(
+    listeners: Map<E | "all", ObserverInstance<T>>
+  ): void {
+    this.listenerMap = listeners;
+  }
+
+  public dispose(): void {
+    this.listenerMap.clear();
   }
 }
 

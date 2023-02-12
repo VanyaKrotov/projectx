@@ -52,6 +52,10 @@ class ComputedManager<T extends () => T>
     return this.memo;
   };
 
+  public set(): boolean {
+    return false;
+  }
+
   public dispose(): void {
     this.reaction.dispose();
     super.dispose();
@@ -63,6 +67,10 @@ class ComputedManager<T extends () => T>
     }
 
     return this.targetHandler();
+  }
+
+  public support(value: T): boolean {
+    return typeof value === "function";
   }
 }
 

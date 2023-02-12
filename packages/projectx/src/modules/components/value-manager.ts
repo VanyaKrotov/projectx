@@ -1,4 +1,4 @@
-import type { ManagerOptions, ValueManagerInstance } from "../../shared";
+import { isObject, ManagerOptions, ValueManagerInstance } from "../../shared";
 
 import BasicManager from "./basic-manager";
 
@@ -21,6 +21,12 @@ class ValueManager<T>
     });
 
     return true;
+  }
+
+  public support(value: T): boolean {
+    const type = typeof value;
+
+    return value === null || type !== "object";
   }
 }
 

@@ -19,7 +19,7 @@ function registerManager<T>(manager: ContainerManagerInstance<T>): T {
   managers.set(manager.name, manager);
   diManager.push(manager.target as object);
 
-  return manager.target;
+  return manager.source();
 }
 
 export function fromClass<T extends object | Annotated, A = T>(
