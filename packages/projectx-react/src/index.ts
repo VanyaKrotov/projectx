@@ -1,1 +1,6 @@
-export { observer } from "./modules";
+export {
+  observer,
+  LocalObserver,
+  observerWithRef,
+  useLocalObservable,
+} from "./modules";
