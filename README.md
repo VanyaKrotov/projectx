@@ -1,10 +1,6 @@
-<div style="display: flex; align-items: flex-end;">
-    <div style="font-size: 34px;">ProjectX</div>
-</div>
+# ProjectX
 
-<div style="font-size: 22px; margin-bottom: 20px;">
-    <i style=" color: silver;">Просто управляй состоянием </i>🧑‍🔧
-</div>
+_Просто управляй состоянием_
 
 [![ Версия npm ](https://badge.fury.io/js/projectx.store.svg)](https://badge.fury.io/js/projectx.store)
 
