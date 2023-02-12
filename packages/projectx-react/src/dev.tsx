@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import { observer } from "./modules";
@@ -20,52 +20,58 @@ class State {
   }
 }
 
-const state = observable.class(State);
-const state2 = observable.class(State);
+const state1 = observable.fromClass(State);
+const state2 = observable.fromClass(State);
+
+console.log(state1);
 
 const Info = observer(({ state, i }: { state: State; i: string }) => {
   console.log(`render [Info-${i}]`);
 
+  useEffect(() => {
+    console.log(`mount [Info-${i}]`);
+  }, []);
+
   return <div>{state.counter}</div>;
 });
 
-const Increment = ({
-  state: _state,
-  postfix,
-}: {
-  state: State;
-  postfix: string;
-}) => {
+const Increment = ({ state, postfix }: { state: State; postfix: string }) => {
   console.log(`render [Increment-${postfix}]`);
+
+  useEffect(() => {
+    console.log(`mount [Increment-${postfix}]`);
+  }, []);
 
   return (
     <div>
-      <Info state={_state} i={postfix} />
-      <button onClick={() => _state.increment()}>+</button>
-      <button onClick={() => _state.decrement()}>-</button>
+      <Info state={state} i={postfix} />
+      <button onClick={() => state.increment()}>+</button>
+      <button onClick={() => state.decrement()}>-</button>
     </div>
   );
 };
-
-console.log(state);
 
 const App = () => {
   console.log("render [App]");
 
+  useEffect(() => {
+    console.log("mount [App]");
+  }, []);
+
   return (
     <div>
-      <Increment state={state} postfix="1" />
-      {state.counter > 2 && state2.counter > -1 && (
-        <Increment state={state2} postfix="2" />
-      )}
+      <Increment state={state1} postfix="1" />
+      {/* <LocalObserver>
+        {() => (
+          <>
+            {state1.counter > 2 && state2.counter > -1 && (
+              <Increment state={state2} postfix="2" />
+            )}
+          </>
+        )}
+      </LocalObserver> */}
     </div>
   );
 };
 
-const App_ = observer(App);
-
-const app = <App_ />;
-
-state.increment();
-
-root.render(app);
+root.render(<App />);

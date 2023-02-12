@@ -2,4 +2,4 @@ export * from "./shared/types";
 
 export * from "./components";
 
-export { Reaction } from "./modules";
+export { Reaction, observableValue } from "./modules";

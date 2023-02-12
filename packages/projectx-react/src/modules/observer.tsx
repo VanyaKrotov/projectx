@@ -1,56 +1,39 @@
 import React, {
   ComponentType,
-  useEffect,
-  useRef,
-  ReactElement,
   FC,
+  forwardRef,
+  ForwardRefExoticComponent,
+  ForwardRefRenderFunction,
+  PropsWithoutRef,
+  RefAttributes,
 } from "react";
 
-// TODO: заменить на либу из npm
-// @ts-ignore
-import { Reaction, ReactionInstance } from "projectx/client";
-
-import { useForceUpdate } from "../shared/hooks";
-import { LocalObserverProps } from "../shared/types";
-
-function useObserveComponent<P extends object>(
-  fn: () => ReactElement<P>,
-  name?: string
-): ReactElement<P> {
-  const forceUpdate = useForceUpdate();
-  const ref = useRef<ReactionInstance | null>(null);
-  if (!ref.current) {
-    ref.current = new Reaction(name);
-  }
-
-  ref.current!.startWatch();
-
-  const component = fn();
-
-  useEffect(() => {
-    ref.current!.endWatch();
-
-    ref.current!.watch(forceUpdate);
-
-    return () => {
-      ref.current!.dispose();
-      ref.current = null;
-    };
-  }, []);
-
-  return component;
-}
+import type { LocalObserverProps } from "../shared/types";
+import { getComponentName } from "../shared";
+import { useObserveComponent } from "./use-observe-component";
 
 function observer<P extends object>(Comp: ComponentType<P>): FC<P> {
-  const componentName = Comp.displayName || Comp.name || Comp.constructor.name;
-
   return (props: P) => {
-    return useObserveComponent<P>(() => <Comp {...props} />, componentName);
+    return useObserveComponent<P>(
+      () => <Comp {...props} />,
+      getComponentName(Comp)
+    );
   };
 }
 
-function LocalObserver({ children }: LocalObserverProps) {
+function observerWithRef<T, P extends object>(
+  Comp: ForwardRefRenderFunction<T, P>
+): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<T>> {
+  return forwardRef((props: P, ref) => {
+    return useObserveComponent<P>(
+      () => <Comp {...props} ref={ref} />,
+      getComponentName(Comp)
+    );
+  });
+}
+
+function LocalObserver<P extends object>({ children }: LocalObserverProps<P>) {
   return useObserveComponent(children);
 }
 
-export { observer, LocalObserver };
+export { observer, LocalObserver, observerWithRef };

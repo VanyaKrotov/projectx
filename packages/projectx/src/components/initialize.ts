@@ -23,5 +23,11 @@ export const configuration = new ConfigurationManager();
 export const diManager = new DIManager();
 
 if (__DEV__) {
-  console.log("ProjectX data: ", { interceptor, batch, managers, reactions });
+  console.log("ProjectX data: ", {
+    interceptor,
+    batch,
+    managers,
+    reactions,
+    diManager,
+  });
 }

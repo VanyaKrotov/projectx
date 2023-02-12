@@ -1,4 +1,4 @@
-import { autorun, observable, dependencyInject } from "./index";
+import { autorun, observable } from "./index";
 
 class Account {
   public isAuthorized = true;
@@ -8,50 +8,36 @@ class Account {
   }
 }
 
-class BaseState {
+class State {
   counter = 1;
   array = [10, 23];
 
-  map = new Map<number, Account>();
-  set = new Set<Account>();
+  data: any = null;
 
   get mul() {
     return this.counter * 2;
   }
 
-  pushAccount(id: number, account: Account) {
-    this.map.set(id, account);
-    this.set.add(account);
-  }
-}
-
-const account = observable.fromClass(Account);
-
-const map = observable.fromMap(new Map<number, Account>([[1, new Account()]]));
-const set = observable.fromSet(new Set<Account>([new Account()]));
-
-console.log(account);
-console.log(map);
-
-class State extends BaseState {
-  private readonly account = dependencyInject(Account);
-
   increment() {
     this.counter++;
-
-    this.account.changeAuth(false);
   }
 
   decrement() {
     this.counter--;
   }
 
-  fetch() {
-    this.array[0] = this.counter + 1;
+  async fetch() {
+    this.data = {
+      value: 10,
+      next: {
+        value: 12,
+      },
+    };
   }
 
   push() {
-    this.counter++;
+    this.data = null;
+    this.array.push(this.array.length + 1);
   }
 }
 
@@ -72,8 +58,14 @@ const obj = {
 const state = observable.fromClass(State);
 const stateObj = observable.fromObject(obj);
 
+const account: Account = observable.fromClass(Account);
+
+const map = observable.fromMap(new Map<number, number>());
+
 console.log(state);
 console.log(stateObj);
+console.log(account);
+console.log(map);
 
 const div = document.createElement("div");
 const div1 = document.createElement("div");
@@ -100,17 +92,17 @@ autorun(() => {
 
 autorun(() => {
   console.log("trigger stateObj");
-  div1.innerText = `stateObj: ${stateObj.test}`;
+  div1.innerText = `stateObj: ${state.array.join()}`;
 });
 
 autorun(() => {
-  console.log("trigger map");
-  div3.innerText = `map: ${JSON.stringify(Array.from(state.map.entries()))}`;
+  console.log("trigger data");
+  div2.innerText = `auth: ${JSON.stringify(state.data)}`;
 });
 
 autorun(() => {
-  console.log("trigger set");
-  div2.innerText = `set: ${JSON.stringify(Array.from(state.set))}`;
+  console.log("trigger acc");
+  div3.innerText = `ss: ${JSON.stringify(Object.fromEntries(map.entries()))}`;
 });
 
 buttonPlus.addEventListener("click", () => {
@@ -122,30 +114,15 @@ buttonMinus.addEventListener("click", () => {
 });
 
 buttonPlus2.addEventListener("click", () => {
-  // stateObj.inc();
-
-  // map.get(1)?.changeAuth(false);
-
-  state.pushAccount(1, new Account());
-
-  // set.forEach((e) => e.changeAuth(false));
-
-  // map.set(map.size + 1, "test " + map.size);
+  map.set(map.size, map.size ** 2);
 });
 
 buttonMinus2.addEventListener("click", () => {
-  // stateObj.dec();
-  // set.clear();
-  // map.delete(map.size);
-
-  state.set.clear();
-  state.map.clear();
+  map.delete(map.size - 1);
 });
 
 buttonFetch.addEventListener("click", () => {
   state.fetch();
-  map.set(1, new Account());
-  set.add(new Account());
 });
 
 buttonPush.addEventListener("click", () => {

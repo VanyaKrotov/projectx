@@ -127,10 +127,7 @@ class ObjectManager<T extends object | Annotated>
   }
 
   public get snapshot(): T {
-    return Array.from(this.values.entries()).reduce(
-      (acc, [key, manager]) => Object.assign(acc, { [key]: manager.snapshot }),
-      {} as T
-    );
+    return this.target;
   }
 
   public get keys() {
