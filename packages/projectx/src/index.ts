@@ -5,8 +5,6 @@ export {
   autorun,
   transaction,
   configurations,
-  inject,
-  DependencyInjector,
 } from "./modules";
 
-export type { Annotated, EntryAnnotation, AsyncInjector } from "./shared/types";
+export type { Annotated, EntryAnnotation } from "./shared/types";

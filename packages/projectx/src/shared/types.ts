@@ -1,7 +1,5 @@
 export type PropertiesInfo = Record<string, PropertyDescriptor>;
 
-export type AsyncInjector = <T>(target: Constructable<T, T>) => Promise<T>;
-
 //#region Manager
 
 export type Path = string | number | symbol | never;

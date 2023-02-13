@@ -7,7 +7,6 @@ import type {
 import Batch from "./batch";
 import Interceptor from "./interceptor";
 import ConfigurationManager from "./configuration-manager";
-import DIManager from "./di-manager";
 
 export const interceptor = new Interceptor();
 
@@ -19,14 +18,11 @@ export const reactions = new Map<string, ReactionInstance>();
 
 export const configuration = new ConfigurationManager();
 
-export const diManager = new DIManager();
-
 if (configuration.config.develop) {
   console.log("ProjectX data: ", {
     interceptor,
     batch,
     managers,
     reactions,
-    diManager,
   });
 }
