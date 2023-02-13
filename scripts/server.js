@@ -14,35 +14,46 @@ function runServer(port = 4000) {
     const filename = req.url !== "/" ? req.url : "index.html";
     const filepath = path.join(__dirname, BUILD_DIR, filename);
     if (fs.existsSync(filepath)) {
-      const stream = fs.createReadStream(filepath);
+      let result;
+      try {
+        const file = fs.readFileSync(filepath);
 
-      stream.on("ready", () => {
         const type =
           mime[path.parse(filepath).ext] || "application/octet-stream";
 
         res.writeHead(200, { "content-type": type });
 
-        stream.pipe(res);
-      });
-
-      stream.on("error", (err) => {
-        console.log(`${req.method} ${req.url} => 500 ${filepath} ${err.name}`);
-
+        result = {
+          content: file.toString(),
+          code: 200,
+        };
+      } catch (err) {
         res.writeHead(500, err.name);
 
-        res.end(JSON.stringify(err));
-      });
+        result = {
+          content: JSON.stringify(err),
+          code: 500,
+        };
+      }
+
+      console.log(`${req.method} ${req.url} => ${result.code} ${filepath}`);
+
+      res.end(result.content);
     } else {
-      const reqProxy = http.request({ path: req.url, port: port });
+      console.log(`File [${filename}] not found from path ${filepath}`);
+      // const reqProxy = http.request({ path: req.url, port: port });
 
-      reqProxy.on("response", (resProxy) => {
-        const type = resProxy.headers["content-type"];
+      // reqProxy.on("response", (resProxy) => {
+      //   const type = resProxy.headers["content-type"];
 
-        res.writeHead(resProxy.statusCode, { "content-type": type });
-        resProxy.pipe(res);
-      });
+      //   res.writeHead(resProxy.statusCode, { "content-type": type });
+      //   resProxy.pipe(res);
+      // });
 
-      req.pipe(reqProxy);
+      // req.pipe(reqProxy);
+
+      res.writeHead(404, `File ${filename} not found`);
+      res.end(`File [${filename}] not found from path ${filepath}`);
     }
   });
 

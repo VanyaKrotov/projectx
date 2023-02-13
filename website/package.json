@@ -6,10 +6,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "projectx.store-react": "^0.0.1-beta",
+    "@rsuite/icons": "^1.0.2",
+    "axios": "^1.3.2",
+    "projectx.store-react": "^0.0.3-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.1"
+    "react-router-dom": "^6.8.1",
+    "rsuite": "^5.26.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/projectx"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",

@@ -1,0 +1,22 @@
+.layout-container {
+  width: 100%;
+  display: flex;
+  margin-top: 12px;
+
+  & > div:first-child {
+    width: 240px;
+  }
+
+  & > div:last-child {
+    flex: auto;
+    padding: 12px;
+  }
+
+  & .rs-sidenav-item {
+    padding-left: 18px !important;
+  }
+
+  & .rs-dropdown-item {
+    padding-left: 32px !important;
+  }
+}

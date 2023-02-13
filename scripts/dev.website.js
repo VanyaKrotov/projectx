@@ -1,4 +1,6 @@
 const esbuild = require("esbuild");
+const fs = require("fs");
+const path = require("path");
 
 const { getConfig } = require("../config/website.config");
 const { runServer } = require("./server");
@@ -10,4 +12,4 @@ esbuild
     console.error(err);
     process.exit(1);
   })
-  .then(() => runServer());
+  .then(runServer);

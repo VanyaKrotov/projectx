@@ -1,3 +1,9 @@
-* {
-  color: red;
+body {
+  margin: 0;
+  font-size: 16px !important;
+}
+
+.center-container {
+  max-width: 1440px;
+  margin: 0 auto;
 }

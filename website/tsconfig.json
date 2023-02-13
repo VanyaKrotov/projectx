@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "composite": true,
-    "rootDir": "src",
     "lib": ["es6", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Node",
@@ -16,7 +15,17 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "shared/*": ["src/shared/*"],
+      "assets/*": ["assets/*"],
+      "components/*": ["src/components/*"],
+      "modules/*": ["src/modules/*"],
+      "entities/*": ["src/entities/*"],
+      "pages/*": ["src/pages/*"],
+      "@/*": ["./*"]
+    }
   },
   "include": ["src/**/*"]
 }

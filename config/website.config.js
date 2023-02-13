@@ -1,5 +1,6 @@
 const path = require("path");
 const { sassPlugin } = require("esbuild-sass-plugin");
+const svgrPlugin = require("esbuild-plugin-svgr");
 
 function getConfig({ mode = "development", minify = false }) {
   const { name, version, main } = require(`../website/package.json`);
@@ -19,6 +20,7 @@ function getConfig({ mode = "development", minify = false }) {
     minify,
     tsconfig: path.resolve(__dirname, "../website/tsconfig.json"),
     plugins: [
+      svgrPlugin(),
       sassPlugin({
         type: "style",
       }),
