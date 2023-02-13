@@ -1,0 +1,38 @@
+{
+  "packages": {
+    "store": {
+      "versions": [
+        {
+          "version": "0.0.3-beta",
+          "date": "2023-02-13T15:06:06.432Z"
+        },
+        {
+          "version": "0.0.2-beta",
+          "description": "",
+          "date": "2023-02-12T15:06:06.432Z"
+        },
+        {
+          "version": "0.0.1-beta",
+          "description": "",
+          "date": "2023-02-11T15:06:06.432Z"
+        }
+      ]
+    },
+    "store-react": {
+      "versions": [
+        {
+          "version": "0.0.3-beta",
+          "date": "2023-02-13T15:06:06.432Z"
+        },
+        {
+          "version": "0.0.2-beta",
+          "date": "2023-02-12T15:06:06.432Z"
+        },
+        {
+          "version": "0.0.1-beta",
+          "date": "2023-02-11T15:06:06.432Z"
+        }
+      ]
+    }
+  }
+}
