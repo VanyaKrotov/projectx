@@ -1,52 +1,20 @@
-# ProjectX
+# ProjectX.Store
 
-_Просто управляй состоянием_
+_Библиотека для управления состояния приложения_
 
-[![ Версия npm ](https://badge.fury.io/js/projectx.store.svg)](https://badge.fury.io/js/projectx.store)
 [![ Версия npm ](https://badge.fury.io/js/projectx.store.svg)](https://badge.fury.io/js/projectx.store-react)
 
----
-
-## Введение
-
-### ProjectX — это набор библиотек связанных целью повысить удобство и скорость разработки.
-
-### Реализуемые подходы:
-
-    1. создать состояние также легко как создать переменную;
-    2. изменить состояние также легко как изменить переменную;
-    3. экшены это методы состояния;
-    4. использование ООП для сложных состояний;
-    5. единая структура для отслеживаемого состояния и статической структуры данных;
-    6. объединяй состояния между собой даже если одно из ниx создасться позже;
-
-_Много маленьких состояний лучше одного большого монолита..._
-
-Существующие решения:
-
-- [projectx.store](https://github.com/VanyaKrotov/projectx/tree/main/packages/projectx) — менеджер состояний для приложения, работает по принципу библиотеки [MobX](https://github.com/mobxjs/mobx) но реализует некоторые вещи иначе.
-
-- [projectx.store-react](https://github.com/VanyaKrotov/projectx/tree/main/packages/projectx-react) — библиотека позволяющая соединить отслеживаемые состояния `projectx.store` с реактивным подходом `react`.
-
 ## Установка
-
-Основная библиотека. Набор всех необходимых функций и классов для создания отслеживаемого состояния и управления его реакциями.
 
 ```
 npm i projectx.store
 ```
 
-Коннектор для React. Функции связывающие состояние и изменения дерева React, также имеет методы для создания локальных состояний компонентов.
-
-```
-npm i projectx.store-react
-```
-
 ## Документация
 
-### Описание методов и классов
+Полная документация расположена по [ссылке](https://github.com/VanyaKrotov/projectx/blob/main/README.md)
 
-_projectx.store_
+### Описание функций и классов
 
 - `observable` - набор функций для создания состояний из различных структур данных.
 
@@ -334,165 +302,4 @@ console.log(state.account === account);
 
 // store of Account {}
 // true
-```
-
-_projectx.store-react_
-
-- `observer()` - функция для создания узла отслеживания изменений состояний.
-
-- `observerWithRef()` - также функция для создания узла отслеживания с поддержкой передачи _`React.Ref`_.
-
-Пример:
-
-```ts
-class State {
-  counter = 1;
-
-  increment() {
-    this.counter++;
-  }
-
-  decrement() {
-    this.counter--;
-  }
-}
-
-const state = observable.fromObject(new State());
-
-// use observer(...) or observerWithRef(...)
-const Counter = observer(() => {
-  console.log("render [Counter]");
-
-  return (
-    <div>
-      <div>{state.counter}</div>
-      <button onClick={() => state.increment()}>+</button>
-      <button onClick={() => state.decrement()}>-</button>
-    </div>
-  );
-});
-
-const App = () => {
-  console.log("render [App]");
-
-  return (
-    <div>
-      <Counter />
-    </div>
-  );
-};
-
-// Output
-// render [App]
-// render [Counter]
-// increment()
-// render [Counter]
-// decrement()
-// render [Counter]
-```
-
-- `useLocalObservable()` - react хук для создания лоокального состояния.
-
-Пример:
-
-```ts
-class State {
-  counter = 1;
-
-  increment() {
-    this.counter++;
-  }
-
-  decrement() {
-    this.counter--;
-  }
-}
-
-const Counter = () => {
-  const state = useLocalObservable(() => new State());
-  console.log("render [Counter]");
-
-  return (
-    <div>
-      <div>{state.counter}</div>
-      <button onClick={() => state.increment()}>+</button>
-      <button onClick={() => state.decrement()}>-</button>
-    </div>
-  );
-};
-
-const App = () => {
-  console.log("render [App]");
-
-  return (
-    <div>
-      <Counter />
-    </div>
-  );
-};
-
-// Output
-// render [App]
-// render [Counter]
-// increment()
-// render [Counter]
-// decrement()
-// render [Counter]
-```
-
-- `<LocalObserver />` - компонент для создания локального узла отслеживания реакций внутри JSX.
-
-Пример:
-
-```ts
-class State {
-  counter = 1;
-
-  increment() {
-    this.counter++;
-  }
-
-  decrement() {
-    this.counter--;
-  }
-}
-
-const state = observable.fromObject(new State());
-
-const Counter = () => {
-  console.log("render [Counter]");
-
-  return (
-    <div>
-      <LocalObserver>
-        {() => {
-          console.log("render [Local]");
-
-          return <div>{state.counter}</div>;
-        }}
-      </LocalObserver>
-      <button onClick={() => state.increment()}>+</button>
-      <button onClick={() => state.decrement()}>-</button>
-    </div>
-  );
-};
-
-const App = () => {
-  console.log("render [App]");
-
-  return (
-    <div>
-      <Counter />
-    </div>
-  );
-};
-
-// Output
-// render [App]
-// render [Counter]
-// render [Local]
-// increment()
-// render [Local]
-// decrement()
-// render [Local]
 ```
