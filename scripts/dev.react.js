@@ -4,18 +4,13 @@ const path = require("path");
 const { getConfig } = require("../config/esbuild.config");
 const { runServer } = require("./server");
 
-const ENTRY_POINTS = {
-  development: "src/dev.tsx",
-  production: "src/index.ts",
-};
-
 const PATH = "../packages/projectx-react";
 
 esbuild
   .context(
     getConfig({
       path: path.resolve(__dirname, PATH),
-      entryPoints: ENTRY_POINTS,
+      entryPoints: [path.resolve(__dirname, "../examples/react/basic.tsx")],
     })
   )
   .then((ctx) => ctx.watch())

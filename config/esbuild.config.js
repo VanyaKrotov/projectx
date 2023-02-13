@@ -13,7 +13,7 @@ function getConfig({
     : `build/${name}${minify ? ".min" : ""}${versionPOstfix}.js`;
 
   return {
-    entryPoints: [`${path}/${entryPoints[mode]}`],
+    entryPoints,
     outfile,
     target: "es2015",
     bundle: true,

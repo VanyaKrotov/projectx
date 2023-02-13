@@ -1,4 +1,4 @@
-import { autorun, observable } from "./index";
+import { autorun, observable } from "projectx.store";
 
 class Account {
   public isAuthorized = true;

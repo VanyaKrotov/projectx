@@ -1,9 +1,12 @@
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
-import { LocalObserver, observer, useLocalObservable } from "./modules";
-
 import { observable } from "projectx.store";
+import {
+  LocalObserver,
+  observer,
+  useLocalObservable,
+} from "projectx.store-react";
 
 const root = createRoot(document.getElementById("root")!);
 
