@@ -1,6 +1,6 @@
 {
   "name": "projectx.store-react",
-  "version": "0.0.3-beta",
+  "version": "0.0.4-beta",
   "description": "",
   "main": "src/index.ts",
   "license": "ISC",
@@ -20,7 +20,7 @@
   "dependencies": {
     "i": "^0.3.7",
     "npm": "^9.4.2",
-    "projectx.store": "^0.0.1-beta",
+    "projectx.store": "^0.0.4-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

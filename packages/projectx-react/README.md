@@ -69,7 +69,7 @@ const App = () => {
 // render [Counter]
 ```
 
-- `useLocalObservable()` - react хук для создания лоокального состояния.
+- `useLocalObservable()` - react хук для создания локального состояния.
 
 Пример:
 
