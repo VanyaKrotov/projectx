@@ -6,7 +6,9 @@
     "dev:store": "node scripts/dev.store.js",
     "dev:react": "node scripts/dev.react.js",
     "dev:website": "node scripts/dev.website.js",
-    "test": "jest --config=config/jest.config.ts"
+    "dev:di": "node scripts/dev.di.js",
+    "test": "jest --config=config/jest.config.ts",
+    "test:watch": "jest --config=config/jest.config.ts --watch"
   },
   "devDependencies": {
     "@jest/globals": "^29.4.2",

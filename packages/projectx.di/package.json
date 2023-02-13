@@ -1,0 +1,19 @@
+{
+  "name": "projectx.di",
+  "version": "0.0.1-beta",
+  "description": "Di manager",
+  "main": "src/index.ts",
+  "keywords": [
+    "dependency inject"
+  ],
+  "author": {
+    "name": "Ivan Krotov",
+    "email": "vanyakrotov3059@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/projectx.di"
+  },
+  "license": "ISC"
+}
