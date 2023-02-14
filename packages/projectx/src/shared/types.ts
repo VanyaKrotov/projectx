@@ -185,14 +185,15 @@ export interface WatchOptions<T> {
 
 export interface ReactionInstance {
   id: string;
+  get isEmptyObservers(): boolean;
   dispose(): void;
-  startWatch(): void;
-  endWatch(): void;
+  startCatchCalls(): void;
+  endCatchCalls(): void;
   syncCaptured<T>(fn: () => T): T;
-  watch(watch: WatchCallback): VoidFunction;
+  setReactionCallback(callback: ReactionCallback): void;
 }
 
-export interface WatchCallback {
+export interface ReactionCallback {
   (unlisten: VoidFunction): void;
 }
 

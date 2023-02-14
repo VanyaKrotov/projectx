@@ -1,10 +1,11 @@
-import {
+import type {
   Event,
   Listener,
   ObserverInstance,
   ObserverWithTypeInstance,
-  runAfterScript,
-} from "../../shared";
+} from "../shared";
+
+import { runAfterScript } from "../shared";
 
 export class Observer<T> implements ObserverInstance<T> {
   private listeners = new Set<Listener<T>>();

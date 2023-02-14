@@ -6,9 +6,7 @@ import type {
 } from "../../shared";
 import { createUniqPath } from "../../shared";
 
-import { interceptor } from "../../components";
-
-import { ObserverWithType } from "./observer";
+import { ObserverWithType, interceptor } from "../../components";
 
 abstract class BasicManager<T>
   extends ObserverWithType<T, ActionTypes>

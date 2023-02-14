@@ -4,26 +4,23 @@ function when<T = boolean>(
   fn: () => T,
   resolveFn: (value: T) => boolean = (value) => Boolean(value)
 ): Promise<T> {
-  const reaction = new Reaction();
+  const reaction = new Reaction("When");
 
-  return new Promise<T>((res) => {
-    const result = reaction.syncCaptured(fn);
-
+  return new Promise<T>((resolve) => {
     const handle = (value: T) => {
       if (!resolveFn(value)) {
         return;
       }
 
-      res(value);
-
+      resolve(value);
       reaction.dispose();
     };
 
-    reaction.watch(() => {
+    reaction.setReactionCallback(() => {
       handle(fn());
     });
 
-    handle(result);
+    handle(reaction.syncCaptured(fn));
   });
 }
 

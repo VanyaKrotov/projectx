@@ -1,19 +1,13 @@
-import type { WatchCallback } from "../shared";
-
 import { Reaction } from "./reaction";
 
 function autorun<T>(fn: () => T): VoidFunction {
-  const reaction = new Reaction();
+  const reaction = new Reaction("Autorun");
+
+  reaction.setReactionCallback(() => {
+    reaction.syncCaptured(fn);
+  });
 
   reaction.syncCaptured(fn);
-
-  const watch: WatchCallback = () => {
-    reaction.syncCaptured(fn);
-
-    reaction.watch(watch);
-  };
-
-  reaction.watch(watch);
 
   return () => {
     reaction.dispose();

@@ -4,7 +4,7 @@ export {
   watch,
   autorun,
   transaction,
-  configurations,
+  configuration,
 } from "./modules";
 
 export type { Annotated, EntryAnnotation } from "./shared/types";

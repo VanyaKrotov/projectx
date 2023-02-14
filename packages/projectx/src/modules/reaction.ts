@@ -3,7 +3,7 @@ import type {
   InterceptorEvent,
   Path,
   ReactionInstance,
-  WatchCallback,
+  ReactionCallback,
 } from "../shared";
 import { uid } from "../shared/uid";
 
@@ -12,38 +12,52 @@ import { batch, interceptor, managers, reactions } from "../components";
 
 class Reaction implements ReactionInstance {
   private unsubscribeFns: (() => void)[] = [];
+  private tree: PathTree;
+  private reactionCallback: ReactionCallback | null = null;
 
   public readonly id: string;
-  private tree: PathTree;
+
+  public get isEmptyObservers(): boolean {
+    return this.tree.isEmpty;
+  }
 
   constructor(
     id: string = "Reaction",
     private scope: Map<Path, ContainerManagerInstance> = managers
   ) {
     this.id = `${id}#${uid()}`;
-
     this.tree = new PathTree(scope);
 
     reactions.set(this.id, this);
   }
 
+  private changeHandler = () => this.reactionCallback?.(this.unlisten);
+
   private listener = ({ path }: InterceptorEvent) => {
     const has = this.scope?.has(path[0]);
-    if (has) {
-      this.tree.push(path);
+    if (!has) {
+      return true;
     }
 
-    return !has;
+    this.tree.push(path);
+
+    const managers = this.tree.getListenManagers();
+    this.unlisten();
+    this.unsubscribeFns = managers.map(({ listenTypes, manager }) =>
+      manager.listen(listenTypes, () => {
+        batch.action(this.changeHandler);
+      })
+    );
   };
 
   private unlisten = () => {
-    if (!this.unsubscribeFns.length) {
-      return;
-    }
-
     this.unsubscribeFns.forEach((unlistener) => unlistener());
     this.unsubscribeFns = [];
   };
+
+  public setReactionCallback(callback: ReactionCallback): void {
+    this.reactionCallback = callback;
+  }
 
   public dispose(): void {
     reactions.delete(this.id);
@@ -52,42 +66,21 @@ class Reaction implements ReactionInstance {
     this.unlisten();
   }
 
-  public startWatch(): void {
+  public startCatchCalls(): void {
     this.tree.clear();
     interceptor.register(this.listener);
   }
 
-  public endWatch(): void {
+  public endCatchCalls(): void {
     interceptor.unregister(this.listener);
   }
 
-  public watch(watch: WatchCallback): VoidFunction {
-    if (this.tree.isEmpty) {
-      console.warn(
-        `Instances for listen in reaction \`${this.id}\` not found. Reconsider the use of adverse reactions.`
-      );
-
-      return () => {};
-    }
-
-    const managers = this.tree.getListenManagers();
-    const handler = () => watch(this.unlisten);
-    this.unlisten();
-    this.unsubscribeFns = managers.map(({ listenTypes, manager }) =>
-      manager.listen(listenTypes, () => {
-        batch.action(handler);
-      })
-    );
-
-    return this.unlisten;
-  }
-
   public syncCaptured<T>(fn: () => T): T {
-    this.startWatch();
+    this.startCatchCalls();
 
     const result = fn();
 
-    this.endWatch();
+    this.endCatchCalls();
 
     return result;
   }

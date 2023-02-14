@@ -1,4 +1,13 @@
-import { autorun, observable } from "../../packages/projectx";
+import {
+  autorun,
+  observable,
+  watch,
+  configuration,
+} from "../../packages/projectx";
+
+configuration({
+  develop: true,
+});
 
 class Account {
   public isAuthorized = true;
@@ -85,6 +94,15 @@ buttonMinus2.innerText = "-";
 buttonFetch.innerText = "fetch";
 buttonPush.innerText = "push";
 
+configuration;
+
+watch(
+  () => (state.counter > 3 ? stateObj.counter : state.counter),
+  (val) => {
+    console.log("watch: ", val);
+  }
+);
+
 autorun(() => {
   console.log("trigger counter");
   div.innerText = `state: ${state.counter}`;
@@ -114,11 +132,13 @@ buttonMinus.addEventListener("click", () => {
 });
 
 buttonPlus2.addEventListener("click", () => {
-  map.set(map.size, map.size ** 2);
+  stateObj.counter++;
+  // map.set(map.size, map.size ** 2);
 });
 
 buttonMinus2.addEventListener("click", () => {
-  map.delete(map.size - 1);
+  stateObj.counter--;
+  // map.delete(map.size - 1);
 });
 
 buttonFetch.addEventListener("click", () => {

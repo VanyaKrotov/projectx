@@ -16,13 +16,17 @@ export const managers = new Map<Path, ContainerManagerInstance>();
 
 export const reactions = new Map<string, ReactionInstance>();
 
-export const configuration = new ConfigurationManager();
+export const configManager = new ConfigurationManager();
 
-if (configuration.config.develop) {
+configManager.listen(({ current }) => {
+  if (!current?.develop) {
+    return;
+  }
+
   console.log("ProjectX data: ", {
     interceptor,
     batch,
     managers,
     reactions,
   });
-}
+});

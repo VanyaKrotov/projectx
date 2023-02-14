@@ -1,9 +1,9 @@
 import type { Configuration } from "../shared";
 
-import { configuration } from "../components/initialize";
+import { configManager } from "../components/initialize";
 
-function configurations(config: Partial<Configuration>): void {
-  configuration.change(config);
+function configuration(config: Partial<Configuration>): void {
+  configManager.change(config);
 }
 
-export { configurations };
+export { configuration };

@@ -10,23 +10,21 @@ function watch<T>(
     initialCall = false,
   }: Partial<WatchOptions<T>> = {}
 ): VoidFunction {
-  const reaction = new Reaction();
+  const reaction = new Reaction("Watch");
   let result = reaction.syncCaptured(contextFn);
   if (initialCall) {
     callback(result, undefined as T);
   }
 
-  const watch = () => {
+  reaction.setReactionCallback(() => {
     const value = reaction.syncCaptured(contextFn);
-    if (!isEqual(value, result)) {
-      callback(value, result);
-      result = value;
+    if (isEqual(value, result)) {
+      return;
     }
 
-    reaction.watch(watch);
-  };
-
-  reaction.watch(watch);
+    callback(value, result);
+    result = value;
+  });
 
   return () => {
     reaction.dispose();
