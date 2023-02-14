@@ -7,10 +7,14 @@ const mime = {
   ".css": "text/css",
 };
 
-function runServer(port = 4000, dir = "../dist") {
+function runServer({ port = 4000, includes = [], prefix = "../", outDir }) {
   const server = http.createServer((req, res) => {
     const filename = req.url !== "/" ? req.url : "index.html";
-    const filepath = path.join(__dirname, dir, filename);
+    const dirPath = includes.some((inc) => filename.startsWith(inc))
+      ? ""
+      : outDir;
+
+    const filepath = path.join(__dirname, prefix, dirPath, filename);
     if (fs.existsSync(filepath)) {
       let result;
       try {

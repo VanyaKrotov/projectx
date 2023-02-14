@@ -18,4 +18,9 @@ esbuild
     console.error(err);
     process.exit(1);
   })
-  .then(() => runServer());
+  .then(() =>
+    runServer({
+      outDir: "dist",
+      prefix: "../",
+    })
+  );
