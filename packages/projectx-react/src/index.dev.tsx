@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import { observable } from "projectx.store";
@@ -23,7 +23,7 @@ const state2 = observable.fromClass(State);
 
 console.log(state1);
 
-const Info = observer(({ state, i }: { state: State; i: string }) => {
+const Info = ({ state, i }: { state: State; i: string }) => {
   console.log(`render [Info-${i}]`);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const Info = observer(({ state, i }: { state: State; i: string }) => {
   }, []);
 
   return <div>{state.counter}</div>;
-});
+};
 
 const Increment = ({ state, postfix }: { state: State; postfix: string }) => {
   console.log(`render [Increment-${postfix}]`);
@@ -49,14 +49,14 @@ const Increment = ({ state, postfix }: { state: State; postfix: string }) => {
   );
 };
 
-const Test = () => {
+const App = () => {
   const data = useLocalObservable(() => new State());
 
-  return <Increment state={data} postfix="state" />;
-};
-
-const App = () => {
   console.log("render [App]");
+
+  useLayoutEffect(() => {
+    data.increment();
+  }, []);
 
   useEffect(() => {
     console.log("mount [App]");
@@ -64,7 +64,7 @@ const App = () => {
 
   return (
     <div>
-      <Test />
+      <Increment state={data} postfix="state" />
       <Increment state={state1} postfix="1" />
       <LocalObserver>
         {() => (
@@ -79,4 +79,6 @@ const App = () => {
   );
 };
 
-root.render(<App />);
+const AppO = observer(App);
+
+root.render(<AppO />);

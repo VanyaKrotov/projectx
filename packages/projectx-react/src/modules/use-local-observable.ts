@@ -9,11 +9,12 @@ import {
   ReactionInstance,
 } from "projectx.store/src/client";
 
-import { useHandleReaction } from "../shared";
+import { useForceUpdate, useHandleReaction } from "../shared";
 
 function useLocalObservable<T>(getState: () => T): T {
   const manager = useRef<ManagerInstance<T>>();
   const reaction = useRef<ReactionInstance>();
+  const forceUpdate = useForceUpdate();
   if (!manager.current) {
     manager.current = observableValue(getState(), {
       path: [createUniqPath("LocalState")],
@@ -25,12 +26,16 @@ function useLocalObservable<T>(getState: () => T): T {
         [manager.current.name, manager.current as ContainerManagerInstance<T>],
       ])
     );
+
+    reaction.current.setReactionCallback(forceUpdate);
   }
 
-  useHandleReaction(reaction.current!, () => {
-    manager.current?.dispose();
-    manager.current = undefined;
-    reaction.current = undefined;
+  useHandleReaction(reaction.current!, {
+    unmount: () => {
+      manager.current?.dispose();
+      manager.current = undefined;
+      reaction.current = undefined;
+    },
   });
 
   return manager.current.source();

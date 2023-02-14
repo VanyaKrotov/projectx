@@ -1,20 +1,43 @@
 import { useRef, ReactElement } from "react";
 
-import { Reaction, ReactionInstance } from "projectx.store/src/client";
+import { Reaction } from "projectx.store/src/client";
 
-import { useHandleReaction } from "../shared/hooks";
+import type { ObserverComponentRefData } from "../shared/types";
+import { useForceUpdate, useHandleReaction } from "../shared/hooks";
 
 function useObserveComponent<P extends object>(
   fn: () => ReactElement<P>,
   name?: string
 ): ReactElement<P> {
-  const ref = useRef<ReactionInstance>();
+  const ref = useRef<ObserverComponentRefData>();
+  const forceUpdate = useForceUpdate();
   if (!ref.current) {
-    ref.current = new Reaction(name);
+    const reaction = new Reaction(name);
+
+    reaction.setReactionCallback(() => {
+      ref.current!.isCallBeforeMount = !ref.current!.isMount;
+
+      forceUpdate();
+    });
+
+    ref.current = {
+      reaction,
+      isMount: false,
+      isCallBeforeMount: false,
+    };
   }
 
-  useHandleReaction(ref.current, () => {
-    ref.current = undefined;
+  useHandleReaction(ref.current!.reaction, {
+    unmount: () => {
+      ref.current = undefined;
+    },
+    didnmount: () => {
+      ref.current!.isMount = true;
+
+      if (ref.current?.isCallBeforeMount) {
+        forceUpdate();
+      }
+    },
   });
 
   return fn();

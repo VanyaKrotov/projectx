@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { ReactionInstance } from "projectx.store/src/client";
+
+import type { UseHandleReactionOptions } from "./types";
 
 export function useForceUpdate(): VoidFunction {
   const [_, setState] = useState([]);
@@ -10,22 +11,26 @@ export function useForceUpdate(): VoidFunction {
 
 export function useHandleReaction(
   reaction: ReactionInstance,
-  unmount?: VoidFunction
+  { didnmount, unmount }: UseHandleReactionOptions
 ) {
-  const forceUpdate = useForceUpdate();
-
-  reaction.startWatch();
+  reaction.startCatchCalls();
 
   useEffect(() => {
-    reaction.endWatch();
-    reaction.watch(forceUpdate);
+    reaction.endCatchCalls();
+
+    if (reaction.isEmptyObservers) {
+      console.warn(
+        `[projectx.store-react] Reaction \`${reaction.id}\` not have dependencies. We advise you to reconsider its use.`
+      );
+    }
   });
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    didnmount?.();
+
+    return () => {
       reaction.dispose();
       unmount?.();
-    },
-    []
-  );
+    };
+  }, []);
 }

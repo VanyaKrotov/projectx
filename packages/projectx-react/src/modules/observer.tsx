@@ -10,6 +10,7 @@ import React, {
 
 import type { LocalObserverProps } from "../shared/types";
 import { getComponentName } from "../shared";
+
 import { useObserveComponent } from "./use-observe-component";
 
 function observer<P extends object>(Comp: ComponentType<P>): FC<P> {
