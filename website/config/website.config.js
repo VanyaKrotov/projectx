@@ -3,7 +3,7 @@ const { sassPlugin } = require("esbuild-sass-plugin");
 const svgrPlugin = require("esbuild-plugin-svgr");
 
 function getConfig({ mode = "development", minify = false }) {
-  const { name, version, main } = require(`../website/package.json`);
+  const { name, version, main } = require("../package.json");
 
   const isDevelopment = mode === "development";
   const versionPostfix = isDevelopment ? "" : `.v${version}`;
@@ -12,13 +12,13 @@ function getConfig({ mode = "development", minify = false }) {
     : `build/${name}${minify ? ".min" : ""}${versionPostfix}.js`;
 
   return {
-    entryPoints: [path.resolve(__dirname, `../website/${main}`)],
+    entryPoints: [path.resolve(__dirname, `../${main}`)],
     outfile,
     target: "es2015",
     bundle: true,
     sourcemap: isDevelopment,
     minify,
-    tsconfig: path.resolve(__dirname, "../website/tsconfig.json"),
+    tsconfig: path.resolve(__dirname, "../tsconfig.json"),
     plugins: [
       svgrPlugin(),
       sassPlugin({

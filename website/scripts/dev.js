@@ -1,9 +1,7 @@
 const esbuild = require("esbuild");
-const fs = require("fs");
-const path = require("path");
 
 const { getConfig } = require("../config/website.config");
-const { runServer } = require("./server");
+const { runServer } = require("../../scripts/server");
 
 esbuild
   .context(getConfig({}))
@@ -12,4 +10,4 @@ esbuild
     console.error(err);
     process.exit(1);
   })
-  .then(runServer);
+  .then(() => runServer(3000, "../website/dist"));

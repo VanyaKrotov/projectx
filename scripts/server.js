@@ -7,12 +7,10 @@ const mime = {
   ".css": "text/css",
 };
 
-const BUILD_DIR = "../dist";
-
-function runServer(port = 4000) {
+function runServer(port = 4000, dir = "../dist") {
   const server = http.createServer((req, res) => {
     const filename = req.url !== "/" ? req.url : "index.html";
-    const filepath = path.join(__dirname, BUILD_DIR, filename);
+    const filepath = path.join(__dirname, dir, filename);
     if (fs.existsSync(filepath)) {
       let result;
       try {

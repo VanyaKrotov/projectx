@@ -10,7 +10,7 @@ esbuild
   .context(
     getConfig({
       path: path.resolve(__dirname, PATH),
-      entryPoints: [path.resolve(__dirname, "../examples/react/basic.tsx")],
+      entryPoints: [path.resolve(__dirname, PATH, "src/index.dev.tsx")],
     })
   )
   .then((ctx) => ctx.watch())
