@@ -21,6 +21,5 @@ esbuild
   .then(() =>
     runServer({
       outDir: "dist",
-      prefix: "../",
     })
   );
