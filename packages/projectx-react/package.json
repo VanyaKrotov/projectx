@@ -1,13 +1,9 @@
 {
   "name": "projectx.store-react",
-  "version": "0.0.5-beta",
+  "version": "0.0.6-beta",
   "description": "",
   "main": "src/index.ts",
   "license": "ISC",
-  "devDependencies": {
-    "@types/react": "^18.0.27",
-    "@types/react-dom": "^18.0.10"
-  },
   "author": {
     "name": "Ivan Krotov",
     "email": "vanyakrotov3059@gmail.com"
@@ -17,16 +13,20 @@
     "url": "https://github.com/VanyaKrotov/projectx",
     "directory": "packages/projectx-react"
   },
-  "dependencies": {
-    "projectx.store": "^0.0.4-beta",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
   "keywords": [
     "store",
     "observe",
     "reactive",
     "state",
     "react"
-  ]
+  ],
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10"
+  },
+  "dependencies": {
+    "projectx.store": "^0.0.5-beta",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
 }
