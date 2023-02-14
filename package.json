@@ -23,8 +23,6 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "projectx.store": "^0.0.3-beta",
-    "projectx.store-react": "^0.0.3-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }
