@@ -41,8 +41,7 @@ const HomePage = () => {
     );
   }
 
-  const loading = store.loading || viewStore.loading;
-  console.log(loading);
+  const loading = store.loading;
   if (loading) {
     return <div>loading...</div>;
   }

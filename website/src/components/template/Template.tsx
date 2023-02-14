@@ -6,13 +6,16 @@ import "./template.scss";
 
 interface Props {
   children: ReactNode;
+  loading: boolean;
 }
 
-const Template: FC<Props> = ({ children }) => {
+const Template: FC<Props> = ({ children, loading }) => {
   return (
     <main>
       <Header />
-      <article className="center-container">{children}</article>
+      <article className="center-container">
+        {loading ? <div>loading...</div> : children}
+      </article>
     </main>
   );
 };

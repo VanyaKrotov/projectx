@@ -19,7 +19,7 @@ const Main = () => {
 
   return (
     <CustomProvider theme={viewStore.theme}>
-      <Template>
+      <Template loading={viewStore.loading}>
         <Routes>
           <Route path="docs/*" element={<DocsPage />} />
           <Route path="api/*" element={<div>api</div>} />
