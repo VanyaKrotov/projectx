@@ -29,7 +29,10 @@ esbuild
       );
     });
 
-    return runServer(3000, "../website/dist");
+    return runServer({
+      port: 3000,
+      outDir: "dist",
+      includes: ["/assets"],
+      prefix: "../website/",
+    });
   });
-
-// esbuild.context().then((ctx) => ctx.watch());

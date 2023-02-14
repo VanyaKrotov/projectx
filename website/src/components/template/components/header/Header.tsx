@@ -32,16 +32,16 @@ const Header = () => {
         </Navbar.Brand>
 
         <Nav activeKey={pathname}>
-          <Nav.Item as={Link} to="docs" eventKey="docs">
+          <Nav.Item as={Link} to="/docs" eventKey="docs">
             Документация
           </Nav.Item>
-          <Nav.Item as={Link} to="api" eventKey="api">
+          <Nav.Item as={Link} to="/api" eventKey="api">
             Справочник API
           </Nav.Item>
-          <Nav.Item as={Link} to="examples" eventKey="examples">
+          <Nav.Item as={Link} to="/examples" eventKey="examples">
             Примеры
           </Nav.Item>
-          <Nav.Item as={Link} to="release" eventKey="release">
+          <Nav.Item as={Link} to="/release" eventKey="release">
             Релизы
           </Nav.Item>
         </Nav>

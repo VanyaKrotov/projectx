@@ -1,41 +1,94 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Nav, Sidenav } from "rsuite";
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
+import { observer, useLocalObservable } from "projectx.store-react";
+
+import { viewStore } from "entities/view";
 
 import Layout from "components/layout";
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+
+import { SECTIONS } from "./shared/constants";
+import HomePageState from "./shared/state";
+import { createSearchParam } from "./shared/selectors";
+
+import { Examples, Install, Intro, Started } from "./components";
 
 const HomePage = () => {
+  const store = useLocalObservable(() => new HomePageState());
   const { pathname } = useLocation();
-  const subpage = pathname.replace("/docs", "");
-  if (!subpage) {
-    return <Navigate replace to="intro" />;
+  const [search] = useSearchParams();
+  const version = search.get("version") || "0.1.0";
+  const lib = search.get("lib") || "store";
+
+  useEffect(() => {
+    store.loadData(`${lib}.${version}`);
+  }, [lib, version]);
+
+  const section: string = pathname.replace(/^\/docs\/*/, "");
+  if (!section) {
+    return (
+      <Navigate
+        replace
+        to={{ pathname: "intro", search: createSearchParam(lib, version) }}
+      />
+    );
   }
+
+  const loading = store.loading || viewStore.loading;
+  console.log(loading);
+  if (loading) {
+    return <div>loading...</div>;
+  }
+
+  if (store.error || !store.data) {
+    return <div>error</div>;
+  }
+
+  const sectionData = store.data.sections[section];
+  console.log(sectionData);
+  console.log(lib);
 
   return (
     <Layout
       sidebar={
-        <Sidenav appearance="subtle" defaultOpenKeys={["p.s", "p.s-r"]}>
-          <Nav activeKey={subpage}>
-            <Nav.Menu title={<b>projectx.store</b>} eventKey="p.s">
-              <Nav.Item as={Link} eventKey="/intro" to="intro">
-                Введение
-              </Nav.Item>
-              <Nav.Item eventKey="/install" as={Link} to="install">
-                Устанока
-              </Nav.Item>
-              <Nav.Item eventKey="/started" as={Link} to="started">
-                Начало работы
-              </Nav.Item>
-              <Nav.Item eventKey="/examples" as={Link} to="examples">
-                Примеры
-              </Nav.Item>
-            </Nav.Menu>
-            <Nav.Menu title={<b>projectx.store-react</b>} eventKey="p.s-r">
-              <Nav.Item eventKey="p.s-r-1">Введение</Nav.Item>
-              <Nav.Item eventKey="p.s-r-2">Устанока</Nav.Item>
-              <Nav.Item eventKey="p.s-r-3">Начало работы</Nav.Item>
-              <Nav.Item eventKey="p.s-r-4">Примеры</Nav.Item>
-            </Nav.Menu>
+        <Sidenav
+          appearance="subtle"
+          defaultOpenKeys={Object.keys(viewStore.data!.packages)}
+        >
+          <Nav activeKey={`${lib}-${section}`}>
+            {Object.entries(viewStore.data!.packages).map(([libname]) => (
+              <Nav.Menu
+                title={<b>projectx.{libname}</b>}
+                eventKey={libname}
+                key={libname}
+              >
+                {SECTIONS.map(({ eventKey, pathname, title }) => {
+                  const key = `${libname}-${eventKey}`;
+
+                  return (
+                    <Nav.Item
+                      as={Link}
+                      key={key}
+                      eventKey={key}
+                      to={{
+                        pathname,
+                        search: createSearchParam(libname, version),
+                      }}
+                    >
+                      {title}
+                    </Nav.Item>
+                  );
+                })}
+              </Nav.Menu>
+            ))}
+
             <Nav.Item>
               <b>Что-то еще?</b>
             </Nav.Item>
@@ -44,13 +97,13 @@ const HomePage = () => {
       }
     >
       <Routes>
-        <Route path="intro" element={<div>1</div>} />
-        <Route path="install" element={<div>2</div>} />
-        <Route path="started" element={<div>3</div>} />
-        <Route path="examples" element={<div>4</div>} />
+        <Route path="intro" element={<Intro data={sectionData} />} />
+        <Route path="install" element={<Install data={sectionData} />} />
+        <Route path="started" element={<Started data={sectionData} />} />
+        <Route path="examples" element={<Examples data={sectionData} />} />
       </Routes>
     </Layout>
   );
 };
 
-export default HomePage;
+export default observer(HomePage);
