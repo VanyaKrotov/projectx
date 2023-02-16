@@ -1,4 +1,4 @@
-import { OBJ_PROPERTIES } from "./constants";
+import { OBJ_PROPERTIES, SERVICE_FIELD_NAME } from "./constants";
 import { uid } from "./uid";
 
 export function isObject<T>(target: T) {
@@ -9,33 +9,12 @@ export function isFunction(functionToCheck: Function) {
   return typeof functionToCheck === "function";
 }
 
-export function createUniqPath(path = "Observable"): string {
-  return `${path}#${uid()}`;
-}
-
-export function runAfterScript(fn: VoidFunction): Promise<void> {
-  return Promise.resolve().then(fn);
-}
-
-export function getFieldsOfObject<T extends object>(object: T): PropertiesInfo {
-  const prototypes = Object.getPrototypeOf(object);
-  if (!prototypes || prototypes === OBJ_PROPERTIES) {
-    return Object.getOwnPropertyDescriptors(object);
-  }
-
-  return Object.assign(
-    getFieldsOfObject(prototypes),
-    Object.getOwnPropertyDescriptors(prototypes),
-    Object.getOwnPropertyDescriptors(object)
-  );
-}
-
 export function isFunctionDescriptor({ value }: PropertyDescriptor): boolean {
   return isFunction(value);
 }
 
-export function isGetter({ get, set }: PropertyDescriptor) {
-  return get && !set;
+export function isGetter({ get, set }: PropertyDescriptor): boolean {
+  return Boolean(get && !set);
 }
 
 export function isEqualArray<T>(arr1: T[], arr2: T[]): boolean {
@@ -51,6 +30,33 @@ export function isObjectOfClass<T>(target: T): boolean {
     target &&
       typeof target === "object" &&
       Object.getPrototypeOf(target) !== OBJ_PROPERTIES
+  );
+}
+
+export function isObserveValue<T>(target: T): boolean {
+  return isObject(target) && SERVICE_FIELD_NAME in (target as object);
+}
+
+export function getUniqPath(path = ""): string {
+  return `${path}#${uid()}`;
+}
+
+export function runAfterScript(fn: VoidFunction): Promise<void> {
+  return Promise.resolve().then(fn);
+}
+
+export function getAllObjectFields<T extends object>(
+  object: T
+): PropertiesInfo {
+  const prototypes = Object.getPrototypeOf(object);
+  if (!prototypes || prototypes === OBJ_PROPERTIES) {
+    return Object.getOwnPropertyDescriptors(object);
+  }
+
+  return Object.assign(
+    getAllObjectFields(prototypes),
+    Object.getOwnPropertyDescriptors(prototypes),
+    Object.getOwnPropertyDescriptors(object)
   );
 }
 
@@ -85,4 +91,25 @@ export function getKeysOfManager<
   }
 
   return [];
+}
+
+export function defineServiceProperty<T extends object, V>(
+  target: T,
+  value: V
+): T {
+  if (SERVICE_FIELD_NAME in target) {
+    return target;
+  }
+
+  return Object.defineProperty(target, SERVICE_FIELD_NAME, {
+    value,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+}
+
+export function deleteServiceProperty<T extends object>(target: T): boolean {
+  // @ts-ignore
+  return delete target[SERVICE_FIELD_NAME];
 }

@@ -7,5 +7,5 @@ export { when } from "./when";
 export { transaction } from "./transaction";
 export { configuration } from "./configurations";
 
-export { observeOf } from "./observable";
+export { observeOf } from "./observe-of";
 export { Reaction } from "./reaction";

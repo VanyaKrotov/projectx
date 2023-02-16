@@ -1,5 +1,5 @@
 import { isFunction } from "../../../shared";
-import { observeOf } from "../../observable";
+import { observeOf } from "../../observe-of";
 import { ContainerManager } from "../abstraction";
 
 import * as traps from "./map-traps";
@@ -49,6 +49,7 @@ class MapManager<K, T>
     super(target, new Map<K, ManagerInstance<T>>([]), options);
 
     this.proxy = this.define(target);
+    this.instanceCreated(this.proxy);
   }
 
   public disposeManagers(): void {

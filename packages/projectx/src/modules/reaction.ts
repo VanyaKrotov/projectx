@@ -15,10 +15,10 @@ class Reaction implements ReactionInstance {
   }
 
   constructor(
-    id: string = "Reaction",
+    id = "",
     private scope: Map<Path, ContainerManagerInstance> = managers
   ) {
-    this.id = `${id}#${uid()}`;
+    this.id = `${id}@${uid()}`;
     this.tree = new PathTree(scope);
 
     reactions.set(this.id, this);

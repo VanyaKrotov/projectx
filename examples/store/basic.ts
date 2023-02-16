@@ -1,10 +1,9 @@
 import {
   autorun,
-  observable,
   watch,
   configuration,
-  native,
   observe,
+  observable,
 } from "../../packages/projectx";
 
 configuration({
@@ -22,6 +21,8 @@ class Account {
 class BaseState {
   array = [10, 23];
 }
+
+const account = observe.fromObject(new Account());
 
 class State extends BaseState {
   counter = 1;
@@ -69,18 +70,14 @@ const obj = {
   },
 };
 
-const state = observe.fromObject(new State(), {
-  array: observable.shadow,
-  mul: native,
-});
+const state = observe.fromObject(new State());
 
-const stateObj = observe.fromObject(obj);
-const account = observe.fromObject(new Account());
+const stateObj = observe.fromObject(obj, { saveInstance: true });
 
 const map = observe.fromMap(new Map<number, number>());
 
 console.log(state);
-console.log(stateObj);
+console.log(stateObj, obj);
 console.log(account);
 console.log(map);
 

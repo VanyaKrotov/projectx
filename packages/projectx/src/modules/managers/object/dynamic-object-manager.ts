@@ -37,6 +37,7 @@ class DynamicObjectManager<T extends object>
     super(target, options);
 
     this.proxy = this.defineProxy(target);
+    this.instanceCreated(this.proxy);
   }
 
   public set(value: T): boolean {

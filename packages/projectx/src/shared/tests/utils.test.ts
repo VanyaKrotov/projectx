@@ -1,8 +1,8 @@
-import { test, expect, describe } from "@jest/globals";
+import { test, expect } from "@jest/globals";
 
 import {
-  createUniqPath,
-  getFieldsOfObject,
+  getUniqPath,
+  getAllObjectFields,
   isEqualArray,
   isFunction,
   isObject,
@@ -27,9 +27,9 @@ test("isFunction", () => {
 });
 
 test("createUniqPath", () => {
-  expect(createUniqPath()).toBe("ObservableState#0");
-  expect(createUniqPath("State")).toBe("State#1");
-  expect(createUniqPath("State")).toBe("State#2");
+  expect(getUniqPath()).toBe("ObservableState#0");
+  expect(getUniqPath("State")).toBe("State#1");
+  expect(getUniqPath("State")).toBe("State#2");
 });
 
 test("isEqualArray", () => {
@@ -96,15 +96,15 @@ test("getFieldsOfObject", () => {
     }
   }
 
-  expect(Object.keys(getFieldsOfObject(new A()))).toEqual([
+  expect(Object.keys(getAllObjectFields(new A()))).toEqual([
     "constructor",
     "value",
   ]);
-  expect(Object.keys(getFieldsOfObject(new B()))).toEqual([
+  expect(Object.keys(getAllObjectFields(new B()))).toEqual([
     "constructor",
     "r",
     "value",
   ]);
-  expect(Object.keys(getFieldsOfObject({}))).toEqual([]);
-  expect(Object.keys(getFieldsOfObject({ test: 10 }))).toEqual(["test"]);
+  expect(Object.keys(getAllObjectFields({}))).toEqual([]);
+  expect(Object.keys(getAllObjectFields({ test: 10 }))).toEqual(["test"]);
 });

@@ -1,4 +1,4 @@
-import { createUniqPath, isObjectOfClass, isObject } from "../shared";
+import { getUniqPath, isObjectOfClass, isObject } from "../shared";
 
 import { managers } from "../components";
 import {
@@ -17,7 +17,7 @@ function registerManager<T>(manager: ContainerManagerInstance<T>): T {
 
 export function fromObject<T extends object>(
   target: T,
-  annotations?: Partial<Record<keyof T, number>>
+  options: Partial<FromObjectOptions<T>> = {}
 ) {
   if (!isObject(target)) {
     throw new Error(
@@ -25,49 +25,68 @@ export function fromObject<T extends object>(
     );
   }
 
+  const source = options.saveInstance ? { ...target } : target;
   if (isObjectOfClass(target)) {
     return registerManager(
-      new ObjectManager(target, {
-        path: [createUniqPath(target.constructor.name)],
-        annotations: annotations as Record<keyof T, number>,
+      new ObjectManager(source, {
+        path: [getUniqPath(target.constructor.name)],
+        annotations: options.annotations as Record<keyof T, number>,
       })
     );
   }
 
   return registerManager(
-    new DynamicObjectManager(target, {
-      path: [createUniqPath("dynamic")],
-      annotations: annotations as Record<keyof T, number>,
+    new DynamicObjectManager(source, {
+      path: [getUniqPath("dynamic")],
+      annotations: options.annotations as Record<keyof T, number>,
     })
   );
 }
 
-export function fromArray<T>(target: Array<T>): Array<T> {
+export function fromArray<T>(target: Array<T>, annotation?: number): Array<T> {
   if (!Array.isArray(target)) {
     throw new Error(
       `[projectx] The type passed to \`fromArray\` function must be an array.`
     );
   }
 
-  return registerManager(new ArrayManager(target));
+  return registerManager(
+    new ArrayManager(target, {
+      annotation,
+      path: [getUniqPath("array")],
+    })
+  );
 }
 
-export function fromMap<K, T>(target: Map<K, T>): Map<K, T> {
+export function fromMap<K, T>(
+  target: Map<K, T>,
+  annotation?: number
+): Map<K, T> {
   if (!(target instanceof Map)) {
     throw new Error(
       `[projectx] The type passed to \`fromMap\` function must be an Map.`
     );
   }
 
-  return registerManager(new MapManager(target));
+  return registerManager(
+    new MapManager(target, {
+      annotation,
+      path: [getUniqPath("map")],
+    })
+  );
 }
 
-export function fromSet<T>(target: Set<T>): Set<T> {
+export function fromSet<T>(target: Set<T>, annotation?: number): Set<T> {
   if (!(target instanceof Set)) {
     throw new Error(
       `[projectx] The type passed to \`fromSet\` function must be an Set.`
     );
   }
 
-  return registerManager(new SetManager(target));
+  return registerManager(
+    new SetManager(target, {
+      annotation,
+      path: [getUniqPath("map")],
+    })
+  );
 }

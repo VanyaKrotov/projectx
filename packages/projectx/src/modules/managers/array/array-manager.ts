@@ -1,4 +1,4 @@
-import { observeOf } from "../../observable";
+import { observeOf } from "../../observe-of";
 import { ContainerManager } from "../abstraction";
 import * as traps from "./array-traps";
 
@@ -12,6 +12,8 @@ class ArrayManager<T>
     super(target, [], options);
 
     this.proxy = this.define(target);
+
+    this.instanceCreated(this.proxy);
   }
 
   private handlers: Required<

@@ -15,7 +15,7 @@ class ComputedManager<T extends () => T>
   constructor(target: T, options: ManagerOptions) {
     super(target, options);
 
-    this.reaction = new Reaction(`Computed#${this.path.join(".")}`);
+    this.reaction = new Reaction("computed");
 
     this.reaction.setReactionCallback(() => {
       this.isChanged = true;

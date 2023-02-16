@@ -1,5 +1,7 @@
 export const OBJ_PROPERTIES = Object.getPrototypeOf({});
 
+export const SERVICE_FIELD_NAME = "[px]";
+
 export const OBJECT_TYPES: ActionTypes[] = ["expansion", "compression"];
 
 export const DEFAULT_TYPES: ActionTypes[] = ["change", "reinstall"];

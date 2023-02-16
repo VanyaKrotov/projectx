@@ -1,6 +1,6 @@
 import { isFunction } from "../../../shared";
 
-import { observeOf } from "../../observable";
+import { observeOf } from "../../observe-of";
 import { ContainerManager } from "../abstraction";
 import * as traps from "./set-traps";
 
@@ -47,6 +47,7 @@ class SetManager<T>
     super(target, new Set<ManagerInstance<T>>([]), options);
 
     this.proxy = this.define(target);
+    this.instanceCreated(this.proxy);
   }
 
   public setValue(key: Path, value: Set<T>): boolean {

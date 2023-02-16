@@ -1,7 +1,11 @@
-import { AnnotationTypes } from "../../../shared";
+import {
+  AnnotationTypes,
+  defineServiceProperty,
+  deleteServiceProperty,
+} from "../../../shared";
 import BasicManager from "./basic-manager";
 
-abstract class ContainerManager<T, V, E = T>
+abstract class ContainerManager<T extends object, V, E = T>
   extends BasicManager<T>
   implements ContainerManagerInstance<T, V>
 {
@@ -15,8 +19,17 @@ abstract class ContainerManager<T, V, E = T>
   }
 
   public dispose(): void {
+    this.instanceRemoved(this.source());
     this.disposeManagers();
     super.dispose();
+  }
+
+  protected instanceCreated(target: T): void {
+    defineServiceProperty(target, true);
+  }
+
+  protected instanceRemoved(target: T): void {
+    deleteServiceProperty(target);
   }
 
   public abstract setValue(

@@ -1,4 +1,4 @@
-import { createUniqPath, AnnotationTypes } from "../../../shared";
+import { getUniqPath, AnnotationTypes } from "../../../shared";
 
 import { ObserverWithType, interceptor } from "../../../components";
 
@@ -13,7 +13,7 @@ abstract class BasicManager<T>
   constructor(
     public target: T,
     {
-      path = [createUniqPath()],
+      path = [getUniqPath("observe")],
       annotation = AnnotationTypes.native,
     }: ManagerOptions = {},
     defaultAnnotation = AnnotationTypes.native

@@ -1,14 +1,13 @@
 import {
   isObjectOfClass,
-  findManager,
-  getFieldsOfObject,
+  getAllObjectFields,
   isFunctionDescriptor,
   AnnotationTypes,
+  isObserveValue,
 } from "../../../shared";
 
-import { observeOf as observableValue } from "../../observable";
+import { observeOf } from "../../observe-of";
 
-import { managers } from "../../../components";
 import { ContainerManager } from "../abstraction";
 
 class ObjectManager<T extends object>
@@ -26,6 +25,8 @@ class ObjectManager<T extends object>
     this.annotations = annotations;
 
     this.define(target);
+
+    this.instanceCreated(this.target);
   }
 
   protected createManager(
@@ -34,7 +35,7 @@ class ObjectManager<T extends object>
     description?: PropertyDescriptor,
     annotation?: number
   ): ManagerInstance<T> {
-    const created = observableValue(
+    const created = observeOf(
       value,
       {
         path: this.joinToPath(key),
@@ -71,18 +72,14 @@ class ObjectManager<T extends object>
     );
   }
 
-  protected defineField(key: string, description: PropertyDescriptor): boolean {
-    // TODO
+  protected defineField(key: string, descriptor: PropertyDescriptor): boolean {
     const fieldAnnotation = this.annotations[key];
     if (
       fieldAnnotation === AnnotationTypes.native ||
-      findManager(managers, ({ target }) => target === description.value)
+      isFunctionDescriptor(descriptor) ||
+      isObserveValue(descriptor.value)
     ) {
       return false;
-    }
-
-    if (isFunctionDescriptor(description)) {
-      return Boolean(Object.defineProperty(this.target, key, description));
     }
 
     let {
@@ -90,18 +87,18 @@ class ObjectManager<T extends object>
       value = get?.bind(this.target),
       configurable = true,
       enumerable = true,
-    } = description;
+    } = descriptor;
 
     this.values.set(
       key,
-      this.createManager(key, value, description, fieldAnnotation)
+      this.createManager(key, value, descriptor, fieldAnnotation)
     );
 
     const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
       get: () => this.values.get(key)!.get(),
-      set: (value) => this.setValue(key, value, description, fieldAnnotation),
+      set: (value) => this.setValue(key, value, descriptor, fieldAnnotation),
     };
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));
@@ -144,7 +141,7 @@ class ObjectManager<T extends object>
   protected define(target: T): boolean {
     this.disposeManagers();
 
-    const fields = getFieldsOfObject(target);
+    const fields = getAllObjectFields(target);
     for (const key in fields) {
       this.defineField(key, fields[key]);
     }

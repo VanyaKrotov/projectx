@@ -1,4 +1,4 @@
-import { observeOf } from "../../observable";
+import { observeOf } from "../../observe-of";
 
 import SetManager from "./set-manager";
 

@@ -182,3 +182,8 @@ declare interface ReactionCallback {
 }
 
 //#endregion
+
+interface FromObjectOptions<T> {
+  saveInstance: boolean;
+  annotations: Partial<Record<keyof T, number>>;
+}

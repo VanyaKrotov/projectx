@@ -1,4 +1,4 @@
 export * from "./components";
 
-export { createUniqPath } from "./shared";
+export { getUniqPath } from "./shared";
 export { Reaction, observeOf } from "./modules";
