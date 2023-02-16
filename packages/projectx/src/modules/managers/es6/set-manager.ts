@@ -1,14 +1,14 @@
 import type {
-  Annotation,
   ManagerInstance,
   ManagerOptions,
   Path,
   SetManagerInstance,
-} from "../../shared";
-import { isFunction } from "../../shared";
+} from "../../../shared";
+import { isFunction } from "../../../shared";
 
-import { observable } from "../observable";
-import ContainerManager from "./container-manager";
+import { observable } from "../../observable";
+import { ContainerManager } from "../abstraction";
+import * as traps from "./set-traps";
 
 type PickMethods =
   | "clear"
@@ -18,91 +18,6 @@ type PickMethods =
   | "add"
   | "values";
 
-const SetTraps = new (class {
-  public clear<T>(self: SetManager<T>) {
-    if (!self.target.size) {
-      return;
-    }
-
-    const prev = self.snapshot;
-    self.disposeManagers();
-    self.target.clear();
-
-    self.emit("compression", {
-      current: self.target,
-      prev,
-    });
-  }
-
-  public delete = <T>(value: T, self: SetManager<T>): boolean => {
-    const prev = self.snapshot;
-    const manager = self.getByValue(value);
-    if (manager) {
-      manager.dispose();
-      self.values.delete(manager);
-    }
-
-    const result = self.target.delete(value);
-    if (result) {
-      self.emit("compression", {
-        current: self.target,
-        prev,
-      });
-    }
-
-    return result;
-  };
-
-  public add = <T>(value: T, self: SetManager<T>) => {
-    const manager = self.getByValue(value);
-    if (manager) {
-      return self.proxy;
-    }
-
-    const prev = self.snapshot;
-    self.values.add(
-      observable(value, { path: self.joinToPath(self.target.size) })
-    );
-    self.target.add(value);
-
-    self.emit("expansion", { current: self.target, prev });
-
-    return self.proxy;
-  };
-
-  private getSetFromValues = <T>(self: SetManager<T>): Set<T> => {
-    const set = new Set<T>();
-    for (const manager of self.values) {
-      set.add(manager.get());
-    }
-
-    return set;
-  };
-
-  public getSet = <T>(self: SetManager<T>) => {
-    const set = this.getSetFromValues(self);
-    if (!set.size) {
-      self.reportUsage();
-    }
-
-    return set;
-  };
-
-  public forEach = <T>(
-    callbackfn: (v: T, k: T, set: Set<T>) => void,
-    self: SetManager<T>
-  ) => {
-    for (const manager of self.values) {
-      const value = manager.get();
-      callbackfn(value, value, self.proxy);
-    }
-
-    if (!self.values.size) {
-      self.reportUsage();
-    }
-  };
-})();
-
 class SetManager<T>
   extends ContainerManager<Set<T>, Set<ManagerInstance<T>>>
   implements SetManagerInstance<T>
@@ -110,12 +25,12 @@ class SetManager<T>
   public proxy: Set<T>;
 
   private targetMethods: Pick<Set<T>, PickMethods> = {
-    clear: () => SetTraps.clear(this),
-    delete: (value) => SetTraps.delete(value, this),
-    add: (value) => SetTraps.add(value, this),
-    values: () => SetTraps.getSet(this).values(),
-    entries: () => SetTraps.getSet(this).entries(),
-    forEach: (callbackfn) => SetTraps.forEach(callbackfn, this),
+    clear: () => traps.clear(this),
+    delete: (value) => traps.deleteValue(value, this),
+    add: (value) => traps.add(value, this),
+    values: () => traps.getSet(this).values(),
+    entries: () => traps.getSet(this).entries(),
+    forEach: (callbackfn) => traps.forEach(callbackfn, this),
   };
 
   private handlers: Required<Pick<ProxyHandler<Set<T>>, "get">> = {
@@ -140,7 +55,7 @@ class SetManager<T>
     this.proxy = this.define(target);
   }
 
-  public changeField(key: Path, value: Set<T>): boolean {
+  public setValue(key: Path, value: Set<T>): boolean {
     return true;
   }
 

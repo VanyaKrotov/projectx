@@ -1,6 +1,6 @@
-import { isObject, ManagerOptions, ValueManagerInstance } from "../../shared";
+import type { ManagerOptions, ValueManagerInstance } from "../../../shared";
 
-import BasicManager from "./basic-manager";
+import { BasicManager } from "../abstraction";
 
 class ValueManager<T>
   extends BasicManager<T>

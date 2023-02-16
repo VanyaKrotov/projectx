@@ -1,10 +1,10 @@
-import type {
+import {
   ManagerInstance,
   ContainerManagerInstance,
   ManagerOptions,
   Path,
-  Annotation,
-} from "../../shared";
+  AnnotationTypes,
+} from "../../../shared";
 
 import BasicManager from "./basic-manager";
 
@@ -15,9 +15,10 @@ abstract class ContainerManager<T, V, E = T>
   constructor(
     target: T,
     public values: V,
-    options?: Omit<ManagerOptions, "annotation">
+    options?: ManagerOptions,
+    defaultAnnotation: number = AnnotationTypes.observable
   ) {
-    super(target, options);
+    super(target, options, defaultAnnotation);
   }
 
   public dispose(): void {
@@ -25,11 +26,11 @@ abstract class ContainerManager<T, V, E = T>
     super.dispose();
   }
 
-  public abstract changeField(
+  public abstract setValue(
     key: Path,
     value: E,
     description?: PropertyDescriptor,
-    annotation?: Annotation
+    annotation?: number
   ): boolean;
 
   public abstract get keys(): Path[];

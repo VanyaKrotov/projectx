@@ -1,19 +1,16 @@
 import type {
-  Annotated,
   ManagerInstance,
-  ManagerOptions,
   Path,
   ObjectManagerInstance,
-  ObserverAnnotation,
-} from "../../shared";
-import { isObject } from "../../shared";
+  ObjectManagerOptions,
+} from "../../../shared";
+import { isObject } from "../../../shared";
 
 import ObjectManager from "./object-manager";
 
-class DynamicObjectManager<T extends object | Annotated>
+class DynamicObjectManager<T extends object>
   extends ObjectManager<T>
-  implements
-    ObjectManagerInstance<T, ObserverAnnotation, Map<Path, ManagerInstance>>
+  implements ObjectManagerInstance<T, Map<Path, ManagerInstance>>
 {
   protected proxy: T;
 
@@ -42,7 +39,7 @@ class DynamicObjectManager<T extends object | Annotated>
     },
   };
 
-  constructor(target: T, options?: ManagerOptions<ObserverAnnotation>) {
+  constructor(target: T, options?: ObjectManagerOptions) {
     super(target, options);
 
     this.proxy = this.defineProxy(target);

@@ -3,10 +3,10 @@ import type {
   ManagerOptions,
   Path,
   ActionTypes,
-} from "../../shared";
-import { createUniqPath } from "../../shared";
+} from "../../../shared";
+import { createUniqPath, AnnotationTypes } from "../../../shared";
 
-import { ObserverWithType, interceptor } from "../../components";
+import { ObserverWithType, interceptor } from "../../../components";
 
 abstract class BasicManager<T>
   extends ObserverWithType<T, ActionTypes>
@@ -14,15 +14,20 @@ abstract class BasicManager<T>
 {
   public path: Path[];
 
+  public annotation: number;
+
   constructor(
     public target: T,
     {
       path = [createUniqPath()],
-    }: Omit<ManagerOptions<never>, "annotation"> = {}
+      annotation = AnnotationTypes.none,
+    }: ManagerOptions = {},
+    defaultAnnotation = AnnotationTypes.none
   ) {
     super();
 
     this.path = path;
+    this.annotation = defaultAnnotation | annotation;
 
     this.emit("define", { current: this.target });
   }

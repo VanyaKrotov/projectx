@@ -1,19 +1,18 @@
-import type {
+import {
+  ComputedAnnotation,
   ComputedManagerInstance,
   ManagerOptions,
   ReactionInstance,
-} from "../../shared";
-import { ANNOTATIONS } from "../../shared";
+} from "../../../shared";
 
-import { Reaction } from "../reaction";
+import { Reaction } from "../../reaction";
 
-import BasicManager from "./basic-manager";
+import { BasicManager } from "../abstraction";
 
 class ComputedManager<T extends () => T>
   extends BasicManager<T>
   implements ComputedManagerInstance<T>
 {
-  public annotation = ANNOTATIONS.computed;
   private reaction: ReactionInstance;
   private memo?: T;
   private memoized = false;
@@ -22,8 +21,15 @@ class ComputedManager<T extends () => T>
   constructor(target: T, options: ManagerOptions) {
     super(target, options);
 
-    this.annotation = { ...this.annotation, ...options.annotation };
     this.reaction = new Reaction(`Computed#${this.path.join(".")}`);
+
+    this.reaction.setReactionCallback(() => {
+      this.isChanged = true;
+
+      this.emit("change", {
+        prev: this.memo!,
+      });
+    });
   }
 
   public get snapshot(): T {
@@ -41,14 +47,6 @@ class ComputedManager<T extends () => T>
     this.memoized = true;
     this.isChanged = false;
 
-    this.reaction.watch(() => {
-      this.isChanged = true;
-
-      this.emit("change", {
-        prev: this.memo!,
-      });
-    });
-
     return this.memo;
   };
 
@@ -62,7 +60,7 @@ class ComputedManager<T extends () => T>
   }
 
   public get(): T {
-    if (!this.annotation.memoised) {
+    if (!(this.annotation & ComputedAnnotation.memo)) {
       return this.snapshot;
     }
 

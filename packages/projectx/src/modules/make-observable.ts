@@ -1,9 +1,4 @@
-import type {
-  Constructable,
-  Annotated,
-  GetConstructorArgs,
-  ContainerManagerInstance,
-} from "../shared";
+import type { ContainerManagerInstance } from "../shared";
 import { createUniqPath, isObjectOfClass, isObject } from "../shared";
 
 import { managers } from "../components";
@@ -13,7 +8,7 @@ import {
   MapManager,
   ObjectManager,
   SetManager,
-} from "./components";
+} from "./managers";
 
 function registerManager<T>(manager: ContainerManagerInstance<T>): T {
   managers.set(manager.name, manager);
@@ -21,18 +16,10 @@ function registerManager<T>(manager: ContainerManagerInstance<T>): T {
   return manager.source();
 }
 
-export function fromClass<T extends object | Annotated, A = T>(
-  Target: Constructable<T, A>,
-  ...args: GetConstructorArgs<A>
-): T {
-  return registerManager(
-    new ObjectManager(new Target(...args), {
-      path: [createUniqPath(Target.name)],
-    })
-  );
-}
-
-export function fromObject<T extends object | Annotated>(target: T) {
+export function fromObject<T extends object>(
+  target: T,
+  annotations?: Record<keyof T, number>
+) {
   if (!isObject(target)) {
     throw new Error(
       `[projectx] The type passed to \`fromObject\` function must be an object.`
@@ -43,11 +30,17 @@ export function fromObject<T extends object | Annotated>(target: T) {
     return registerManager(
       new ObjectManager(target, {
         path: [createUniqPath(target.constructor.name)],
+        annotations,
       })
     );
   }
 
-  return registerManager(new DynamicObjectManager(target));
+  return registerManager(
+    new DynamicObjectManager(target, {
+      path: [createUniqPath("dynamic")],
+      annotations,
+    })
+  );
 }
 
 export function fromArray<T>(target: Array<T>): Array<T> {

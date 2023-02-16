@@ -16,7 +16,7 @@ export function isFunction(functionToCheck: Function) {
   return typeof functionToCheck === "function";
 }
 
-export function createUniqPath(path = "ObservableState"): string {
+export function createUniqPath(path = "Observable"): string {
   return `${path}#${uid()}`;
 }
 

@@ -1,50 +1,44 @@
 import {
-  Annotated,
-  ManagerOptions,
-  EntryAnnotation,
   ObjectManagerInstance,
   Path,
   ManagerInstance,
-  ObserverAnnotation,
-  Annotation,
   isObjectOfClass,
-} from "../../shared";
+  AnnotationTypes,
+  ObjectManagerOptions,
+} from "../../../shared";
 import {
   findManager,
   getFieldsOfObject,
   isFunctionDescriptor,
-  ANNOTATIONS,
-  RESERVED_FIELDS,
-} from "../../shared";
+} from "../../../shared";
 
-import { observable as observableValue } from "../observable";
+import { observable as observableValue } from "../../observable";
 
-import { managers } from "../../components";
-import ContainerManager from "./container-manager";
+import { managers } from "../../../components";
+import { ContainerManager } from "../abstraction";
 
-class ObjectManager<T extends object | Annotated>
+class ObjectManager<T extends object>
   extends ContainerManager<T, Map<Path, ManagerInstance>>
-  implements
-    ObjectManagerInstance<T, ObserverAnnotation, Map<Path, ManagerInstance>>
+  implements ObjectManagerInstance<T, Map<Path, ManagerInstance>>
 {
-  public annotation = ANNOTATIONS.observer;
+  protected annotations: Record<string, number>;
 
-  constructor(target: T, options?: ManagerOptions<ObserverAnnotation>) {
+  constructor(
+    target: T,
+    { annotations = {}, ...options }: ObjectManagerOptions = {}
+  ) {
     super(target, new Map<Path, ManagerInstance>(), options);
 
-    this.annotation = { ...this.annotation, ...options?.annotation };
-    this.define(target);
-  }
+    this.annotations = annotations;
 
-  protected get annotations(): EntryAnnotation {
-    return (this.target as Annotated).annotation || {};
+    this.define(target);
   }
 
   protected createManager(
     key: Path,
     value: T,
     description?: PropertyDescriptor,
-    annotation?: Annotation
+    annotation?: number
   ): ManagerInstance<T> {
     const created = observableValue(
       value,
@@ -64,11 +58,11 @@ class ObjectManager<T extends object | Annotated>
     return created;
   }
 
-  public changeField(
+  public setValue(
     key: Path,
     value: T,
     description?: PropertyDescriptor | undefined,
-    annotation?: Annotation | undefined
+    annotation?: number
   ): boolean {
     const manager = this.values.get(key)!;
     if (manager.support(value)) {
@@ -84,19 +78,11 @@ class ObjectManager<T extends object | Annotated>
   }
 
   protected defineField(key: string, description: PropertyDescriptor): boolean {
-    const { observable = true, ...restAnnotation } =
-      this.annotations[key] || {};
-    let isReservedName;
+    // TODO
     if (
-      !observable ||
-      findManager(managers, ({ target }) => target === description.value) ||
-      (isReservedName = RESERVED_FIELDS.includes(key))
+      this.annotations[key] === AnnotationTypes.none ||
+      findManager(managers, ({ target }) => target === description.value)
     ) {
-      console.assert(
-        !isReservedName,
-        `Name \`${String(key)}\` reserved for [projectx]!`
-      );
-
       return false;
     }
 
@@ -111,16 +97,18 @@ class ObjectManager<T extends object | Annotated>
       enumerable = true,
     } = description;
 
+    const fieldAnnotation = this.annotations[key];
+
     this.values.set(
       key,
-      this.createManager(key, value, description, restAnnotation)
+      this.createManager(key, value, description, fieldAnnotation)
     );
 
     const createDescription: PropertyDescriptor = {
       configurable,
       enumerable,
       get: () => this.values.get(key)!.get(),
-      set: (value) => this.changeField(key, value, description, restAnnotation),
+      set: (value) => this.setValue(key, value, description, fieldAnnotation),
     };
 
     return Boolean(Object.defineProperty(this.target, key, createDescription));

@@ -9,7 +9,7 @@ import {
   ObjectManager,
   SetManager,
   ValueManager,
-} from "./components";
+} from "./managers";
 
 export function observable<T>(
   target: T,

@@ -1,13 +1,14 @@
 import type {
-  Annotation,
   ManagerInstance,
   ManagerOptions,
   MapManagerInstance,
   Path,
-} from "../../shared";
-import { isFunction } from "../../shared";
-import { observable } from "../observable";
-import ContainerManager from "./container-manager";
+} from "../../../shared";
+import { isFunction } from "../../../shared";
+import { observable } from "../../observable";
+import { ContainerManager } from "../abstraction";
+
+import * as traps from "./map-traps";
 
 type PickMethods =
   | "clear"
@@ -18,79 +19,6 @@ type PickMethods =
   | "set"
   | "values";
 
-const MapTraps = new (class {
-  public clear = <K, T>(self: MapManager<K, T>) => {
-    if (!self.target.size) {
-      return;
-    }
-
-    const prev = self.snapshot;
-    self.disposeManagers();
-    self.target.clear();
-
-    self.emit("compression", {
-      current: self.target,
-      prev,
-    });
-  };
-
-  public delete = <K, T>(key: K, self: MapManager<K, T>) => {
-    const prev = self.snapshot;
-    const manager = self.values.get(key);
-    if (manager) {
-      manager.dispose();
-      self.values.delete(key);
-    }
-
-    const result = self.target.delete(key);
-    if (result) {
-      self.emit("compression", {
-        current: self.target,
-        prev,
-      });
-    }
-
-    return result;
-  };
-
-  public set = <K, T>(key: K, value: T, self: MapManager<K, T>) => {
-    self.changeField(key as Path, value);
-
-    return self.proxy;
-  };
-
-  private getMapFromValues = <K, T>(self: MapManager<K, T>) => {
-    const map = new Map<K, T>();
-    for (const [key, manager] of self.values) {
-      map.set(key, manager.get());
-    }
-
-    return map;
-  };
-
-  public getMap = <K, T>(self: MapManager<K, T>) => {
-    const map = this.getMapFromValues(self);
-    if (!map.size) {
-      self.reportUsage();
-    }
-
-    return map;
-  };
-
-  public forEach = <K, T>(
-    callbackfn: (v: T, k: K, set: Map<K, T>) => void,
-    self: MapManager<K, T>
-  ) => {
-    for (const [key, manager] of self.values) {
-      callbackfn(manager.get(), key, self.proxy);
-    }
-
-    if (!self.values.size) {
-      self.reportUsage();
-    }
-  };
-})();
-
 class MapManager<K, T>
   extends ContainerManager<Map<K, T>, Map<K, ManagerInstance<T>>, T>
   implements MapManagerInstance<K, T>
@@ -98,13 +26,13 @@ class MapManager<K, T>
   public proxy: Map<K, T>;
 
   private targetMethods: Pick<Map<K, T>, PickMethods> = {
-    clear: () => MapTraps.clear(this),
-    delete: (key) => MapTraps.delete(key, this),
+    clear: () => traps.clear(this),
+    delete: (key) => traps.deleteByKey(key, this),
     get: (key) => this.values.get(key)?.get(),
-    set: (key, value) => MapTraps.set(key, value, this),
-    values: () => MapTraps.getMap(this).values(),
-    entries: () => MapTraps.getMap(this).entries(),
-    forEach: (callbackfn) => MapTraps.forEach(callbackfn, this),
+    set: (key, value) => traps.set(key, value, this),
+    values: () => traps.getMap(this).values(),
+    entries: () => traps.getMap(this).entries(),
+    forEach: (callbackfn) => traps.forEach(callbackfn, this),
   };
 
   private handlers: Required<Pick<ProxyHandler<Map<K, T>>, "get">> = {
@@ -138,7 +66,7 @@ class MapManager<K, T>
     return this.values.get(key as K) || null;
   }
 
-  public changeField(key: Path, value: T): boolean {
+  public setValue(key: Path, value: T): boolean {
     const typedKey = key as K;
     const manager = this.values.get(typedKey);
     const isSupportType = manager?.support(value);
