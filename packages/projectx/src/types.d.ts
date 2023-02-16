@@ -1,10 +1,10 @@
-export type PropertiesInfo = Record<string, PropertyDescriptor>;
+declare type PropertiesInfo = Record<string, PropertyDescriptor>;
 
 //#region Manager
 
-export type Path = string | number | symbol | never;
+declare type Path = string | number | symbol | never;
 
-export interface ManagerInstance<T = any>
+declare interface ManagerInstance<T = any>
   extends ObserverWithTypeInstance<T, ActionTypes> {
   path: Path[];
   target: T;
@@ -18,11 +18,11 @@ export interface ManagerInstance<T = any>
   support(value: T): boolean;
 }
 
-export interface ValueManagerInstance<T> extends ManagerInstance<T> {}
+declare interface ValueManagerInstance<T> extends ManagerInstance<T> {}
 
-export interface ComputedManagerInstance<T> extends ManagerInstance<T> {}
+declare interface ComputedManagerInstance<T> extends ManagerInstance<T> {}
 
-export interface ContainerManagerInstance<T = any, V = any>
+declare interface ContainerManagerInstance<T = any, V = any>
   extends ManagerInstance<T> {
   values: V;
   get keys(): Path[];
@@ -30,19 +30,19 @@ export interface ContainerManagerInstance<T = any, V = any>
   manager(key: Path): ManagerInstance | null;
 }
 
-export interface ObjectManagerInstance<T, V>
+declare interface ObjectManagerInstance<T, V>
   extends ContainerManagerInstance<T, V> {}
 
-export interface ArrayManagerInstance<T, V>
+declare interface ArrayManagerInstance<T, V>
   extends ContainerManagerInstance<T, V> {}
 
-export interface MapManagerInstance<K, T>
+declare interface MapManagerInstance<K, T>
   extends ContainerManagerInstance<Map<K, T>, Map<K, ManagerInstance<T>>> {}
 
-export interface SetManagerInstance<T>
+declare interface SetManagerInstance<T>
   extends ContainerManagerInstance<Set<T>, Set<ManagerInstance<T>>> {}
 
-export type ActionTypes =
+declare type ActionTypes =
   | "change"
   | "expansion"
   | "compression"
@@ -51,12 +51,12 @@ export type ActionTypes =
   | "all"
   | "reinstall";
 
-export interface ManagerOptions {
+declare interface ManagerOptions {
   path?: Path[];
   annotation?: number;
 }
 
-export interface ObjectManagerOptions extends ManagerOptions {
+declare interface ObjectManagerOptions extends ManagerOptions {
   annotations?: Record<string, number>;
 }
 
@@ -64,24 +64,24 @@ export interface ObjectManagerOptions extends ManagerOptions {
 
 //#region observer
 
-export interface Event<V = unknown> {
+declare interface ObserverEvent<V = unknown> {
   current?: V;
   prev?: V;
 }
 
-export interface Listener<V = unknown> {
-  (event: Event<V>): boolean | void;
+declare interface Listener<V = unknown> {
+  (event: ObserverEvent<V>): boolean | void;
 }
 
-export interface ObserverInstance<T> {
+declare interface ObserverInstance<T> {
   listen(listener: Listener<T>): VoidFunction;
-  emit(event: Event<T>): void;
+  emit(event: ObserverEvent<T>): void;
 }
 
-export interface ObserverWithTypeInstance<T, E> {
+declare interface ObserverWithTypeInstance<T, E> {
   listen(type: E, callback: Listener<T>): VoidFunction;
   listen(type: E[], callback: Listener<T>): VoidFunction;
-  emit(type: E, event: Event<T>): void;
+  emit(type: E, event: ObserverEvent<T>): void;
   shareListeners(): Map<E | "all", ObserverInstance<T>>;
   receiveListeners(listeners: Map<E | "all", ObserverInstance<T>>): void;
   dispose(): void;
@@ -91,7 +91,7 @@ export interface ObserverWithTypeInstance<T, E> {
 
 //#region PathTree
 
-export interface PathNodeInstance {
+declare interface PathNodeInstance {
   value: Path;
   manager: ManagerInstance | null;
   listenTypes: ActionTypes[];
@@ -100,12 +100,12 @@ export interface PathNodeInstance {
   push(paths: Path[]): void;
 }
 
-export type ListenManagersResult = {
+declare type ListenManagersResult = {
   manager: ManagerInstance;
   listenTypes: ActionTypes[];
 };
 
-export interface PathsTreeInstance {
+declare interface PathsTreeInstance {
   getListenManagers(): ListenManagersResult[];
   push(path: Path[]): void;
   clear(): void;
@@ -116,15 +116,15 @@ export interface PathsTreeInstance {
 
 //#region Interceptor
 
-export interface InterceptorEvent {
+declare interface InterceptorEvent {
   path: Path[];
 }
 
-export interface InterceptorListener {
+declare interface InterceptorListener {
   (event: InterceptorEvent): void | boolean;
 }
 
-export interface InterceptorInstance {
+declare interface InterceptorInstance {
   emit(event: InterceptorEvent): void;
   register(listener: InterceptorListener): void;
   unregister(listener: InterceptorListener): void;
@@ -134,7 +134,7 @@ export interface InterceptorInstance {
 
 //#region Batch
 
-export interface BatchInstance {
+declare interface BatchInstance {
   open(): void;
   action(handler: VoidFunction): void;
   close(): void;
@@ -144,34 +144,30 @@ export interface BatchInstance {
 
 //#region Common
 
-export interface ConfigurationManagerInstance {
+declare interface ConfigurationManagerInstance {
   get config(): Configuration;
   reset(): void;
   change(config: Partial<Configuration>): void;
 }
 
-export interface Configuration {
+declare interface Configuration {
   equalResolver: IsEqualFunction<never>;
   develop: boolean;
 }
 
-export interface IsEqualFunction<T> {
+declare interface IsEqualFunction<T> {
   (a: T, b: T): boolean;
 }
 //#endregion
 
 //#region reaction
 
-export interface WatchOptions<T> {
+declare interface WatchOptions<T> {
   isEqual: IsEqualFunction<T>;
   initialCall: boolean;
 }
 
-//#endregion
-
-//#region Reaction
-
-export interface ReactionInstance {
+declare interface ReactionInstance {
   id: string;
   get isEmptyObservers(): boolean;
   dispose(): void;
@@ -181,7 +177,7 @@ export interface ReactionInstance {
   setReactionCallback(callback: ReactionCallback): void;
 }
 
-export interface ReactionCallback {
+declare interface ReactionCallback {
   (unlisten: VoidFunction): void;
 }
 

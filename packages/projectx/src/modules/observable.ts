@@ -1,5 +1,4 @@
-import type { ManagerInstance, ManagerOptions } from "../shared";
-import { isObject, isComputed, isObjectOfClass } from "../shared";
+import { isObject, isGetter, isObjectOfClass } from "../shared";
 
 import {
   ArrayManager,
@@ -11,7 +10,7 @@ import {
   ValueManager,
 } from "./managers";
 
-export function observable<T>(
+export function observeOf<T>(
   target: T,
   options: ManagerOptions,
   description: PropertyDescriptor = {}
@@ -36,7 +35,7 @@ export function observable<T>(
     return new DynamicObjectManager(target as object, options);
   }
 
-  if (isComputed(description)) {
+  if (isGetter(description)) {
     return new ComputedManager(target as () => never, options);
   }
 

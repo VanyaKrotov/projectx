@@ -1,17 +1,9 @@
-import {
-  AnnotationTypes,
-  ComputedAnnotation,
-  ObservableAnnotation,
-} from "../shared";
+import { AnnotationTypes, ObservableAnnotationTypes } from "../shared";
 
-export const none = AnnotationTypes.none;
+export const native = AnnotationTypes.native;
 
 export const observable = {
-  deep: ObservableAnnotation.deep,
-  shadow: ObservableAnnotation.shadow,
-  ref: ObservableAnnotation.ref,
-};
-
-export const computed = {
-  memo: ComputedAnnotation.memo,
+  deep: ObservableAnnotationTypes.deep,
+  shadow: ObservableAnnotationTypes.shadow,
+  ref: ObservableAnnotationTypes.ref,
 };

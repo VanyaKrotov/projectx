@@ -1,4 +1,3 @@
-import type { Path } from "../../../shared";
 import { isFunction } from "../../../shared";
 
 import ArrayManager from "./array-manager";

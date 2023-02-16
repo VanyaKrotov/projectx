@@ -1,9 +1,3 @@
-import type {
-  ContainerManagerInstance,
-  Path,
-  ReactionInstance,
-} from "../shared";
-
 import Batch from "./batch";
 import Interceptor from "./interceptor";
 import ConfigurationManager from "./configuration-manager";

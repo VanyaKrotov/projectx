@@ -1,34 +1,21 @@
-import { ActionTypes } from "./types";
-
-export const ANNOTATIONS = {
-  observer: {},
-  value: {},
-  computed: {
-    memoised: true,
-  },
-  array: {},
-};
-
-export const RESERVED_FIELDS = ["annotation"];
-
 export const OBJ_PROPERTIES = Object.getPrototypeOf({});
 
 export const OBJECT_TYPES: ActionTypes[] = ["expansion", "compression"];
 
 export const DEFAULT_TYPES: ActionTypes[] = ["change", "reinstall"];
 
-export enum ObservableAnnotation {
+export const enum ObservableAnnotationTypes {
   deep = 2,
   shadow = 4,
   ref = 8,
 }
 
-export enum ComputedAnnotation {
+export const enum ComputedAnnotationTypes {
   memo = 16,
 }
 
-export enum AnnotationTypes {
-  none = 0,
-  observable = ObservableAnnotation.deep,
-  computed = ComputedAnnotation.memo,
+export const enum AnnotationTypes {
+  native = 0,
+  observable = ObservableAnnotationTypes.deep,
+  computed = 16,
 }

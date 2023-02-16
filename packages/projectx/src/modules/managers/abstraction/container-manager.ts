@@ -1,11 +1,4 @@
-import {
-  ManagerInstance,
-  ContainerManagerInstance,
-  ManagerOptions,
-  Path,
-  AnnotationTypes,
-} from "../../../shared";
-
+import { AnnotationTypes } from "../../../shared";
 import BasicManager from "./basic-manager";
 
 abstract class ContainerManager<T, V, E = T>

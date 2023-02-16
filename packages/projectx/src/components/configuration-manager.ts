@@ -1,4 +1,3 @@
-import type { Configuration, ConfigurationManagerInstance } from "../shared";
 import { Observer } from "./observer";
 
 const DEFAULT: Configuration = {

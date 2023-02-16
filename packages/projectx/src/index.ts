@@ -1,10 +1,10 @@
 export {
+  observe,
+  native,
   observable,
-  when,
-  watch,
+  configuration,
   autorun,
   transaction,
-  configuration,
+  watch,
+  when,
 } from "./modules";
-
-export type { Annotated, EntryAnnotation } from "./shared/types";

@@ -3,6 +3,8 @@ import {
   observable,
   watch,
   configuration,
+  native,
+  observe,
 } from "../../packages/projectx";
 
 configuration({
@@ -17,9 +19,12 @@ class Account {
   }
 }
 
-class State {
-  counter = 1;
+class BaseState {
   array = [10, 23];
+}
+
+class State extends BaseState {
+  counter = 1;
 
   data: any = null;
 
@@ -64,12 +69,15 @@ const obj = {
   },
 };
 
-const state = observable.fromClass(State);
-const stateObj = observable.fromObject(obj);
+const state = observe.fromObject(new State(), {
+  array: observable.shadow,
+  mul: native,
+});
 
-const account: Account = observable.fromClass(Account);
+const stateObj = observe.fromObject(obj);
+const account = observe.fromObject(new Account());
 
-const map = observable.fromMap(new Map<number, number>());
+const map = observe.fromMap(new Map<number, number>());
 
 console.log(state);
 console.log(stateObj);

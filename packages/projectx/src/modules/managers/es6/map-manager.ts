@@ -1,11 +1,5 @@
-import type {
-  ManagerInstance,
-  ManagerOptions,
-  MapManagerInstance,
-  Path,
-} from "../../../shared";
 import { isFunction } from "../../../shared";
-import { observable } from "../../observable";
+import { observeOf } from "../../observable";
 import { ContainerManager } from "../abstraction";
 
 import * as traps from "./map-traps";
@@ -78,7 +72,7 @@ class MapManager<K, T>
 
     const prev = this.snapshot;
     this.target.set(typedKey, value);
-    const newManager = observable(value, {
+    const newManager = observeOf(value, {
       path: this.joinToPath(key as Path),
     });
 
@@ -129,7 +123,7 @@ class MapManager<K, T>
     for (const [key, value] of target) {
       this.values.set(
         key,
-        observable(value, { path: this.joinToPath(key as Path) })
+        observeOf(value, { path: this.joinToPath(key as Path) })
       );
     }
 

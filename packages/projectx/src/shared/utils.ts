@@ -1,10 +1,3 @@
-import type {
-  ContainerManagerInstance,
-  ManagerInstance,
-  Path,
-  PropertiesInfo,
-} from "./types";
-
 import { OBJ_PROPERTIES } from "./constants";
 import { uid } from "./uid";
 
@@ -41,7 +34,7 @@ export function isFunctionDescriptor({ value }: PropertyDescriptor): boolean {
   return isFunction(value);
 }
 
-export function isComputed({ get, set }: PropertyDescriptor) {
+export function isGetter({ get, set }: PropertyDescriptor) {
   return get && !set;
 }
 

@@ -1,5 +1,3 @@
-import type { WatchOptions } from "../shared";
-
 import { Reaction } from "./reaction";
 
 function watch<T>(

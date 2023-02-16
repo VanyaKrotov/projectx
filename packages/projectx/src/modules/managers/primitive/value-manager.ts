@@ -1,5 +1,3 @@
-import type { ManagerOptions, ValueManagerInstance } from "../../../shared";
-
 import { BasicManager } from "../abstraction";
 
 class ValueManager<T>

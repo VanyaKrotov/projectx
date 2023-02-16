@@ -1,9 +1,3 @@
-import type {
-  ManagerInstance,
-  ManagerOptions,
-  Path,
-  ActionTypes,
-} from "../../../shared";
 import { createUniqPath, AnnotationTypes } from "../../../shared";
 
 import { ObserverWithType, interceptor } from "../../../components";
@@ -20,9 +14,9 @@ abstract class BasicManager<T>
     public target: T,
     {
       path = [createUniqPath()],
-      annotation = AnnotationTypes.none,
+      annotation = AnnotationTypes.native,
     }: ManagerOptions = {},
-    defaultAnnotation = AnnotationTypes.none
+    defaultAnnotation = AnnotationTypes.native
   ) {
     super();
 

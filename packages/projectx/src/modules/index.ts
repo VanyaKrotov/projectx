@@ -1,9 +1,11 @@
-export * as observable from "./make-observable";
+export * as observe from "./make-observable";
+export * from "./annotations";
+
 export { watch } from "./watch";
 export { autorun } from "./autorun";
 export { when } from "./when";
 export { transaction } from "./transaction";
 export { configuration } from "./configurations";
-export { observable as observableValue } from "./observable";
 
+export { observeOf } from "./observable";
 export { Reaction } from "./reaction";

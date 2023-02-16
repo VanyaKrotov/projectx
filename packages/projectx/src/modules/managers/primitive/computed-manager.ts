@@ -1,10 +1,4 @@
-import {
-  ComputedAnnotation,
-  ComputedManagerInstance,
-  ManagerOptions,
-  ReactionInstance,
-} from "../../../shared";
-
+import { AnnotationTypes } from "../../../shared";
 import { Reaction } from "../../reaction";
 
 import { BasicManager } from "../abstraction";
@@ -60,10 +54,6 @@ class ComputedManager<T extends () => T>
   }
 
   public get(): T {
-    if (!(this.annotation & ComputedAnnotation.memo)) {
-      return this.snapshot;
-    }
-
     return this.targetHandler();
   }
 

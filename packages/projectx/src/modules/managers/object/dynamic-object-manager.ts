@@ -1,9 +1,3 @@
-import type {
-  ManagerInstance,
-  Path,
-  ObjectManagerInstance,
-  ObjectManagerOptions,
-} from "../../../shared";
 import { isObject } from "../../../shared";
 
 import ObjectManager from "./object-manager";

@@ -1,18 +1,12 @@
 import {
-  ObjectManagerInstance,
-  Path,
-  ManagerInstance,
   isObjectOfClass,
-  AnnotationTypes,
-  ObjectManagerOptions,
-} from "../../../shared";
-import {
   findManager,
   getFieldsOfObject,
   isFunctionDescriptor,
+  AnnotationTypes,
 } from "../../../shared";
 
-import { observable as observableValue } from "../../observable";
+import { observeOf as observableValue } from "../../observable";
 
 import { managers } from "../../../components";
 import { ContainerManager } from "../abstraction";
@@ -79,8 +73,9 @@ class ObjectManager<T extends object>
 
   protected defineField(key: string, description: PropertyDescriptor): boolean {
     // TODO
+    const fieldAnnotation = this.annotations[key];
     if (
-      this.annotations[key] === AnnotationTypes.none ||
+      fieldAnnotation === AnnotationTypes.native ||
       findManager(managers, ({ target }) => target === description.value)
     ) {
       return false;
@@ -96,8 +91,6 @@ class ObjectManager<T extends object>
       configurable = true,
       enumerable = true,
     } = description;
-
-    const fieldAnnotation = this.annotations[key];
 
     this.values.set(
       key,

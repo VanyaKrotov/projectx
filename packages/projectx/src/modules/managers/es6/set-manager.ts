@@ -1,12 +1,6 @@
-import type {
-  ManagerInstance,
-  ManagerOptions,
-  Path,
-  SetManagerInstance,
-} from "../../../shared";
 import { isFunction } from "../../../shared";
 
-import { observable } from "../../observable";
+import { observeOf } from "../../observable";
 import { ContainerManager } from "../abstraction";
 import * as traps from "./set-traps";
 
@@ -131,7 +125,7 @@ class SetManager<T>
 
     let index = 0;
     for (const value of target) {
-      this.values.add(observable(value, { path: this.joinToPath(index) }));
+      this.values.add(observeOf(value, { path: this.joinToPath(index) }));
       index++;
     }
 

@@ -1,5 +1,3 @@
-import type { Path } from "../../../shared";
-
 import MapManager from "./map-manager";
 
 export function clear<K, T>(self: MapManager<K, T>) {

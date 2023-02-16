@@ -1,13 +1,3 @@
-import type {
-  ListenManagersResult,
-  ManagerInstance,
-  Path,
-  ActionTypes,
-  PathNodeInstance,
-  PathsTreeInstance,
-  ContainerManagerInstance,
-} from "../shared";
-
 import {
   isEqualArray,
   getManagerOf,

@@ -1,10 +1,3 @@
-import type {
-  ContainerManagerInstance,
-  InterceptorEvent,
-  Path,
-  ReactionInstance,
-  ReactionCallback,
-} from "../shared";
 import { uid } from "../shared/uid";
 
 import PathTree from "./paths-tree";

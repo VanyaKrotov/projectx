@@ -1,11 +1,4 @@
-import type {
-  ArrayManagerInstance,
-  ManagerInstance,
-  ManagerOptions,
-  Path,
-} from "../../../shared";
-
-import { observable } from "../../observable";
+import { observeOf } from "../../observable";
 import { ContainerManager } from "../abstraction";
 import * as traps from "./array-traps";
 
@@ -50,7 +43,7 @@ class ArrayManager<T>
       return this.values[index].set(value);
     }
 
-    this.values[index] = observable(value, {
+    this.values[index] = observeOf(value, {
       path: this.joinToPath(key),
     });
     this.target[index] = value;
@@ -102,7 +95,7 @@ class ArrayManager<T>
 
     for (let i = 0; i < target.length; i++) {
       this.values.push(
-        observable<T>(target[i], {
+        observeOf<T>(target[i], {
           path: this.joinToPath(i),
         })
       );

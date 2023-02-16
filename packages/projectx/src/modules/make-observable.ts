@@ -1,4 +1,3 @@
-import type { ContainerManagerInstance } from "../shared";
 import { createUniqPath, isObjectOfClass, isObject } from "../shared";
 
 import { managers } from "../components";
@@ -18,7 +17,7 @@ function registerManager<T>(manager: ContainerManagerInstance<T>): T {
 
 export function fromObject<T extends object>(
   target: T,
-  annotations?: Record<keyof T, number>
+  annotations?: Partial<Record<keyof T, number>>
 ) {
   if (!isObject(target)) {
     throw new Error(
@@ -30,7 +29,7 @@ export function fromObject<T extends object>(
     return registerManager(
       new ObjectManager(target, {
         path: [createUniqPath(target.constructor.name)],
-        annotations,
+        annotations: annotations as Record<keyof T, number>,
       })
     );
   }
@@ -38,7 +37,7 @@ export function fromObject<T extends object>(
   return registerManager(
     new DynamicObjectManager(target, {
       path: [createUniqPath("dynamic")],
-      annotations,
+      annotations: annotations as Record<keyof T, number>,
     })
   );
 }

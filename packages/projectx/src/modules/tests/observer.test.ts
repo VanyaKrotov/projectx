@@ -1,12 +1,10 @@
 import { describe, test, expect } from "@jest/globals";
 
-import type { Event } from "../../shared";
-
 import { Observer, ObserverWithType } from "../../components/observer";
 
 test("Observer", async () => {
   const observer = new Observer<number>();
-  const events: Event<number>[] = [];
+  const events: ObserverEvent<number>[] = [];
 
   expect(events).toEqual([]);
 
@@ -42,7 +40,7 @@ describe("ObserverWithType<'change' | 'add'>", () => {
   const observer = new ObserverWithType<number, "change" | "add" | "all">();
 
   test("type 'change'", async () => {
-    const events: Event<number>[] = [];
+    const events: ObserverEvent<number>[] = [];
 
     expect(events.length).toBe(0);
 
@@ -75,7 +73,7 @@ describe("ObserverWithType<'change' | 'add'>", () => {
   });
 
   test("type 'add'", async () => {
-    const events: Event<number>[] = [];
+    const events: ObserverEvent<number>[] = [];
 
     expect(events.length).toBe(0);
 
@@ -111,7 +109,7 @@ describe("ObserverWithType<'change' | 'add'>", () => {
   });
 
   test("type 'all'", async () => {
-    const events: Event<number>[] = [];
+    const events: ObserverEvent<number>[] = [];
 
     expect(events.length).toBe(0);
 

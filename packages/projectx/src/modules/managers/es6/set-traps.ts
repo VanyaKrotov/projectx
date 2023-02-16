@@ -1,4 +1,4 @@
-import { observable } from "../../observable";
+import { observeOf } from "../../observable";
 
 import SetManager from "./set-manager";
 
@@ -44,7 +44,7 @@ export function add<T>(value: T, self: SetManager<T>) {
 
   const prev = self.snapshot;
   self.values.add(
-    observable(value, { path: self.joinToPath(self.target.size) })
+    observeOf(value, { path: self.joinToPath(self.target.size) })
   );
   self.target.add(value);
 
