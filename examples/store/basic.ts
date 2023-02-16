@@ -3,7 +3,6 @@ import {
   watch,
   configuration,
   observe,
-  observable,
 } from "../../packages/projectx";
 
 configuration({

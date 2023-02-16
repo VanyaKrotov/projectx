@@ -1,47 +1,49 @@
-import { AnnotationTypes } from "../../../shared";
 import { Reaction } from "../../reaction";
 
 import { BasicManager } from "../abstraction";
 
-class ComputedManager<T extends () => T>
+interface Computed<T> {
+  (): T;
+}
+
+class ComputedManager<T>
   extends BasicManager<T>
   implements ComputedManagerInstance<T>
 {
   private reaction: ReactionInstance;
-  private memo?: T;
+  private memoValue?: T;
   private memoized = false;
-  private isChanged = false;
+  private changed = false;
 
   constructor(target: T, options: ManagerOptions) {
     super(target, options);
 
     this.reaction = new Reaction("computed");
-
     this.reaction.setReactionCallback(() => {
-      this.isChanged = true;
+      this.changed = true;
 
       this.emit("change", {
-        prev: this.memo!,
+        prev: this.memoValue,
       });
     });
   }
 
   public get snapshot(): T {
-    return this.target();
+    return (this.target as Computed<T>)();
   }
 
   private targetHandler = (): T => {
     this.reportUsage();
 
-    if (this.memoized && !this.isChanged) {
-      return this.memo!;
+    if (this.memoized && !this.changed) {
+      return this.memoValue!;
     }
 
-    this.memo = this.reaction.syncCaptured(this.target);
+    this.memoValue = this.reaction.syncCaptured<T>(this.target as Computed<T>);
     this.memoized = true;
-    this.isChanged = false;
+    this.changed = false;
 
-    return this.memo;
+    return this.memoValue;
   };
 
   public set(): boolean {
