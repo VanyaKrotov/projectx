@@ -1,4 +1,4 @@
-import { watch, State, watchGroup, createSelector } from "../../packages/state";
+import { watch, State, combine } from "../../packages/state";
 
 interface CounterState {
   counter: number;
@@ -49,36 +49,34 @@ const dates = new Dates();
 
 console.log(state);
 
-watch(
-  state,
-  (state) => state.counter,
-  (counter) => {
-    console.log("change: ", counter);
-  }
-);
-
-const joinSelector = createSelector(
-  [
-    (state1: CounterState) => state1.counter,
-    (_s1, state2: DatesState) => state2.array[0],
-  ],
-  (counter, date) => {
-    return `${counter} - ${date}`;
-  }
-);
-
-watchGroup([state, dates], [joinSelector], (str) => {
-  console.log("group: ", str);
+const combineState = combine({
+  counter: state,
+  dates,
 });
 
+console.log(combineState);
+
+const div = document.createElement("div");
 const buttonInc = document.createElement("button");
 const buttonDec = document.createElement("button");
 const buttonTest = document.createElement("button");
+
+watch(
+  combineState,
+  (state) => state.counter.counter,
+  (counter) => {
+    div.innerText = `counter: ${counter}`;
+  },
+  {
+    initCall: true,
+  }
+);
 
 buttonInc.innerText = "inc";
 buttonDec.innerText = "dec";
 buttonTest.innerText = "test";
 
+document.body.appendChild(div);
 document.body.appendChild(buttonInc);
 document.body.appendChild(buttonDec);
 document.body.appendChild(buttonTest);

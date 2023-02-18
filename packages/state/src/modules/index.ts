@@ -1,4 +1,3 @@
-export { default as createState } from "./create-state";
 export { default as State } from "./state";
-export { watch, watchGroup } from "./watch";
-export { createSelector } from "./selector";
+export { watch } from "./watch";
+export { combine } from "./combine";

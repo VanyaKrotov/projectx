@@ -2,7 +2,7 @@ import type { StateInstance } from "types";
 
 import { Observer } from "../components";
 
-abstract class State<T extends object>
+abstract class State<T extends object = object>
   extends Observer<unknown>
   implements StateInstance<T>
 {
@@ -19,9 +19,13 @@ abstract class State<T extends object>
 
     Object.assign(this.state, value);
 
-    this.emit({});
+    this.emit();
 
     afterChange?.();
+  }
+
+  public dispose(): void {
+    super.dispose();
   }
 }
 

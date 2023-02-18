@@ -11,12 +11,16 @@ class Observer<T = unknown> implements ObserverInstance<T> {
     };
   }
 
-  public emit(event: ObserverEvent<T>): void {
+  public emit(event: ObserverEvent<T> = {}): void {
     for (const listener of this.#listeners) {
       if (listener(event)) {
         return;
       }
     }
+  }
+
+  public dispose(): void {
+    this.#listeners.clear();
   }
 }
 

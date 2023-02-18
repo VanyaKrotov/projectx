@@ -12,6 +12,7 @@ declare module "types" {
 
   export interface ObserverInstance<T> {
     listen(listener: ObserverListener<T>): VoidFunction;
+    dispose(): void;
   }
 
   //#endregion
@@ -38,7 +39,9 @@ declare module "types" {
 
   //#region common
 
-  type OneOrArray<T> = T | T[];
+  type CombineState<T extends Record<string, State>> = {
+    [P in keyof T]: T[P]["state"];
+  };
 
   //#endregion
 }

@@ -1,1 +1,1 @@
-export { State, watch, watchGroup, createSelector } from "./modules";
+export { State, watch, combine } from "./modules";
