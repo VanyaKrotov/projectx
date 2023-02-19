@@ -18,6 +18,10 @@ abstract class State<S extends object = object>
       value = change(this.data);
     }
 
+    if (this.data === value) {
+      return;
+    }
+
     const previous = {} as S;
     for (const key in value) {
       previous[key] = this.data[key];

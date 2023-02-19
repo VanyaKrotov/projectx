@@ -25,8 +25,12 @@ export interface StateInstance<S = object> {
   dispose(): void;
 }
 
-export interface ReactionOptions<T = unknown> {
-  resolver: (a: T, b: T) => boolean;
+export interface EqualResolver<T> {
+  (a: T, b: T): boolean;
+}
+
+export interface ReactionOptions {
+  resolver: EqualResolver<never>;
   initCall: boolean;
 }
 
