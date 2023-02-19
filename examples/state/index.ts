@@ -1,4 +1,4 @@
-import State, { combine } from "../../packages/state";
+import State, { batch, combine } from "../../packages/state";
 
 class CounterState extends State<{ counter: number }> {
   public readonly data = {
@@ -110,3 +110,23 @@ b.increment();
 
 c.increment();
 // reaction[c]: 101
+
+batch(() => {
+  a.increment();
+  a.increment();
+  a.increment();
+  a.increment();
+
+  b.increment();
+  b.increment();
+  b.increment();
+  b.increment();
+
+  c.increment();
+  c.increment();
+  c.increment();
+  c.increment();
+});
+
+// reaction:  111
+// reaction[c]:  105

@@ -1,0 +1,30 @@
+{
+  "name": "projectx.state-react",
+  "version": "0.0.1-beta",
+  "description": "",
+  "main": "src/index.ts",
+  "license": "ISC",
+  "author": {
+    "name": "Ivan Krotov",
+    "email": "vanyakrotov3059@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/state-react"
+  },
+  "keywords": [
+    "observe",
+    "reactive",
+    "state",
+    "react"
+  ],
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
+  }
+}
