@@ -1,7 +1,13 @@
-abstract class Observer<T = unknown> implements Observer.ObserverInstance<T> {
-  readonly #listeners = new Set<Observer.Listener<T>>();
+import type {
+  ObserverEvent,
+  ObserverInstance,
+  ObserverListener,
+} from "../shared/types";
 
-  public listen(listener: Observer.Listener<T>): VoidFunction {
+abstract class Observer<T = unknown> implements ObserverInstance<T> {
+  readonly #listeners = new Set<ObserverListener<T>>();
+
+  public listen(listener: ObserverListener<T>): VoidFunction {
     this.#listeners.add(listener);
 
     return () => {
@@ -9,7 +15,7 @@ abstract class Observer<T = unknown> implements Observer.ObserverInstance<T> {
     };
   }
 
-  public emit(event: Observer.Event<T>): void {
+  public emit(event: ObserverEvent<T>): void {
     for (const listener of this.#listeners) {
       if (listener(event)) {
         return;

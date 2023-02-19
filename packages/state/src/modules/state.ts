@@ -1,3 +1,5 @@
+import type { StateInstance, ReactionOptions } from "../shared/types";
+
 import { Observer } from "../components";
 import { defaultEqualResolver } from "../shared";
 
@@ -36,7 +38,7 @@ abstract class State<S extends object = object>
     {
       resolver = defaultEqualResolver,
       initCall = false,
-    }: Partial<WatchOptions> = {}
+    }: Partial<ReactionOptions> = {}
   ): VoidFunction {
     const callSelectors = () =>
       selectors.map((selector) => selector(this.data)) as T;

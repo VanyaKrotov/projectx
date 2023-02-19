@@ -1,3 +1,5 @@
+import type { StateInstance, CombineState } from "../shared/types";
+
 import State from "./state";
 
 function combine<T extends Record<string, StateInstance>>(
@@ -12,7 +14,7 @@ function combine<T extends Record<string, StateInstance>>(
 
       const combined = {} as CombineState<T>;
       for (const key in states) {
-        const stateInstance = states[key] as unknown as State;
+        const stateInstance = states[key] as unknown as State<CombineState<T>>;
 
         combined[key] = stateInstance.data;
         this.unlisten.push(

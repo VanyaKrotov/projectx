@@ -1,10 +1,11 @@
 import { describe, test, expect } from "@jest/globals";
 
+import { ObserverEvent } from "../../shared/types";
 import Observer from "../observer";
 
 describe("Observer", () => {
   test("default", () => {
-    const events: Observer.Event<number>[] = [];
+    const events: ObserverEvent<number>[] = [];
     const observer = new (class extends Observer<number> {})();
 
     const unlisten = observer.listen((event) => {
@@ -31,8 +32,8 @@ describe("Observer", () => {
   });
 
   test("stop event", () => {
-    const events1: Observer.Event<number>[] = [];
-    const events2: Observer.Event<number>[] = [];
+    const events1: ObserverEvent<number>[] = [];
+    const events2: ObserverEvent<number>[] = [];
     const observer = new (class extends Observer<number> {})();
 
     const unlisten1 = observer.listen((event) => {
