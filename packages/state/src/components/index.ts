@@ -1,1 +1,2 @@
-export { default as Observer } from "./observer";
+export { Observer } from "./observer";
+export { BatchManager } from "./batch-manager";

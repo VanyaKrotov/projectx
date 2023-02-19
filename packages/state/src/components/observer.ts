@@ -28,4 +28,4 @@ abstract class Observer<T = unknown> implements ObserverInstance<T> {
   }
 }
 
-export default Observer;
+export { Observer };

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "@jest/globals";
 
 import { ObserverEvent } from "../../shared/types";
-import Observer from "../observer";
+import { Observer } from "../observer";
 
 describe("Observer", () => {
   test("default", () => {

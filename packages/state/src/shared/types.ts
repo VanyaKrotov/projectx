@@ -14,9 +14,9 @@ export interface ObserverInstance<T> {
 
 type StateMutator<T> = Partial<T> | ((prev: T) => T);
 
-export interface StateInstance<S = object> {
+export interface StateInstance<S extends EachObject = EachObject> {
   data: S;
-  change(change: StateMutator<S>, afterChange?: VoidFunction): void;
+  change(change: StateMutator<S>): void;
   reaction<T extends unknown[]>(
     selectors: ((state: S) => unknown)[],
     action: (...args: T) => void,
@@ -30,10 +30,12 @@ export interface EqualResolver<T> {
 }
 
 export interface ReactionOptions {
-  resolver: EqualResolver<never>;
+  resolver: EqualResolver<unknown>;
   initCall: boolean;
 }
 
 export type CombineState<T extends Record<string, StateInstance>> = {
   [P in keyof T]: T[P]["data"];
 };
+
+export type EachObject = { [key: string | symbol | never]: unknown | any };

@@ -1,3 +1,3 @@
 import { EqualResolver } from "./types";
 
-export const defaultEqualResolver: EqualResolver<never> = (a, b) => a === b;
+export const defaultEqualResolver: EqualResolver<unknown> = (a, b) => a === b;

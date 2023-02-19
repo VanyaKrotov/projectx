@@ -1,7 +1,5 @@
 # ProjectX.State
 
-_Библиотека для управления состояниями_
-
 [![ Версия npm ](https://badge.fury.io/js/projectx.state.svg)](https://badge.fury.io/js/projectx.state)
 
 ## Установка
@@ -11,8 +9,6 @@ npm i projectx.state
 ```
 
 ## Документация
-
-Полная документация расположена по [ссылке](https://github.com/VanyaKrotov/projectx/blob/main/README.md)
 
 ### Описание функций и классов
 
@@ -144,4 +140,58 @@ b.increment();
 
 c.increment();
 // reaction[c]: 101
+```
+
+- `batch()` - функция объединяющая мутации одно или более состояний.
+
+Пример:
+
+```ts
+/* ... states from  previous example */
+
+const a = new A();
+const b = new B();
+const c = new B();
+
+const comb = combine({
+  a,
+  b,
+  c,
+});
+
+const unlisten = comb.reaction(
+  [(state) => state.a.val + state.b.val],
+  (sum: number) => {
+    console.log("reaction: ", sum);
+  }
+);
+
+const unlistenc = comb.reaction([(state) => state.c.val], (value: number) => {
+  console.log("reaction[c]: ", value);
+});
+
+a.increment();
+// reaction: 102
+
+b.increment();
+// reaction: 103
+
+batch(() => {
+  a.increment();
+  a.increment();
+  a.increment();
+  a.increment();
+
+  b.increment();
+  b.increment();
+  b.increment();
+  b.increment();
+
+  c.increment();
+  c.increment();
+  c.increment();
+  c.increment();
+});
+// reaction:  111
+// reaction[c]:  105
 ```

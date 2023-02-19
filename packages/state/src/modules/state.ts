@@ -1,25 +1,23 @@
-import type { StateInstance, ReactionOptions } from "../shared/types";
+import type {
+  StateInstance,
+  ReactionOptions,
+  EachObject,
+} from "../shared/types";
 
 import { Observer } from "../components";
 import { defaultEqualResolver } from "../shared";
+import { manager } from "./batch";
 
-abstract class State<S extends object = object>
+abstract class State<S extends EachObject = EachObject>
   extends Observer<S>
   implements StateInstance<S>
 {
   public abstract readonly data: S;
 
-  public change(
-    change: Partial<S> | ((prev: S) => S),
-    afterChange?: VoidFunction
-  ): void {
+  public change(change: Partial<S> | ((prev: S) => S)): void {
     let value = change as S;
     if (typeof change === "function") {
       value = change(this.data);
-    }
-
-    if (this.data === value) {
-      return;
     }
 
     const previous = {} as S;
@@ -32,8 +30,6 @@ abstract class State<S extends object = object>
       current: value,
       previous,
     });
-
-    afterChange?.();
   }
 
   public reaction<T extends unknown[]>(
@@ -47,12 +43,12 @@ abstract class State<S extends object = object>
     const callSelectors = () =>
       selectors.map((selector) => selector(this.data)) as T;
     const hasSelector = selectors.length > 0;
-    let memo: T = callSelectors();
+    let memo = callSelectors();
     if (initCall) {
       action.apply(null, memo);
     }
 
-    return this.listen(() => {
+    const handler = () => {
       if (!hasSelector) {
         return action.apply(null, memo);
       }
@@ -65,7 +61,9 @@ abstract class State<S extends object = object>
       memo = values;
 
       return action.apply(null, memo);
-    });
+    };
+
+    return this.listen(() => manager.action(handler));
   }
 }
 
