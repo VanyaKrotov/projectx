@@ -1,12 +1,10 @@
-import { CombineState } from "types";
-
 import State from "./state";
 
-function combine<T extends Record<string, State>>(
+function combine<T extends Record<string, StateInstance>>(
   states: T
-): State<CombineState<T>> {
+): StateInstance<CombineState<T>> {
   return new (class extends State<CombineState<T>> {
-    public state: CombineState<T>;
+    public data: CombineState<T>;
     private unlisten: VoidFunction[] = [];
 
     constructor() {
@@ -14,12 +12,19 @@ function combine<T extends Record<string, State>>(
 
       const combined = {} as CombineState<T>;
       for (const key in states) {
-        combined[key] = states[key].state;
+        const stateInstance = states[key] as unknown as State;
 
-        this.unlisten.push(states[key].listen(() => this.emit()));
+        combined[key] = stateInstance.data;
+        this.unlisten.push(
+          stateInstance.listen((event) =>
+            this.emit({
+              [key]: event,
+            })
+          )
+        );
       }
 
-      this.state = combined;
+      this.data = combined;
     }
 
     public dispose() {

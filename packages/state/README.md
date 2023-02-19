@@ -1,13 +1,13 @@
-# ProjectX.Store
+# ProjectX.State
 
-_Библиотека для управления состояния приложения_
+_Библиотека для управления состояниями_
 
-[![ Версия npm ](https://badge.fury.io/js/projectx.store.svg)](https://badge.fury.io/js/projectx.store-react)
+[![ Версия npm ](https://badge.fury.io/js/projectx.state.svg)](https://badge.fury.io/js/projectx.state)
 
 ## Установка
 
 ```
-npm i projectx.store
+npm i projectx.state
 ```
 
 ## Документация
@@ -16,221 +16,132 @@ npm i projectx.store
 
 ### Описание функций и классов
 
-- `observable` - набор функций для создания состояний из различных структур данных.
+- `State` - базовый класс для создания состояний.
 
-- `observable.fromClass()` - создание экземпляра состояния из класса.
+  - `data = {}` - основное хранилище состояния (_readonly_);
+
+  - `change()` - метод для мутации состояния;
+
+  - `reaction()` - метод для отслеживания мутаций состояния;
+
+  - `dispose()` - метод для сброса всех отслеживаний состояния;
 
 Пример:
 
 ```ts
-class State {
-  constructor(public counter = 0) {}
+class CounterState extends State<{ counter: number }> {
+  public readonly data = {
+    counter: 0,
+  };
 
   public increment() {
-    this.counter++;
+    this.change({ counter: this.data.counter + 1 });
   }
 
   public decrement() {
-    this.counter--;
+    this.change({ counter: this.data.counter - 1 });
   }
 }
 
-// state => экемпляр отслеживаемого состояния
-const state = observable.fromClass(State, 1);
+// counter structure:
+// counter.increment() => function
+// counter.decrement() => function
+// counter.change() => function
+// counter.reaction() => function
+// counter.dispose() => function
+// counter.data => object
+const counter = new CounterState();
 
-console.log(state.counter);
-// 1
-```
+console.log(counter.data); // { counter: 0 }
 
-- `observable.fromObject()` - создание состояния из объекта или экземпляра класса.
+counter.increment();
 
-Пример:
+console.log(counter.data); // { counter: 1 }
 
-```ts
-class State {
-  constructor(public counter = 0) {}
+counter.decrement();
 
-  public increment() {
-    this.counter++;
-  }
+console.log(counter.data); // { counter: 0 }
 
-  public decrement() {
-    this.counter--;
-  }
-}
-
-// state и stateObj => экемпляры отслеживаемых состояний
-const state = observable.fromObject(new State(1));
-const stateObj = observable.fromObject({ counter: 2 });
-
-console.log(state.counter);
-// 1
-console.log(stateObj.counter);
-// 1
-```
-
-- `observable.fromArray()` - создание состояния из массива.
-
-Пример:
-
-```ts
-// array => экемпляр отслеживаемого состояния массива
-const array = observable.fromArray([1, 2, 3]);
-
-console.log(array);
-// [1, 2, 3]
-```
-
-- `observable.fromMap()` - создание состояния из `es6` коллекции ключ/значени.
-
-Пример:
-
-```ts
-// map => экемпляр отслеживаемого состояния
-const map = observable.fromMap(new Map<number, number>([[1, 2]]));
-
-console.log(map);
-// { 1 => 2 }
-```
-
-- `observable.fromSet()` - создание состояния из `es6` массива упорядоченных значений.
-
-Пример:
-
-```ts
-// set => экемпляр отслеживаемого состояний массива уникальных значений
-const set = observable.fromSet(new Set<number>([[1, 1, 2]]));
-
-console.log(set);
-// { 0 => 1, 1 => 2 }
-```
-
-- `when()` - функция ожидания изменения состояния захваченного контекстом в `true`.
-
-Пример:
-
-```ts
-const state = observable.fromObject({
-  counter: 1,
-  inc() {
-    this.counter++;
+// Если массив селекторов пуст, реакция будет вызвана при каждой мутации объекта состояния
+const unlisten = counter.reaction(
+  [(state) => state.counter],
+  (counter) => {
+    console.log("reaction: ", counter);
   },
-  async when() {
-    await when(() => this.counter > 2);
-
-    this.counter = 101;
-  },
-});
-
-cosole.log(state.counter);
-state.inc();
-cosole.log(state.counter);
-state.when();
-cosole.log(state.counter);
-state.inc();
-cosole.log(state.counter);
-
-// Output
-// 1
-// inc()
-// 2
-// when()
-// 2
-// inc()
-// 101
-```
-
-- `watch()` - функция отслежения изменений захваченных в контекст результатов вычислений.
-
-Пример:
-
-```ts
-const state = observable.fromObject({
-  counter: 1,
-  inc() {
-    this.counter++;
-  },
-});
-
-watch(
-  () => state.counter ** 2,
-  (value, prev) => {
-    console.log(value, prev);
+  {
+    initCall: true, // default = false. Запускает вызов реакции при ее монтировании
+    resolver: (a, b) => a === b, // default = (a, b) => a === b.
   }
 );
 
-state.inc();
-state.inc();
+counter.increment();
+// reaction: 1
 
-// Output
-// 1 undefined
-// inc()
-// 4 2
-// inc()
-// 9 4
+counter.decrement();
+// reaction: 0
+
+unlisten();
+
+counter.increment();
 ```
 
-- `autorun()` - функция реагирования на изменения захваченных состояний.
+- `combine()` - функция для объединения нескольких состояний в одно с единым центром отслеживания реакций.
 
 Пример:
 
 ```ts
-const state = observable.fromObject({
-  counter: 1,
-  inc() {
-    this.counter++;
-  },
+class A extends State<{ val: number }> {
+  public readonly data = {
+    val: 1,
+  };
+
+  public increment() {
+    this.change({ val: this.data.val + 1 });
+  }
+}
+
+class B extends State<{ val: number }> {
+  public readonly data = {
+    val: 100,
+  };
+
+  public increment() {
+    this.change({ val: this.data.val + 1 });
+  }
+}
+
+const a = new A();
+const b = new B();
+const c = new B();
+
+// comb structure:
+// counter.change() => function
+// counter.reaction() => function
+// counter.dispose() => function
+// counter.data => object
+const comb = combine({
+  a,
+  b,
+  c,
 });
 
-autorun(() => {
-  console.log(state.counter);
+const unlisten = comb.reaction(
+  [(state) => state.a.val + state.b.val],
+  (sum: number) => {
+    console.log("reaction: ", sum);
+  }
+);
+
+const unlistenc = comb.reaction([(state) => state.c.val], (value: number) => {
+  console.log("reaction[c]: ", value);
 });
 
-state.inc();
-state.inc();
+a.increment();
+// reaction: 102
 
-// Output
-// 1
-// inc()
-// 2
-// inc()
-// 3
+b.increment();
+// reaction: 103
+
+c.increment();
+// reaction[c]: 101
 ```
-
-- `transaction()` - функция для объединения нескольких изменений в одип пакет для вызова реакциий.
-
-Пример:
-
-```ts
-const state = observable.fromObject({
-  counter: 1,
-  inc() {
-    this.counter++;
-    this.counter++;
-  },
-});
-
-autorun(() => {
-  console.log(state.counter);
-});
-
-state.inc();
-
-transaction(() => {
-  state.inc();
-});
-
-// Output
-// 1
-// inc()
-// 2
-// 3
-// transaction()
-// 5
-```
-
-- `configurations({})` - функция для настройки параметров работы `projectx.store` в проекте.
-
-  - `develop` - включает режим отладки библиотеки (в консоли будут выведены внутренние переменные и методы);
-
-  - `equalResolver(a, b)` - устанавливает функцию для проверки изменения состояния. Значение по умолчанию: `(a, b) => a === b`;

@@ -1,9 +1,7 @@
-import type { ObserverEvent, ObserverInstance, ObserverListener } from "types";
+abstract class Observer<T = unknown> implements Observer.ObserverInstance<T> {
+  readonly #listeners = new Set<Observer.Listener<T>>();
 
-class Observer<T = unknown> implements ObserverInstance<T> {
-  readonly #listeners = new Set<ObserverListener<T>>();
-
-  public listen(listener: ObserverListener<T>): VoidFunction {
+  public listen(listener: Observer.Listener<T>): VoidFunction {
     this.#listeners.add(listener);
 
     return () => {
@@ -11,7 +9,7 @@ class Observer<T = unknown> implements ObserverInstance<T> {
     };
   }
 
-  public emit(event: ObserverEvent<T> = {}): void {
+  public emit(event: Observer.Event<T>): void {
     for (const listener of this.#listeners) {
       if (listener(event)) {
         return;

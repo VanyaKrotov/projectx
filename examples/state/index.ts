@@ -1,95 +1,112 @@
-import { watch, State, combine } from "../../packages/state";
+import State, { combine } from "../../packages/state";
 
-interface CounterState {
-  counter: number;
-  test: number;
-}
-
-interface DatesState {
-  array: string[];
-}
-
-class Counter extends State<CounterState> {
-  public state = {
+class CounterState extends State<{ counter: number }> {
+  public readonly data = {
     counter: 0,
-    test: 1,
   };
 
   public increment() {
-    this.change({
-      counter: this.state.counter + 1,
-    });
+    this.change({ counter: this.data.counter + 1 });
   }
 
   public decrement() {
-    this.change({ counter: this.state.counter - 1 });
-  }
-
-  public test() {
-    this.change({
-      test: this.state.test + 1,
-    });
+    this.change({ counter: this.data.counter - 1 });
   }
 }
 
-class Dates extends State<DatesState> {
-  public state: DatesState = {
-    array: [],
-  };
+// counter structure:
+// counter.increment() => function
+// counter.decrement() => function
+// counter.change() => function
+// counter.reaction() => function
+// counter.dispose() => function
+// counter.data => object
+const counter = new CounterState();
 
-  push() {
-    this.change({
-      array: this.state.array.concat([new Date().toString()]),
-    });
-  }
-}
+console.log(counter.data); // { counter: 0 }
 
-const state = new Counter();
-const dates = new Dates();
+counter.increment();
 
-console.log(state);
+console.log(counter.data); // { counter: 1 }
 
-const combineState = combine({
-  counter: state,
-  dates,
-});
+counter.decrement();
 
-console.log(combineState);
+console.log(counter.data); // { counter: 0 }
 
-const div = document.createElement("div");
-const buttonInc = document.createElement("button");
-const buttonDec = document.createElement("button");
-const buttonTest = document.createElement("button");
-
-watch(
-  combineState,
-  (state) => state.counter.counter,
+// Если массив селекторов пуст, реакция будет вызвана при каждой мутации объекта состояния
+let unlisten = counter.reaction(
+  [(state) => state.counter],
   (counter) => {
-    div.innerText = `counter: ${counter}`;
+    console.log("reaction: ", counter);
   },
   {
-    initCall: true,
+    initCall: true, // default = false. Запускает вызов реакции при ее монтировании
+    resolver: (a, b) => a === b, // default = (a, b) => a === b.
+  }
+);
+// reaction: 0
+
+counter.increment();
+// reaction: 1
+
+counter.decrement();
+// reaction: 0
+
+unlisten();
+
+counter.increment();
+
+class A extends State<{ val: number }> {
+  public readonly data = {
+    val: 1,
+  };
+
+  public increment() {
+    this.change({ val: this.data.val + 1 });
+  }
+}
+
+class B extends State<{ val: number }> {
+  public readonly data = {
+    val: 100,
+  };
+
+  public increment() {
+    this.change({ val: this.data.val + 1 });
+  }
+}
+
+const a = new A();
+const b = new B();
+const c = new B();
+
+// comb structure:
+// counter.change() => function
+// counter.reaction() => function
+// counter.dispose() => function
+// counter.data => object
+const comb = combine({
+  a,
+  b,
+  c,
+});
+
+unlisten = comb.reaction(
+  [(state) => state.a.val + state.b.val],
+  (sum: number) => {
+    console.log("reaction: ", sum);
   }
 );
 
-buttonInc.innerText = "inc";
-buttonDec.innerText = "dec";
-buttonTest.innerText = "test";
-
-document.body.appendChild(div);
-document.body.appendChild(buttonInc);
-document.body.appendChild(buttonDec);
-document.body.appendChild(buttonTest);
-
-buttonInc.addEventListener("click", () => {
-  state.increment();
-  dates.push();
+const unlistenc = comb.reaction([(state) => state.c.val], (value: number) => {
+  console.log("reaction[c]: ", value);
 });
 
-buttonDec.addEventListener("click", () => {
-  state.decrement();
-});
+a.increment();
+// reaction: 102
 
-buttonTest.addEventListener("click", () => {
-  state.test();
-});
+b.increment();
+// reaction: 103
+
+c.increment();
+// reaction[c]: 101

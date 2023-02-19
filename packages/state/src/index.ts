@@ -1,1 +1,1 @@
-export { State, watch, combine } from "./modules";
+export { default, combine } from "./modules";
