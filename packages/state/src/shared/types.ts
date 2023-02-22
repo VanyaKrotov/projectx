@@ -32,7 +32,6 @@ export interface CommitChange {
 export interface StateInstance<S extends DataObject = DataObject>
   extends ObserveStateInstance<S> {
   change(value: Partial<S>): void;
-  change(change: (prev: S) => S): void;
   commit(changes: CommitChange[]): boolean[];
 }
 

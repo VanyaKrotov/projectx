@@ -35,7 +35,7 @@ abstract class ObserveState<S extends DataObject = DataObject>
 
     const handler = () => {
       if (!hasSelector) {
-        return action.apply(null, memo);
+        return action.apply(null);
       }
 
       const values = callSelectors();
@@ -60,7 +60,7 @@ abstract class ObserveState<S extends DataObject = DataObject>
     }
 
     return this.listen(({ paths }) => {
-      if (paths.every((path) => !tree.test(path))) {
+      if (!paths.some((path) => tree.test(path))) {
         return;
       }
 
@@ -75,18 +75,12 @@ abstract class State<S extends DataObject = DataObject>
 {
   public abstract readonly data: S;
 
-  public change(value: Partial<S>): void;
-  public change(change: (prev: S) => S): void;
-  public change(change: unknown): void {
-    let value = change as S;
-    if (typeof change === "function") {
-      value = change(this.data);
-    }
-
+  public change(value: Partial<S>): void {
     const paths = [];
     for (const key in value) {
       paths.push(key);
-      this.data[key] = value[key];
+
+      this.data[key] = (value as S)[key];
     }
 
     this.emit({
