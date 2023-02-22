@@ -1,4 +1,5 @@
 export { connect, connectWithRef } from "./connect";
-export { Observe } from "./observable";
+export { SelectObserve, WatchObserve } from "./observable";
+export { StateProvider } from "./state-provider";
 
-export { useSelect } from "./hooks";
+export { useSelect, useWatch, useStateOrDefault } from "./hooks";

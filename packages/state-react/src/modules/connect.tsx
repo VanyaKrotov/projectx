@@ -1,44 +1,50 @@
-import React, { ComponentType, forwardRef, useEffect } from "react";
+import React, { ComponentType, forwardRef, useEffect, useState } from "react";
 
 // @ts-ignore
 import { DataObject, ObserveStateInstance } from "../../../state";
 
-import type { SelectToProps } from "../shared/types";
-import { deepEqual, useForceUpdate } from "../shared";
+import { deepEqual, getValues } from "../shared";
+import { useStateOrDefault } from "./hooks";
+
+interface SelectToProps<
+  T extends DataObject,
+  R extends DataObject,
+  TOwnProps extends DataObject = {}
+> {
+  (state: ObserveStateInstance<T>, ownProps: TOwnProps): R;
+}
 
 function useConnect<T extends DataObject, R extends DataObject, P extends {}>(
-  state: ObserveStateInstance<T>,
   selector: SelectToProps<T, R>,
-  props: P
+  props: P,
+  state?: ObserveStateInstance<T>
 ) {
-  const forceUpdate = useForceUpdate();
-  let selectProps: R | null = null;
-  if (!selectProps) {
-    selectProps = selector(state, props);
-  }
+  const workState = useStateOrDefault(state);
+  const [selectProps, setSelectProps] = useState<R>(() =>
+    selector(workState, props)
+  );
 
   useEffect(() => {
-    return state.reaction([], () => {
-      const nextSelectProps = selector(state, props);
+    return workState.reaction([], () => {
+      const nextSelectProps = selector(workState, props);
       if (deepEqual(selectProps!, nextSelectProps)) {
         return;
       }
 
-      selectProps = nextSelectProps;
-      forceUpdate();
+      setSelectProps(nextSelectProps);
     });
   }, []);
 
   return selectProps;
 }
 
-function connect<S extends DataObject, R extends DataObject>(
-  state: ObserveStateInstance<S>,
-  selector: SelectToProps<S, R>
+function connect<R extends DataObject, S extends DataObject>(
+  selector: SelectToProps<S, R>,
+  state?: ObserveStateInstance<S>
 ) {
   return function <P extends object>(Comp: ComponentType<P>) {
     return (props: Omit<P, keyof R>) => {
-      const selectProps = useConnect(state, selector, props);
+      const selectProps = useConnect(selector, props, state);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} />;
@@ -46,13 +52,13 @@ function connect<S extends DataObject, R extends DataObject>(
   };
 }
 
-function connectWithRef<S extends DataObject, R extends DataObject>(
-  state: ObserveStateInstance<S>,
-  selector: SelectToProps<S, R>
+function connectWithRef<R extends DataObject, S extends DataObject>(
+  selector: SelectToProps<S, R>,
+  state?: ObserveStateInstance<S>
 ) {
   return function <P extends object>(Comp: ComponentType<P>) {
     return forwardRef((props: Omit<P, keyof R>, ref) => {
-      const selectProps = useConnect(state, selector, props);
+      const selectProps = useConnect(selector, props, state);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} ref={ref} />;
@@ -60,4 +66,47 @@ function connectWithRef<S extends DataObject, R extends DataObject>(
   };
 }
 
-export { connect, connectWithRef };
+function useConnectWatch<R>(paths: string[], state?: ObserveStateInstance): R {
+  const workState = useStateOrDefault<ObserveStateInstance>(state);
+  const [selectProps, setSelectProps] = useState<R>(() =>
+    getValues(workState, paths)
+  );
+
+  useEffect(
+    () =>
+      workState.watch(paths, () => setSelectProps(getValues(workState, paths))),
+    [paths, workState]
+  );
+
+  return selectProps;
+}
+
+function connectWatch<R extends DataObject, S extends DataObject>(
+  paths: string[],
+  state?: ObserveStateInstance<S>
+) {
+  return function <P extends object>(Comp: ComponentType<P>) {
+    return (props: Omit<P, keyof R>) => {
+      const selectProps = useConnectWatch(paths, state);
+
+      // @ts-ignore
+      return <Comp {...props} {...selectProps} />;
+    };
+  };
+}
+
+function connectWatchWithRef<R extends DataObject, S extends DataObject>(
+  paths: string[],
+  state?: ObserveStateInstance<S>
+) {
+  return function <P extends object>(Comp: ComponentType<P>) {
+    return forwardRef((props: Omit<P, keyof R>, ref) => {
+      const selectProps = useConnectWatch(paths, state);
+
+      // @ts-ignore
+      return <Comp {...props} {...selectProps} ref={ref} />;
+    });
+  };
+}
+
+export { connect, connectWithRef, connectWatch, connectWatchWithRef };

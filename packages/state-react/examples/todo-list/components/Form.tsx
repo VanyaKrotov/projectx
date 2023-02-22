@@ -1,4 +1,5 @@
 import React, { FC, useState } from "react";
+import { useStateOrDefault } from "../../../src";
 
 import { Todo, TodoState } from "../state";
 
@@ -9,11 +10,9 @@ const DEFAULT_TODO: Todo = {
   title: "",
 };
 
-interface Props {
-  state: TodoState;
-}
+const Form: FC = () => {
+  const state = useStateOrDefault<TodoState>();
 
-const Form: FC<Props> = ({ state }) => {
   const [data, setData] = useState<Todo>(DEFAULT_TODO);
 
   return (

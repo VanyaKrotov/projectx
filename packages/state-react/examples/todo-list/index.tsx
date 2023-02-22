@@ -1,56 +1,46 @@
-import React, { FC, useEffect, useRef } from "react";
-import { connect, Observe } from "../../src";
+import React, { FC, useEffect } from "react";
+import { WatchObserve, StateProvider } from "../../src";
 
-import { TodoState, TodoStateData } from "./state";
+import { Todo as TodoModal, TodoState } from "./state";
 
 import Form from "./components/Form";
 import Todo from "./components/Todo";
 
 const state = new TodoState();
 
-const selectItems = (state: TodoStateData) => state.items;
-const selectLoading = (state: TodoStateData) => state.loading;
-const selectError = (state: TodoStateData) => state.error;
-
-const FormConnect = connect(state, (state) => ({ state: state }))(Form);
-
 const TodoList: FC = () => {
-  const ref = useRef();
-  console.log("render[TodoList]");
-
   useEffect(() => {
-    console.log(ref);
     state.fetchData();
   }, []);
 
   return (
-    <div>
+    <StateProvider state={() => state}>
       <div>
-        <Observe state={state} selector={selectLoading}>
-          {({ data }) =>
-            data ? (
+        <WatchObserve<[boolean]> watch={["loading"]}>
+          {({ data: [loading] }) =>
+            loading ? (
               <div>
                 <div>Loading items...</div>
               </div>
             ) : (
               <>
-                <Observe state={state} selector={selectError}>
-                  {({ data }) =>
-                    data ? (
+                <WatchObserve<[boolean]> watch={["error"]}>
+                  {({ data: [error] }) =>
+                    error ? (
                       <div>
                         <span>Error load todo items. </span>
-                        <span>{data}</span>
+                        <span>{error}</span>
                         <button onClick={() => state.fetchData()}>
                           reload items
                         </button>
                       </div>
                     ) : null
                   }
-                </Observe>
-                <Observe state={state} selector={selectItems}>
-                  {({ data }) => (
+                </WatchObserve>
+                <WatchObserve<[TodoModal[]]> watch={["items"]}>
+                  {({ data: [items] }) => (
                     <>
-                      {data.map((todo) => (
+                      {items.map((todo) => (
                         <Todo
                           {...todo}
                           key={todo.id}
@@ -62,14 +52,14 @@ const TodoList: FC = () => {
                       ))}
                     </>
                   )}
-                </Observe>
+                </WatchObserve>
               </>
             )
           }
-        </Observe>
+        </WatchObserve>
       </div>
-      <FormConnect />
-    </div>
+      <Form />
+    </StateProvider>
   );
 };
 

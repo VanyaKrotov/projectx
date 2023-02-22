@@ -1,1 +1,10 @@
-export { connect, connectWithRef, useSelect, Observe } from "./modules";
+export {
+  connect,
+  connectWithRef,
+  useSelect,
+  SelectObserve,
+  WatchObserve,
+  StateProvider,
+  useWatch,
+  useStateOrDefault,
+} from "./modules";

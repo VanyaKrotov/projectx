@@ -1,4 +1,4 @@
-import State from "../../../state/src/modules/state";
+import { State } from "../../../state/src/modules/state";
 
 export interface Todo {
   id: number;
@@ -91,4 +91,10 @@ class TodoState extends State<TodoStateData> {
   }
 }
 
-export { TodoState };
+class CounterState extends State<{ counter: number }> {
+  public data: { counter: number } = {
+    counter: 0,
+  };
+}
+
+export { TodoState, CounterState };

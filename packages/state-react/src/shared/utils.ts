@@ -1,3 +1,5 @@
+import { ObserveStateInstance, Path } from "../../../state/src";
+
 export function deepEqual<T extends object>(a: T, b: T): boolean {
   const keysA = Object.keys(a);
   const keysB = Object.keys(b);
@@ -12,4 +14,13 @@ export function deepEqual<T extends object>(a: T, b: T): boolean {
   }
 
   return true;
+}
+
+export function getValues<R>(state: ObserveStateInstance, paths: string[]) {
+  const result = [];
+  for (const path of paths) {
+    result.push(Path.get(state.data, path));
+  }
+
+  return result as R;
 }

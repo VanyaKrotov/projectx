@@ -1,20 +1,53 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
-import { EqualResolver, ObserveStateInstance } from "../../../state/src";
+import {
+  DataObject,
+  EqualResolver,
+  ObserveStateInstance,
+} from "../../../state/src";
+import { DefaultContext, getValues } from "../shared";
 
-export function useSelect<S extends object, R = unknown>(
-  state: ObserveStateInstance<S>,
-  selector: (state: S) => R,
+export function useStateOrDefault<S extends ObserveStateInstance>(
+  state?: S
+): S {
+  const context = useContext(DefaultContext);
+  const workState = (state || context) as S;
+  if (!workState) {
+    throw new Error("Context hasn't `state` and prop state is required!");
+  }
+
+  return workState;
+}
+
+export function useSelect<R = unknown, S extends DataObject = DataObject>(
+  selector: (state: ObserveStateInstance<S>) => R,
+  state?: ObserveStateInstance<S>,
   equalResolver?: EqualResolver<R>
 ): R {
-  const [result, setResult] = useState(selector(state.data));
+  const workState = useStateOrDefault(state);
+  const [result, setResult] = useState(() => selector(workState));
 
   useEffect(
     () =>
-      state.reaction([selector], setResult, {
+      workState.reaction([() => selector(workState)], setResult, {
         resolver: equalResolver as EqualResolver<unknown>,
       }),
-    [selector]
+    [selector, workState]
+  );
+
+  return result;
+}
+
+export function useWatch<R = unknown[], S extends DataObject = DataObject>(
+  paths: string[],
+  state?: ObserveStateInstance<S>
+): R {
+  const workState = useStateOrDefault(state);
+  const [result, setResult] = useState<R>(() => getValues(workState, paths));
+
+  useEffect(
+    () => workState.watch(paths, () => setResult(getValues(workState, paths))),
+    [paths, workState]
   );
 
   return result;
