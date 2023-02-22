@@ -1,17 +1,17 @@
 import { FC } from "react";
 
-import { EachObject, StateInstance } from "../../../state/src";
+import { DataObject, ObserveStateInstance } from "../../../state/src";
 
-export interface ObserveProps<S extends EachObject, R> {
-  state: StateInstance<S>;
+export interface ObserveProps<S extends DataObject, R> {
+  state: ObserveStateInstance<S>;
   selector: (data: S) => R;
   children: FC<{ data: R }>;
 }
 
 export interface SelectToProps<
-  T extends EachObject,
-  R extends EachObject,
-  TOwnProps extends EachObject = {}
+  T extends DataObject,
+  R extends DataObject,
+  TOwnProps extends DataObject = {}
 > {
-  (state: StateInstance<T>, ownProps: TOwnProps): R;
+  (state: ObserveStateInstance<T>, ownProps: TOwnProps): R;
 }

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { EqualResolver, StateInstance } from "../../../state/src";
+import { EqualResolver, ObserveStateInstance } from "../../../state/src";
 
 export function useSelect<S extends object, R = unknown>(
-  state: StateInstance<S>,
+  state: ObserveStateInstance<S>,
   selector: (state: S) => R,
   equalResolver?: EqualResolver<R>
 ): R {

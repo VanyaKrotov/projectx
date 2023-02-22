@@ -1,10 +1,9 @@
-export interface ObserverEvent<T> {
-  current?: T;
-  previous?: T;
+export interface ObserverEvent {
+  paths: string[];
 }
 
 export interface ObserverListener<T> {
-  (event: ObserverEvent<T>): void | boolean;
+  (event: ObserverEvent): void | boolean;
 }
 
 export interface ObserverInstance<T> {
@@ -12,17 +11,29 @@ export interface ObserverInstance<T> {
   dispose(): void;
 }
 
-type StateMutator<T> = Partial<T> | ((prev: T) => T);
-
-export interface StateInstance<S extends EachObject = EachObject> {
+export interface ObserveStateInstance<S extends DataObject = DataObject>
+  extends ObserverInstance<S> {
   data: S;
-  change(change: StateMutator<S>): void;
   reaction<T extends unknown[]>(
     selectors: ((state: S) => unknown)[],
     action: (...args: T) => void,
     options?: Partial<ReactionOptions>
   ): VoidFunction;
+  watch(paths: string[], action: VoidFunction): VoidFunction;
+  watch(paths: PathTreeInstance, action: VoidFunction): VoidFunction;
   dispose(): void;
+}
+
+export interface CommitChange {
+  path: string;
+  value: unknown;
+}
+
+export interface StateInstance<S extends DataObject = DataObject>
+  extends ObserveStateInstance<S> {
+  change(value: Partial<S>): void;
+  change(change: (prev: S) => S): void;
+  commit(changes: CommitChange[]): boolean[];
 }
 
 export interface EqualResolver<T> {
@@ -34,8 +45,13 @@ export interface ReactionOptions {
   initCall: boolean;
 }
 
-export type CombineState<T extends Record<string, StateInstance>> = {
+export type CombineState<T extends Record<string, ObserveStateInstance>> = {
   [P in keyof T]: T[P]["data"];
 };
 
-export type EachObject = { [key: string | symbol | never]: unknown | any };
+export type DataObject = { [key: string | symbol | never]: unknown | any };
+
+export interface PathTreeInstance {
+  test(path: string): boolean;
+  push(path: string): void;
+}

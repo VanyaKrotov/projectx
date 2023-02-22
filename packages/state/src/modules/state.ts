@@ -1,36 +1,21 @@
 import type {
-  StateInstance,
+  ObserveStateInstance,
   ReactionOptions,
-  EachObject,
+  DataObject,
+  StateInstance,
+  CommitChange,
+  PathTreeInstance,
 } from "../shared/types";
 
-import { Observer } from "../components";
+import { Observer, Path, PathTree } from "../components";
 import { defaultEqualResolver } from "../shared";
 import { manager } from "./batch";
 
-abstract class State<S extends EachObject = EachObject>
+abstract class ObserveState<S extends DataObject = DataObject>
   extends Observer<S>
-  implements StateInstance<S>
+  implements ObserveStateInstance<S>
 {
   public abstract readonly data: S;
-
-  public change(change: Partial<S> | ((prev: S) => S)): void {
-    let value = change as S;
-    if (typeof change === "function") {
-      value = change(this.data);
-    }
-
-    const previous = {} as S;
-    for (const key in value) {
-      previous[key] = this.data[key];
-      this.data[key] = value[key];
-    }
-
-    this.emit({
-      current: value,
-      previous,
-    });
-  }
 
   public reaction<T extends unknown[]>(
     selectors: ((state: S) => unknown)[],
@@ -65,6 +50,63 @@ abstract class State<S extends EachObject = EachObject>
 
     return this.listen(() => manager.action(handler));
   }
+
+  public watch(paths: string[], action: VoidFunction): VoidFunction;
+  public watch(paths: PathTreeInstance, action: VoidFunction): VoidFunction;
+  public watch(paths: unknown, action: VoidFunction): VoidFunction {
+    let tree = paths as PathTreeInstance;
+    if (!(paths instanceof PathTree)) {
+      tree = new PathTree(paths as string[]);
+    }
+
+    return this.listen(({ paths }) => {
+      if (paths.every((path) => !tree.test(path))) {
+        return;
+      }
+
+      return manager.action(action);
+    });
+  }
 }
 
-export default State;
+abstract class State<S extends DataObject = DataObject>
+  extends ObserveState<S>
+  implements StateInstance<S>
+{
+  public abstract readonly data: S;
+
+  public change(value: Partial<S>): void;
+  public change(change: (prev: S) => S): void;
+  public change(change: unknown): void {
+    let value = change as S;
+    if (typeof change === "function") {
+      value = change(this.data);
+    }
+
+    const paths = [];
+    for (const key in value) {
+      paths.push(key);
+      this.data[key] = value[key];
+    }
+
+    this.emit({
+      paths,
+    });
+  }
+
+  public commit(changes: CommitChange[]): boolean[] {
+    const paths = [];
+    const results: boolean[] = [];
+    for (const { path, value } of changes) {
+      paths.push(path);
+
+      results.push(Path.set(this.data, path, value));
+    }
+
+    this.emit({ paths });
+
+    return results;
+  }
+}
+
+export { ObserveState, State };

@@ -1,13 +1,13 @@
 import React, { ComponentType, forwardRef, useEffect } from "react";
 
 // @ts-ignore
-import { EachObject, StateInstance } from "../../../state";
+import { DataObject, ObserveStateInstance } from "../../../state";
 
 import type { SelectToProps } from "../shared/types";
 import { deepEqual, useForceUpdate } from "../shared";
 
-function useConnect<T extends EachObject, R extends EachObject, P extends {}>(
-  state: StateInstance<T>,
+function useConnect<T extends DataObject, R extends DataObject, P extends {}>(
+  state: ObserveStateInstance<T>,
   selector: SelectToProps<T, R>,
   props: P
 ) {
@@ -32,8 +32,8 @@ function useConnect<T extends EachObject, R extends EachObject, P extends {}>(
   return selectProps;
 }
 
-function connect<S extends EachObject, R extends EachObject>(
-  state: StateInstance<S>,
+function connect<S extends DataObject, R extends DataObject>(
+  state: ObserveStateInstance<S>,
   selector: SelectToProps<S, R>
 ) {
   return function <P extends object>(Comp: ComponentType<P>) {
@@ -46,8 +46,8 @@ function connect<S extends EachObject, R extends EachObject>(
   };
 }
 
-function connectWithRef<S extends EachObject, R extends EachObject>(
-  state: StateInstance<S>,
+function connectWithRef<S extends DataObject, R extends DataObject>(
+  state: ObserveStateInstance<S>,
   selector: SelectToProps<S, R>
 ) {
   return function <P extends object>(Comp: ComponentType<P>) {

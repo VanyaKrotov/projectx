@@ -15,7 +15,7 @@ abstract class Observer<T = unknown> implements ObserverInstance<T> {
     };
   }
 
-  public emit(event: ObserverEvent<T>): void {
+  public emit(event: ObserverEvent): void {
     for (const listener of this.#listeners) {
       if (listener(event)) {
         return;

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "@jest/globals";
 import { batch } from "../batch";
 
-import State from "../state";
+import { State } from "../state";
 
 describe("batch", () => {
   class Counter extends State<{ counter: number }> {
