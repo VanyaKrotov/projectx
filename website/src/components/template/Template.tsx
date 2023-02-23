@@ -1,6 +1,6 @@
 import React, { ReactNode, FC } from "react";
 
-import { Header } from "./components";
+import { Header, Loader } from "./components";
 
 import "./template.scss";
 
@@ -14,7 +14,7 @@ const Template: FC<Props> = ({ children, loading }) => {
     <main>
       <Header />
       <article className="center-container">
-        {loading ? <div>loading...</div> : children}
+        {loading ? <Loader /> : children}
       </article>
     </main>
   );
