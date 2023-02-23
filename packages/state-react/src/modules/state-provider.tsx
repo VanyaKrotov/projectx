@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useContext, useMemo } from "react";
 
-import { ObserveStateInstance } from "../../../state/src";
+import { ObserveStateInstance } from "projectx.state";
 
 import { DefaultContext } from "../shared";
 

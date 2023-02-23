@@ -1,7 +1,5 @@
 import React, { ComponentType, forwardRef, useEffect, useState } from "react";
-
-// @ts-ignore
-import { DataObject, ObserveStateInstance, PathTree } from "../../../state";
+import { DataObject, ObserveStateInstance, PathTree } from "projectx.state";
 
 import { deepEqual, getValues } from "../shared";
 import { useStateOrDefault } from "./hooks";

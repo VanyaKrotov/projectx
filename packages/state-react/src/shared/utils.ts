@@ -1,4 +1,4 @@
-import { ObserveStateInstance, Path } from "../../../state/src";
+import { ObserveStateInstance, Path } from "projectx.state";
 
 export function deepEqual<T extends object>(a: T, b: T): boolean {
   const keysA = Object.keys(a);

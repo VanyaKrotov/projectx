@@ -4,7 +4,7 @@ import {
   DataObject,
   EqualResolver,
   ObserveStateInstance,
-} from "../../../state/src";
+} from "projectx.state";
 import { DefaultContext, getValues } from "../shared";
 
 function useStateOrDefault<S extends ObserveStateInstance>(state?: S): S {

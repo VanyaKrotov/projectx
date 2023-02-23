@@ -2,7 +2,7 @@ import React, { FC } from "react";
 
 import { useSelect, useWatch } from "./hooks";
 
-import { DataObject, ObserveStateInstance } from "../../../state/src";
+import { DataObject, ObserveStateInstance } from "projectx.state";
 
 interface ObserveProps<S extends DataObject, R> {
   state?: ObserveStateInstance<S>;

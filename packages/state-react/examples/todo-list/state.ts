@@ -1,5 +1,4 @@
-import { State } from "../../../state/src/modules/state";
-
+import State from "projectx.state";
 export interface Todo {
   id: number;
   title: string;

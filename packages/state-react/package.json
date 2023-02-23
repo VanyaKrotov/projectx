@@ -25,6 +25,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
+    "projectx.state": "^0.0.1-beta",
     "react": "^18.2.0"
   }
 }
