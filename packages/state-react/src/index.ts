@@ -3,10 +3,11 @@ export {
   connectWithRef,
   connectWatch,
   connectWatchWithRef,
-  useSelect,
   SelectObserve,
   WatchObserve,
   StateProvider,
   useWatch,
+  useSelect,
+  useLocalState,
   useStateOrDefault,
 } from "./modules";

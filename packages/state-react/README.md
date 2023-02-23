@@ -75,6 +75,24 @@ const ConnectIncrement = connectWatch<[number], Props>(
 )(Increment);
 ```
 
+- `useLocalState()` - react хук для создания локального состояния;
+
+Пример:
+
+```tsx
+const Increment: FC = () => {
+  const state = useLocalState(() => new CounterState());
+
+  return (
+    <div>
+      <div>{state.counter}</div>
+      <button onClick={() => state.increment()}>+</button>
+      <button onClick={() => state.decrement()}>-</button>
+    </div>
+  );
+};
+```
+
 - `useSelect()` - react хук для выбора данных из состояния с дальнейшим простушиванием изменений;
 
 Пример:

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import {
   DataObject,
@@ -51,4 +51,26 @@ function useWatch<R = unknown[], S extends DataObject = DataObject>(
   return result;
 }
 
-export { useWatch, useStateOrDefault, useSelect };
+function useLocalState<S extends DataObject, T extends ObserveStateInstance<S>>(
+  initial: () => T
+): T {
+  const [_, forceUpdate] = useState([]);
+  const ref = useRef<T>();
+  if (!ref.current) {
+    ref.current = initial();
+  }
+
+  useEffect(() => {
+    const unsubscribe = ref.current!.listen(() => forceUpdate([]));
+
+    return () => {
+      unsubscribe();
+      ref.current?.dispose();
+      ref.current = undefined;
+    };
+  }, []);
+
+  return ref.current!;
+}
+
+export { useWatch, useStateOrDefault, useSelect, useLocalState };
