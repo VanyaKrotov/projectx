@@ -18,7 +18,11 @@ npm i projectx.state
 
   - `change()` - метод для мутации состояния;
 
-  - `reaction()` - метод для отслеживания мутаций состояния;
+  - `commit()` - метод для мутации состояния посредством точечного внесения изменений;
+
+  - `reaction()` - метод для отслеживания мутаций состояния с использованием мемоизации вычисляемых данных;
+
+  - `watch()` - метод для отслеживания точечных мутаций определенных полей состояния;
 
   - `dispose()` - метод для сброса всех отслеживаний состояния;
 
@@ -43,7 +47,9 @@ class CounterState extends State<{ counter: number }> {
 // counter.increment() => function
 // counter.decrement() => function
 // counter.change() => function
+// counter.commit() => function
 // counter.reaction() => function
+// counter.watch() => function
 // counter.dispose() => function
 // counter.data => object
 const counter = new CounterState();
@@ -81,7 +87,7 @@ unlisten();
 counter.increment();
 ```
 
-- `combine()` - функция для объединения нескольких состояний в одно с единым центром отслеживания реакций.
+- `combine()` - функция для объединения нескольких состояний в одно с единым центром отслеживания реакций и без возможности изменения данных.
 
 Пример:
 
@@ -111,8 +117,8 @@ const b = new B();
 const c = new B();
 
 // comb structure:
-// counter.change() => function
 // counter.reaction() => function
+// counter.watch() => function
 // counter.dispose() => function
 // counter.data => object
 const comb = combine({
@@ -142,7 +148,7 @@ c.increment();
 // reaction[c]: 101
 ```
 
-- `batch()` - функция объединяющая мутации одно или более состояний.
+- `batch()` - функция объединяющая мутации одного или более состояний.
 
 Пример:
 
@@ -194,4 +200,116 @@ batch(() => {
 });
 // reaction:  111
 // reaction[c]:  105
+```
+
+- `PathTree` - класс для создания дерева точечных отслеживаний. (необходимо для метода `watch`)
+
+  - `push()` - добавляет путь в дерево;
+
+  - `test()` - сопоставляет пути мутации с отслеживаемыми данными. Возвращает `true` если мутация влекет за собой изменение отслеживаемого поля.
+
+Пример:
+
+```ts
+const tree = new PathTree(["array.0", "test.value"]);
+
+tree.test("array.1"); // false
+tree.test("array.0"); // true
+tree.test("test.value"); // true
+tree.test("test"); // true
+tree.test("array"); // true
+```
+
+- `Path` - статический класс предоставляющий набор методов для работы с путями мутаций.
+
+  - `get()` - получает значние поля по пути для объекта;
+
+  - `set()` - мутирует значние поля по пути для объектов;
+
+  - `isValid()` - проверяет валидность строки пути;
+
+  - `toString()` - объединяет путь представленный как коллекцию в строку;
+
+  - `fromString()` - разбивает строковый путь в вид коллекции;
+
+  - `toLodashPath()` - переводит строковый путь `projectx.state` в [lodash](https://github.com/lodash/lodash) path;
+
+Пример:
+
+```ts
+Path.get({ value: 10, next: { value: 11 } }, "value"); // 10
+Path.get({ value: 10, next: { value: 11 } }, "next.value"); // 11
+Path.get({ value: 10, next: { value: 11, next: null } }, "next.next.value"); // null
+
+const obj = { value: 10, next: { value: 11, next: null } };
+
+Path.set(obj, "next.value", 20); // true
+// obj => { value: 10, next: { value: 20, next: null } }
+Path.set(obj, "next.next.value", 20); // false
+// obj => { value: 10, next: { value: 11, next: null } }
+
+Path.isValid("path."); // false
+Path.isValid("path.0"); // true
+Path.isValid("path.0.test"); // true
+Path.isValid(".path.0.test"); // false
+Path.isValid("path[0].test"); // false
+
+Path.toString(["next", "value"]); // 'next.value'
+Path.fromString("next.value"); // ["next", "value"]
+
+Path.toLodashPath("value.array.0.test"); // value.array[0].test
+```
+
+## Особые возможности
+
+### В случае необходимости добавления промежуточных слоев для состояний это можно реализовать посредстром переопределения методов состояния.
+
+Пример:
+
+```ts
+// Если необходимо по достижению определенного значения останавливать мутации
+class CounterState extends State<{ counter: number }> {
+  public readonly data = {
+    counter: 0,
+  };
+
+  public increment() {
+    this.change({ counter: this.data.counter + 1 });
+  }
+
+  public decrement() {
+    this.change({ counter: this.data.counter - 1 });
+  }
+
+  public change(value: Partial<{ counter: number }>): void {
+    if (value.counter && value.counter > 10) {
+      return;
+    }
+
+    return super.change(value);
+  }
+}
+
+// Если необходимо останавливать отслеживания изменений определенных полей после мутации
+class CounterState extends State<{ counter: number }> {
+  public readonly data = {
+    counter: 0,
+  };
+
+  public increment() {
+    this.change({ counter: this.data.counter + 1 });
+  }
+
+  public decrement() {
+    this.change({ counter: this.data.counter - 1 });
+  }
+
+  public emit(event: ObserverEvent): void {
+    if (event.paths.includes("counter") && this.data.counter > 5) {
+      return;
+    }
+
+    return super.emit(event);
+  }
+}
 ```
