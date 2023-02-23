@@ -3,7 +3,7 @@ import React, { FC } from "react";
 import { DocSection } from "entities/view/types";
 
 interface Props {
-  data: DocSection;
+  section: string;
 }
 
 const Started: FC<Props> = () => {

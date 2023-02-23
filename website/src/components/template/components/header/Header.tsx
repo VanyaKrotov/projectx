@@ -14,7 +14,7 @@ import SearchIcon from "@rsuite/icons/Search";
 // @ts-ignore
 import { repository } from "@/package.json";
 
-import { viewStore } from "entities/view";
+import { viewState } from "entities/view";
 
 import ThemeIcon from "assets/icons/theme-light-dark.svg";
 import GitHubIcon from "assets/icons/github.svg";
@@ -59,7 +59,7 @@ const Header = () => {
 
             <IconButton
               icon={<Icon as={ThemeIcon} />}
-              onClick={() => viewStore.toggleTheme()}
+              onClick={() => viewState.toggleTheme()}
               appearance="subtle"
               circle
               size="lg"

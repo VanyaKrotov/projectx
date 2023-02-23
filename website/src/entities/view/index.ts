@@ -1,7 +1,5 @@
-import { observable } from "projectx.store";
+import ViewState from "./state";
 
-import ViewStore from "./store";
+const viewState = new ViewState();
 
-const viewStore = observable.fromObject(new ViewStore());
-
-export { viewStore };
+export { viewState };
