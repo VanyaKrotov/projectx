@@ -1,7 +1,7 @@
 {
   "name": "projectx.state",
   "version": "0.0.1-beta",
-  "description": "Lightweight reactive state manager",
+  "description": "State manager",
   "main": "src/index.ts",
   "author": {
     "name": "Ivan Krotov",
