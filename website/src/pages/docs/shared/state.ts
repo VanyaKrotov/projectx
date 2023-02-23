@@ -1,30 +1,35 @@
+import State from "projectx.state";
 import { di } from "shared/constants";
-import { transaction } from "projectx.store";
 
 import { DocData } from "entities/view/types";
 import { ViewService } from "entities/view/service";
 
-class HomePageState {
-  public loading = true;
-  public error: string | null = null;
-  public data: DocData | null = null;
+interface HomePageStateData {
+  loading: boolean;
+  error: string | null;
+  data: DocData | null;
+}
 
-  readonly #viewService = di.injectSync(ViewService)!;
+class HomeState extends State<HomePageStateData> {
+  public data: HomePageStateData = {
+    data: null,
+    error: null,
+    loading: true,
+  };
+
+  readonly viewService = di.inject(ViewService)!;
 
   public async loadData(lib: string) {
-    transaction(() => {
-      this.loading = true;
-      this.error = null;
-    });
+    this.change({ loading: true, error: null });
 
     try {
-      this.data = await this.#viewService.loadDocsForLib(lib);
-    } catch (error) {
-      this.error = (error as Error).message;
-    }
+      const data = await this.viewService.loadDocsForLib(lib);
 
-    this.loading = false;
+      this.change({ loading: false, data });
+    } catch (error) {
+      this.change({ error: (error as Error).message, loading: false });
+    }
   }
 }
 
-export default HomePageState;
+export default HomeState;

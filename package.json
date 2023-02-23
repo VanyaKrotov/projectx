@@ -6,6 +6,8 @@
     "dev:store": "node scripts/dev.store.js",
     "dev:react": "node scripts/dev.react.js",
     "dev:di": "node scripts/dev.di.js",
+    "dev:state": "node scripts/dev.state.js",
+    "dev:state-react": "node scripts/dev.state-react.js",
     "test": "jest --config=config/jest.config.ts",
     "test:watch": "jest --config=config/jest.config.ts --watch"
   },

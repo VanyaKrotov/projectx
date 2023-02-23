@@ -1,0 +1,22 @@
+{
+  "name": "projectx.state",
+  "version": "0.0.1-beta",
+  "description": "State manager",
+  "main": "src/index.ts",
+  "author": {
+    "name": "Ivan Krotov",
+    "email": "vanyakrotov3059@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanyaKrotov/projectx",
+    "directory": "packages/state"
+  },
+  "license": "ISC",
+  "keywords": [
+    "state",
+    "observe",
+    "reactive",
+    "state manager"
+  ]
+}

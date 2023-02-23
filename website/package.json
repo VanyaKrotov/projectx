@@ -11,9 +11,9 @@
   "dependencies": {
     "@rsuite/icons": "^1.0.2",
     "axios": "^1.3.2",
-    "projectx.di": "^0.0.1-beta",
-    "projectx.store": "^0.0.6-beta",
-    "projectx.store-react": "^0.0.7-beta",
+    "projectx.di": "^0.0.2-beta",
+    "projectx.state": "^0.0.1-beta",
+    "projectx.state-react": "^0.0.2-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",

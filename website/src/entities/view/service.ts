@@ -5,7 +5,7 @@ import { ViewApi } from "./api";
 import { AxiosError } from "axios";
 
 class ViewService implements ViewServiceInstance {
-  private readonly api = di.injectSync(ViewApi)!;
+  private readonly api = di.inject(ViewApi)!;
 
   public async loadData(): Promise<ViewData> {
     try {
