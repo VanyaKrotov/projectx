@@ -7,9 +7,7 @@ import {
 } from "../../../state/src";
 import { DefaultContext, getValues } from "../shared";
 
-export function useStateOrDefault<S extends ObserveStateInstance>(
-  state?: S
-): S {
+function useStateOrDefault<S extends ObserveStateInstance>(state?: S): S {
   const context = useContext(DefaultContext);
   const workState = (state || context) as S;
   if (!workState) {
@@ -19,7 +17,7 @@ export function useStateOrDefault<S extends ObserveStateInstance>(
   return workState;
 }
 
-export function useSelect<R = unknown, S extends DataObject = DataObject>(
+function useSelect<R = unknown, S extends DataObject = DataObject>(
   selector: (state: ObserveStateInstance<S>) => R,
   state?: ObserveStateInstance<S>,
   equalResolver?: EqualResolver<R>
@@ -38,7 +36,7 @@ export function useSelect<R = unknown, S extends DataObject = DataObject>(
   return result;
 }
 
-export function useWatch<R = unknown[], S extends DataObject = DataObject>(
+function useWatch<R = unknown[], S extends DataObject = DataObject>(
   paths: string[],
   state?: ObserveStateInstance<S>
 ): R {
@@ -52,3 +50,5 @@ export function useWatch<R = unknown[], S extends DataObject = DataObject>(
 
   return result;
 }
+
+export { useWatch, useStateOrDefault, useSelect };

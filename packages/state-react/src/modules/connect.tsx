@@ -1,7 +1,7 @@
 import React, { ComponentType, forwardRef, useEffect, useState } from "react";
 
 // @ts-ignore
-import { DataObject, ObserveStateInstance } from "../../../state";
+import { DataObject, ObserveStateInstance, PathTree } from "../../../state";
 
 import { deepEqual, getValues } from "../shared";
 import { useStateOrDefault } from "./hooks";
@@ -66,7 +66,11 @@ function connectWithRef<R extends DataObject, S extends DataObject>(
   };
 }
 
-function useConnectWatch<R>(paths: string[], state?: ObserveStateInstance): R {
+function useConnectWatch<R>(
+  tree: PathTree,
+  paths: string[],
+  state?: ObserveStateInstance
+): R {
   const workState = useStateOrDefault<ObserveStateInstance>(state);
   const [selectProps, setSelectProps] = useState<R>(() =>
     getValues(workState, paths)
@@ -74,7 +78,7 @@ function useConnectWatch<R>(paths: string[], state?: ObserveStateInstance): R {
 
   useEffect(
     () =>
-      workState.watch(paths, () => setSelectProps(getValues(workState, paths))),
+      workState.watch(tree, () => setSelectProps(getValues(workState, paths))),
     [paths, workState]
   );
 
@@ -85,9 +89,11 @@ function connectWatch<R extends DataObject, S extends DataObject>(
   paths: string[],
   state?: ObserveStateInstance<S>
 ) {
+  const tree = new PathTree(paths);
+
   return function <P extends object>(Comp: ComponentType<P>) {
     return (props: Omit<P, keyof R>) => {
-      const selectProps = useConnectWatch(paths, state);
+      const selectProps = useConnectWatch(tree, paths, state);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} />;
@@ -99,9 +105,11 @@ function connectWatchWithRef<R extends DataObject, S extends DataObject>(
   paths: string[],
   state?: ObserveStateInstance<S>
 ) {
+  const tree = new PathTree(paths);
+
   return function <P extends object>(Comp: ComponentType<P>) {
     return forwardRef((props: Omit<P, keyof R>, ref) => {
-      const selectProps = useConnectWatch(paths, state);
+      const selectProps = useConnectWatch(tree, paths, state);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} ref={ref} />;
