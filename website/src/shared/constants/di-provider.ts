@@ -1,5 +1,5 @@
-import { createProvider } from "projectx.di";
+import { Provider } from "projectx.di";
 
-const provider = createProvider("Base");
+const provider = new Provider("Base");
 
 export default provider;

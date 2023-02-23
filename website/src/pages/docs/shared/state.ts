@@ -17,7 +17,7 @@ class HomeState extends State<HomePageStateData> {
     loading: true,
   };
 
-  readonly viewService = di.injectSync(ViewService)!;
+  readonly viewService = di.inject(ViewService)!;
 
   public async loadData(lib: string) {
     this.change({ loading: true, error: null });

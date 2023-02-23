@@ -19,7 +19,7 @@ class ViewState extends State<ViewStateData> {
     theme: "dark",
   };
 
-  readonly service = di.injectSync(ViewService)!;
+  readonly service = di.inject(ViewService)!;
 
   public toggleTheme() {
     this.change({ theme: this.data.theme === "dark" ? "light" : "dark" });
