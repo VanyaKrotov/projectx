@@ -8,9 +8,11 @@ describe("path", () => {
       array: [{ value: 10 }],
       test: 10,
       deep: { value: { test: 1 } },
+      next: null,
     };
 
     expect(Path.get(obj, "")).toEqual(obj);
+    expect(Path.get(obj, "next.next")).toEqual(null);
     expect(Path.get(obj, "array")).toEqual(obj.array);
     expect(Path.get(obj, "array.0")).toEqual(obj.array[0]);
     expect(Path.get(obj, "array.0.value")).toBe(obj.array[0].value);
