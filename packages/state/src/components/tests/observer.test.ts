@@ -5,7 +5,7 @@ import { Observer } from "../observer";
 
 describe("Observer", () => {
   test("default", () => {
-    const events: ObserverEvent<number>[] = [];
+    const events: ObserverEvent[] = [];
     const observer = new (class extends Observer<number> {})();
 
     const unlisten = observer.listen((event) => {
@@ -14,9 +14,9 @@ describe("Observer", () => {
 
     expect(typeof unlisten).toBe("function");
 
-    const event1 = { current: 1, previous: 0 };
-    const event2 = { current: 2, previous: 1 };
-    const event3 = { current: 3, previous: 2 };
+    const event1 = { paths: ["counter"] };
+    const event2 = { paths: ["test"] };
+    const event3 = { paths: [] };
 
     expect(events.length).toBe(0);
 
@@ -32,9 +32,9 @@ describe("Observer", () => {
   });
 
   test("stop event", () => {
-    const events1: ObserverEvent<number>[] = [];
-    const events2: ObserverEvent<number>[] = [];
-    const observer = new (class extends Observer<number> {})();
+    const events1: ObserverEvent[] = [];
+    const events2: ObserverEvent[] = [];
+    const observer = new (class extends Observer {})();
 
     const unlisten1 = observer.listen((event) => {
       events1.push(event);
@@ -49,9 +49,9 @@ describe("Observer", () => {
     expect(typeof unlisten1).toBe("function");
     expect(typeof unlisten2).toBe("function");
 
-    const event1 = { current: 1, previous: 0 };
-    const event2 = { current: 2, previous: 1 };
-    const event3 = { current: 3, previous: 2 };
+    const event1 = { paths: ["counter"] };
+    const event2 = { paths: ["counter", "test"] };
+    const event3 = { paths: [] };
 
     expect(events1.length).toBe(0);
     expect(events2.length).toBe(0);

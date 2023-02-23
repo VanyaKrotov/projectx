@@ -50,7 +50,7 @@ function setRecursive(target: object, path: string[], value: unknown): boolean {
   return false;
 }
 
-class Path {
+abstract class Path {
   private static readonly pattern = /^([\w\d_-]+(\.{1}[\w\d_-]+)*)+$/;
 
   public static isValid(path: string): boolean {

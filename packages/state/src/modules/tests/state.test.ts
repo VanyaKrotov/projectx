@@ -35,6 +35,11 @@ describe("State", () => {
 
   test("change", () => {
     const state = new Counter();
+    let changeCount = 0;
+
+    state.watch(["counter"], () => {
+      changeCount++;
+    });
 
     expect(state.data).toEqual(DEFAULT_DATA);
 
@@ -42,10 +47,35 @@ describe("State", () => {
     state.increment();
 
     expect(state.data.counter).toBe(2);
+    expect(changeCount).toBe(2);
 
     state.decrement();
 
     expect(state.data.counter).toBe(1);
+    expect(changeCount).toBe(3);
+  });
+
+  test("commit", () => {
+    const state = new Counter();
+    let changeCount = 0;
+
+    state.watch(["counter"], () => {
+      changeCount++;
+    });
+
+    expect(state.data).toEqual(DEFAULT_DATA);
+
+    state.increment();
+    state.increment();
+    state.commit([{ path: "counter", value: 20 }]);
+
+    expect(state.data.counter).toBe(20);
+    expect(changeCount).toBe(3);
+
+    state.decrement();
+
+    expect(state.data.counter).toBe(19);
+    expect(changeCount).toBe(4);
   });
 
   test("reaction", () => {

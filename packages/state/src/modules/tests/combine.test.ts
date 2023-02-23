@@ -1,7 +1,7 @@
 import { describe, test, expect } from "@jest/globals";
 
 import { combine } from "../combine";
-import State from "../state";
+import { State } from "../state";
 
 describe("combine", () => {
   class A extends State<{ val: number }> {
