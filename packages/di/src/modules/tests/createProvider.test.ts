@@ -1,8 +1,8 @@
 import { describe, test, expect } from "@jest/globals";
 
-import { createProvider } from "../create-provider";
+import { Provider } from "../create-provider";
 
-describe("createProvider", () => {
+describe("Provider", () => {
   class A {
     print() {
       return "A";
@@ -16,14 +16,14 @@ describe("createProvider", () => {
   }
 
   test("register", () => {
-    const provider = createProvider();
+    const provider = new Provider();
 
     provider.register(A);
     provider.register(B);
 
     const temp = {
-      a: provider.injectSync(A),
-      b: provider.injectSync(B),
+      a: provider.inject(A),
+      b: provider.inject(B),
     };
 
     expect(temp.a?.print()).toBe("A");
@@ -31,7 +31,7 @@ describe("createProvider", () => {
   });
 
   test("unregister", () => {
-    const provider = createProvider();
+    const provider = new Provider();
 
     provider.register(A);
     provider.register(B);
@@ -39,32 +39,32 @@ describe("createProvider", () => {
     provider.unregister(B);
 
     const temp = {
-      a: provider.injectSync(A),
-      b: provider.injectSync(B),
+      a: provider.inject(A),
+      b: provider.inject(B),
     };
 
     expect(temp.a?.print()).toBe("A");
     expect(temp.b?.print()).toBeUndefined;
   });
 
-  test("injectSync", () => {
-    const provider = createProvider();
+  test("inject", () => {
+    const provider = new Provider();
 
     provider.register(A);
 
-    const temp = provider.injectSync(A);
+    const temp = provider.inject(A);
 
     expect(temp?.print()).toBe("A");
   });
 
   test("injectAsync", () => {
-    const provider = createProvider();
+    const provider = new Provider();
 
     class C {
       private a: A | null = null;
 
       constructor() {
-        provider.injectAsync(A).then((a) => (this.a = a));
+        provider.injectAfterCreate(A).then((a) => (this.a = a));
       }
 
       print() {

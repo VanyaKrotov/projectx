@@ -1,3 +1,3 @@
-export { createProvider } from "./modules";
+export { Provider } from "./modules";
 
-export type { Provider, Target } from "./shared/types";
+export type { Profile, Target } from "./shared/types";

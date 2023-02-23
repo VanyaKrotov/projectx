@@ -1,6 +1,6 @@
 {
   "name": "projectx.di",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "Di manager",
   "main": "src/index.ts",
   "keywords": [
