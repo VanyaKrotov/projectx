@@ -1,4 +1,10 @@
-import React, { ComponentType, forwardRef, useEffect, useState } from "react";
+import React, {
+  ComponentType,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { DataObject, ObserveStateInstance, PathTree } from "projectx.state";
 
 import { deepEqual, getValues } from "../shared";
@@ -83,15 +89,17 @@ function useConnectWatch<R>(
   return selectProps;
 }
 
-function connectWatch<R extends DataObject, S extends DataObject>(
-  paths: string[],
-  state?: ObserveStateInstance<S>
-) {
+function connectWatch<
+  R extends unknown[],
+  T extends {} = {},
+  S extends DataObject = DataObject
+>(paths: string[], mapper: (values: R) => T, state?: ObserveStateInstance<S>) {
   const tree = new PathTree(paths);
 
   return function <P extends object>(Comp: ComponentType<P>) {
-    return (props: Omit<P, keyof R>) => {
-      const selectProps = useConnectWatch(tree, paths, state);
+    return (props: Omit<P, keyof T>) => {
+      const values = useConnectWatch<R>(tree, paths, state);
+      const selectProps = useMemo(() => mapper(values), [values]);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} />;
@@ -99,15 +107,17 @@ function connectWatch<R extends DataObject, S extends DataObject>(
   };
 }
 
-function connectWatchWithRef<R extends DataObject, S extends DataObject>(
-  paths: string[],
-  state?: ObserveStateInstance<S>
-) {
+function connectWatchWithRef<
+  R extends unknown[],
+  T extends {},
+  S extends DataObject
+>(paths: string[], mapper: (values: R) => T, state?: ObserveStateInstance<S>) {
   const tree = new PathTree(paths);
 
   return function <P extends object>(Comp: ComponentType<P>) {
-    return forwardRef((props: Omit<P, keyof R>, ref) => {
-      const selectProps = useConnectWatch(tree, paths, state);
+    return forwardRef((props: Omit<P, keyof T>, ref) => {
+      const values = useConnectWatch<R>(tree, paths, state);
+      const selectProps = useMemo(() => mapper(values), [values]);
 
       // @ts-ignore
       return <Comp {...props} {...selectProps} ref={ref} />;

@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { useStateOrDefault } from "../../../src";
+import { connectWatch, useStateOrDefault } from "../../../src";
 
 import { Todo, TodoState } from "../state";
 
@@ -10,13 +10,14 @@ const DEFAULT_TODO: Todo = {
   title: "",
 };
 
-const Form: FC = () => {
+const Form: FC<{ count: number }> = ({ count }) => {
   const state = useStateOrDefault<TodoState>();
 
   const [data, setData] = useState<Todo>(DEFAULT_TODO);
 
   return (
     <div>
+      {count}
       <h4>Create todo</h4>
       <div>
         <label>
@@ -76,4 +77,9 @@ const Form: FC = () => {
   );
 };
 
-export default Form;
+export default connectWatch<[Todo[]], { count: number }>(
+  ["items"],
+  ([items]) => ({
+    count: items.length,
+  })
+)(Form);
