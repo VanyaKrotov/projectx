@@ -1,4 +1,9 @@
-export { connect, connectWithRef } from "./connect";
+export {
+  connect,
+  connectWithRef,
+  connectWatch,
+  connectWatchWithRef,
+} from "./connect";
 export { SelectObserve, WatchObserve } from "./observable";
 export { StateProvider } from "./state-provider";
 

@@ -1,6 +1,8 @@
 export {
   connect,
   connectWithRef,
+  connectWatch,
+  connectWatchWithRef,
   useSelect,
   SelectObserve,
   WatchObserve,
