@@ -1,1 +1,1 @@
-export { Provider } from "./create-provider";
+export { Provider } from "./provider";

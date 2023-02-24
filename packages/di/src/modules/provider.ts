@@ -7,19 +7,24 @@ import type {
 
 import { uid } from "../shared/uid";
 
-class Provider implements ProviderInstance {
-  private readonly store = new Map<Target, object>();
-  private readonly queue = new Map<Target, Set<(t: any) => void>>();
+class Provider<TToken extends string = string>
+  implements ProviderInstance<TToken>
+{
+  private readonly store = new Map<Target<object, TToken>, object>();
+  private readonly queue = new Map<
+    Target<object, TToken>,
+    Set<(t: any) => void>
+  >();
 
   constructor(public readonly name = `Provider#${uid()}`) {}
 
-  public register<T extends object>(target: Profile<T>): void;
+  public register<T extends object>(target: Profile<T, TToken>): void;
   public register<T extends object>(target: Constructable<T>): void;
   public register<T extends object>(target: object): void {
-    let data = target as Profile<T>;
+    let data = target as Profile<T, TToken>;
     if (!("target" in target && "instance" in target)) {
       data = {
-        target: target as Target,
+        target: target as Target<T, TToken>,
         instance: new (target as Constructable<T, any>)(),
       };
     }
@@ -48,15 +53,17 @@ class Provider implements ProviderInstance {
     this.queue.delete(data.target);
   }
 
-  public unregister<T extends object>(target: Target<T>): boolean {
+  public unregister<T extends object>(target: Target<T, TToken>): boolean {
     return this.store.delete(target) && this.queue.delete(target);
   }
 
-  public inject<T extends object>(target: Target<T>): T | null {
+  public inject<T extends object>(target: Target<T, TToken>): T | null {
     return this.store.get(target) as T;
   }
 
-  public injectAfterCreate<T extends object>(target: Target<T>): Promise<T> {
+  public injectAfterCreate<T extends object>(
+    target: Target<T, TToken>
+  ): Promise<T> {
     return new Promise<T>((resolve) => {
       const instance = this.inject(target);
       if (instance) {

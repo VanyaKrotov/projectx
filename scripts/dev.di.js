@@ -4,7 +4,7 @@ const path = require("path");
 const { getConfig } = require("../config/esbuild.config");
 const { runServer } = require("./server");
 
-const PATH = "../packages/projectx.di";
+const PATH = "../packages/di";
 
 esbuild
   .context(

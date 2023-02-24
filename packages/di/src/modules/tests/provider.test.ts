@@ -1,6 +1,6 @@
 import { describe, test, expect } from "@jest/globals";
 
-import { Provider } from "../create-provider";
+import { Provider } from "../provider";
 
 describe("Provider", () => {
   class A {

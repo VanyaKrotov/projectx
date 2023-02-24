@@ -1,6 +1,6 @@
-import { createProvider } from "../../packages/projectx.di";
+import { Provider } from "../../packages/di";
 
-const provider = createProvider();
+const provider = new Provider();
 
 class AccountService {
   getData() {
@@ -8,15 +8,10 @@ class AccountService {
   }
 }
 
-provider.register({
-  instance: new AccountService(),
-  target: "account-service",
-});
+provider.register(AccountService);
 
 class Account {
-  constructor(
-    private service = provider.injectSync<AccountService>("account-service")
-  ) {}
+  constructor(private service = provider.inject(AccountService)) {}
 
   print() {
     console.log(this.service);
@@ -26,7 +21,4 @@ class Account {
 
 const account = new Account();
 
-setTimeout(() => {
-  // Имитация клика
-  account.print();
-}, 10);
+account.print();
