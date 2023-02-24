@@ -1,7 +1,5 @@
 # ProjectX.DI
 
-_Библиотека для управления зависимостями_
-
 [![ Версия npm ](https://badge.fury.io/js/projectx.di.svg)](https://badge.fury.io/js/projectx.di)
 
 ## Установка
@@ -52,11 +50,11 @@ const provider = new Provider("TestProvider");
 provide.register(A);
 
 const container = {
-  a: provider.injectSync(A),
+  a: provider.inject(A),
   b: null,
 };
 
-provider.injectAsync(B).then((b) => {
+provider.injectAfterCreate(B).then((b) => {
   container.b = b;
 });
 

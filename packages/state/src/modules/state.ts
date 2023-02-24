@@ -5,6 +5,7 @@ import type {
   StateInstance,
   CommitChange,
   PathTreeInstance,
+  WatchOptions,
 } from "../shared/types";
 
 import { Observer, Path, PathTree } from "../components";
@@ -51,16 +52,32 @@ abstract class ObserveState<S extends DataObject = DataObject>
     return this.listen(() => manager.action(handler));
   }
 
-  public watch(paths: string[], action: VoidFunction): VoidFunction;
-  public watch(paths: PathTreeInstance, action: VoidFunction): VoidFunction;
-  public watch(paths: unknown, action: VoidFunction): VoidFunction {
+  public watch(
+    paths: string[],
+    action: VoidFunction,
+    options?: Partial<WatchOptions>
+  ): VoidFunction;
+  public watch(
+    paths: PathTreeInstance,
+    action: VoidFunction,
+    options?: Partial<WatchOptions>
+  ): VoidFunction;
+  public watch(
+    paths: unknown,
+    action: VoidFunction,
+    { initCall = false }: Partial<WatchOptions> = {}
+  ): VoidFunction {
     let tree = paths as PathTreeInstance;
     if (!(paths instanceof PathTree)) {
       tree = new PathTree(paths as string[]);
     }
 
-    return this.listen(({ paths }) => {
-      if (!paths.some((path) => tree.test(path))) {
+    if (initCall) {
+      action();
+    }
+
+    return this.listen(({ changeTree }) => {
+      if (!tree.includes(changeTree)) {
         return;
       }
 
@@ -76,28 +93,28 @@ abstract class State<S extends DataObject = DataObject>
   public abstract readonly data: S;
 
   public change(value: Partial<S>): void {
-    const paths = [];
+    const changeTree = new PathTree();
     for (const key in value) {
-      paths.push(key);
+      changeTree.push(key);
 
       this.data[key] = (value as S)[key];
     }
 
     this.emit({
-      paths,
+      changeTree,
     });
   }
 
   public commit(changes: CommitChange[]): boolean[] {
-    const paths = [];
+    const changeTree = new PathTree();
     const results: boolean[] = [];
     for (const { path, value } of changes) {
-      paths.push(path);
+      changeTree.push(path);
 
       results.push(Path.set(this.data, path, value));
     }
 
-    this.emit({ paths });
+    this.emit({ changeTree });
 
     return results;
   }

@@ -168,53 +168,96 @@ class CounterState extends State<{ counter: number; array: string[] }> {
   }
 }
 
+class Test extends State<{ array: { value: number }[] }> {
+  public data = {
+    array: [{ value: 10 }, { value: 20 }],
+  };
+
+  public changeArray() {
+    this.commit([{ path: "array.1.value", value: 2000 }]);
+  }
+
+  public restore() {
+    this.commit([{ path: "array.1.value", value: 20 }]);
+  }
+}
+
 const state = new CounterState();
+const test = new Test();
 
 const comb = combine({
   counter: state,
+  test,
 });
 
-comb.watch(["counter.counter"], () => {
-  console.log("watch[counter.counter]: ", comb.data.counter.counter);
-});
+// comb.watch(["counter.counter"], () => {
+//   console.log("watch[counter.counter]: ", comb.data.counter.counter);
+// });
 
-state.reaction([(state) => state.counter], (counter) => {
-  console.log("reaction[counter]: ", counter);
-});
+// comb.watch(["test.val"], () => {
+//   console.log("watch[test.val]: ", comb.data.test.val);
+// });
 
-state.watch(["counter"], () => {
-  console.log("watch[counter]: ", state.data.counter);
-});
+// state.reaction([(state) => state.counter], (counter) => {
+//   console.log("reaction[counter]: ", counter);
+// });
 
-state.watch(["array.2"], () => {
-  console.log("watch[array.2]: ", state.data.array[2]);
-});
+// state.watch(["counter"], () => {
+//   console.log("watch[counter]: ", state.data.counter);
+// });
 
-state.watch(["array.1"], () => {
-  console.log("watch[array.1]: ", state.data.array[1]);
-});
+// state.watch(["array.2"], () => {
+//   console.log("watch[array.2]: ", state.data.array[2]);
+// });
 
-state.watch(["array"], () => {
-  console.log("watch[array]: ", state.data.array);
-});
+// state.watch(["array.1"], () => {
+//   console.log("watch[array.1]: ", state.data.array[1]);
+// });
 
-state.watch(new PathTree(["array.1", "array.2"]), () => {
-  console.log(
-    "watch[array.1|array.2]: ",
-    state.data.array[1],
-    state.data.array[2]
-  );
-});
+// state.watch(["array"], () => {
+//   console.log("watch[array]: ", state.data.array);
+// });
+
+// state.watch(["array.0"], () => {
+//   console.log("watch[array[0]]: ", state.data.array[0]);
+// });
+
+// state.watch(new PathTree(["array.1", "array.2"]), () => {
+//   console.log(
+//     "watch[array.1|array.2]: ",
+//     state.data.array[1],
+//     state.data.array[2]
+//   );
+// });
 
 const buttonPlus = document.createElement("button");
 const buttonMinus = document.createElement("button");
 const buttonTest1 = document.createElement("button");
 const buttonTest2 = document.createElement("button");
 
+const div = document.createElement("div");
+const divTest = document.createElement("div");
+
 buttonPlus.innerText = "+";
 buttonMinus.innerText = "-";
 buttonTest1.innerText = "test1";
 buttonTest2.innerText = "test2";
+
+comb.watch(
+  ["counter.counter"],
+  () => {
+    div.innerText = `counter: ${state.data.counter}`;
+  },
+  { initCall: true }
+);
+
+comb.watch(
+  ["test.array.0", "test.array"],
+  () => {
+    divTest.innerText = `test: ${JSON.stringify(test.data.array)}`;
+  },
+  { initCall: true }
+);
 
 buttonPlus.addEventListener("click", () => {
   state.increment();
@@ -225,12 +268,17 @@ buttonMinus.addEventListener("click", () => {
 });
 
 buttonTest1.addEventListener("click", () => {
-  state.changeString();
+  // state.changeString();
+  test.changeArray();
 });
 
 buttonTest2.addEventListener("click", () => {
-  state.restoreString();
+  // state.restoreString();
+  test.restore();
 });
+
+document.body.appendChild(div);
+document.body.appendChild(divTest);
 
 document.body.appendChild(buttonPlus);
 document.body.appendChild(buttonMinus);

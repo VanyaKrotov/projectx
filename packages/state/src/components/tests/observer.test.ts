@@ -2,6 +2,7 @@ import { describe, test, expect } from "@jest/globals";
 
 import { ObserverEvent } from "../../shared/types";
 import { Observer } from "../observer";
+import { PathTree } from "../path-tree";
 
 describe("Observer", () => {
   test("default", () => {
@@ -14,9 +15,9 @@ describe("Observer", () => {
 
     expect(typeof unlisten).toBe("function");
 
-    const event1 = { paths: ["counter"] };
-    const event2 = { paths: ["test"] };
-    const event3 = { paths: [] };
+    const event1 = { changeTree: new PathTree(["counter"]) };
+    const event2 = { changeTree: new PathTree(["test"]) };
+    const event3 = { changeTree: new PathTree() };
 
     expect(events.length).toBe(0);
 
@@ -49,9 +50,9 @@ describe("Observer", () => {
     expect(typeof unlisten1).toBe("function");
     expect(typeof unlisten2).toBe("function");
 
-    const event1 = { paths: ["counter"] };
-    const event2 = { paths: ["counter", "test"] };
-    const event3 = { paths: [] };
+    const event1 = { changeTree: new PathTree(["counter"]) };
+    const event2 = { changeTree: new PathTree(["test", "counter"]) };
+    const event3 = { changeTree: new PathTree() };
 
     expect(events1.length).toBe(0);
     expect(events2.length).toBe(0);

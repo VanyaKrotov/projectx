@@ -1,12 +1,19 @@
-import { PathTreeInstance } from "../shared/types";
+import { isEmptyObject } from "../shared";
+import { PathTreeInstance, PathTreeNodeInstance } from "../shared/types";
 
 import { Path } from "./path";
 
-class PathTreeNode {
+class PathTreeNode implements PathTreeNodeInstance {
+  public point = false;
+
   constructor(
     public path: string,
     public children: Record<string, PathTreeNode> = {}
   ) {}
+
+  public get isEmpty(): boolean {
+    return isEmptyObject(this.children);
+  }
 }
 
 class PathTree extends PathTreeNode implements PathTreeInstance {
@@ -16,8 +23,20 @@ class PathTree extends PathTreeNode implements PathTreeInstance {
     this.createTree(paths);
   }
 
+  public static pushPrefix(path: string, node: PathTreeNode): PathTreeInstance {
+    const tree = new PathTree();
+
+    tree.children[path] = new PathTreeNode(path, node.children);
+
+    return tree;
+  }
+
   private pushNode(node: PathTreeNode, [path, ...rest]: string[]): void {
-    node.children[path] = node.children[path] || new PathTreeNode(path);
+    if (path in node.children) {
+      node.children[path].point = true;
+    } else {
+      node.children[path] = new PathTreeNode(path);
+    }
 
     if (rest.length) {
       return this.pushNode(node.children[path], rest);
@@ -36,27 +55,41 @@ class PathTree extends PathTreeNode implements PathTreeInstance {
     }
   }
 
-  private testRecursive(
-    node: PathTreeNode,
-    [path, ...rest]: string[]
+  public push(path: string): void {
+    this.pushNode(this, Path.fromString(path));
+  }
+
+  private testTreeRecursive(
+    watch: PathTreeNode,
+    change: PathTreeNode
   ): boolean {
-    if (path in node.children) {
-      return rest.length ? this.testRecursive(node.children[path], rest) : true;
+    if (
+      watch.point ||
+      (watch.isEmpty && change.isEmpty) ||
+      change.isEmpty != watch.isEmpty
+    ) {
+      return true;
+    }
+
+    for (const key in watch.children) {
+      if (!(key in change.children)) {
+        continue;
+      }
+
+      if (this.testTreeRecursive(watch.children[key], change.children[key])) {
+        return true;
+      }
     }
 
     return false;
   }
 
-  public test(path: string): boolean {
-    if (!Path.isValid(path)) {
-      return false;
+  public includes(node: PathTreeNodeInstance): boolean {
+    if (node.isEmpty) {
+      return this.isEmpty;
     }
 
-    return this.testRecursive(this, Path.fromString(path));
-  }
-
-  public push(path: string): void {
-    this.pushNode(this, Path.fromString(path));
+    return this.testTreeRecursive(this, node);
   }
 }
 

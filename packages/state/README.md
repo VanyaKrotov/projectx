@@ -206,18 +206,18 @@ batch(() => {
 
   - `push()` - добавляет путь в дерево;
 
-  - `test()` - сопоставляет пути мутации с отслеживаемыми данными. Возвращает `true` если мутация влекет за собой изменение отслеживаемого поля.
+  - `includes()` - сопоставляет дерево мутации с отслеживаемым деревом. Возвращает `true` если мутация влекет за собой изменение отслеживаемого поля.
 
 Пример:
 
 ```ts
 const tree = new PathTree(["array.0", "test.value"]);
 
-tree.test("array.1"); // false
-tree.test("array.0"); // true
-tree.test("test.value"); // true
-tree.test("test"); // true
-tree.test("array"); // true
+tree.includes(new PathTree(["array.1"])); // false
+tree.includes(new PathTree(["array.0"])); // true
+tree.includes(new PathTree(["test.value"])); // true
+tree.includes(new PathTree(["test"])); // true
+tree.includes(new PathTree(["array"])); // true
 ```
 
 - `Path` - статический класс предоставляющий набор методов для работы с путями мутаций.

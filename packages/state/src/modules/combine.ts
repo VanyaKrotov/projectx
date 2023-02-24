@@ -1,3 +1,4 @@
+import { PathTree } from "../components";
 import type { ObserveStateInstance, CombineState } from "../shared/types";
 
 import { ObserveState } from "./state";
@@ -21,7 +22,7 @@ function combine<T extends Record<string, ObserveStateInstance>>(
         this.unlisten.push(
           state.listen((event) =>
             this.emit({
-              paths: [key as string].concat(event.paths),
+              changeTree: PathTree.pushPrefix(key, event.changeTree),
             })
           )
         );
