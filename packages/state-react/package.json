@@ -1,6 +1,6 @@
 {
   "name": "projectx.state-react",
-  "version": "0.0.2-beta",
+  "version": "0.0.3-beta",
   "description": "",
   "main": "src/index.ts",
   "license": "ISC",
@@ -25,7 +25,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "projectx.state": "^0.0.1-beta",
+    "projectx.state": "^0.0.3-beta",
     "react": "^18.2.0"
   }
 }

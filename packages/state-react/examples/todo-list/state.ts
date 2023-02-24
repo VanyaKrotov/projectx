@@ -75,7 +75,7 @@ class TodoState extends State<TodoStateData> {
 
     this.data.items.splice(index, 1);
 
-    this.change({ items: [...this.data.items] });
+    this.change({ items: this.data.items });
   }
 
   public changeStatus(id: number, status: Todo["status"]) {
@@ -84,9 +84,7 @@ class TodoState extends State<TodoStateData> {
       return;
     }
 
-    this.data.items[index].status = status;
-
-    this.change({ items: [...this.data.items] });
+    this.commit([{ path: `items.${index}.status`, value: status }]);
   }
 }
 
