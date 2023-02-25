@@ -2,13 +2,14 @@
   width: 100%;
   display: flex;
   margin-top: 12px;
+  margin-bottom: 40px;
 
   & > div:first-child {
     width: 240px;
   }
 
   & > div:last-child {
-    flex: auto;
+    width: calc(100% - 240px);
     padding: 12px;
   }
 

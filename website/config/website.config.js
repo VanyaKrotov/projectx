@@ -1,6 +1,7 @@
 const path = require("path");
 const { sassPlugin } = require("esbuild-sass-plugin");
 const svgrPlugin = require("esbuild-plugin-svgr");
+const inlineImage = require("esbuild-plugin-inline-image");
 
 function getConfig({ mode = "development", minify = false }) {
   const { name, version, main } = require("../package.json");
@@ -24,6 +25,7 @@ function getConfig({ mode = "development", minify = false }) {
       sassPlugin({
         type: "style",
       }),
+      inlineImage(),
     ],
   };
 }

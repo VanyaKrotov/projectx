@@ -5,6 +5,7 @@ const path = require("path");
 const mime = {
   ".html": "text/html",
   ".css": "text/css",
+  ".png": "image/png",
 };
 
 function runServer({ port = 4000, includes = [], prefix = "../", outDir }) {
@@ -26,7 +27,7 @@ function runServer({ port = 4000, includes = [], prefix = "../", outDir }) {
         res.writeHead(200, { "content-type": type });
 
         result = {
-          content: file.toString(),
+          content: file,
           code: 200,
         };
       } catch (err) {

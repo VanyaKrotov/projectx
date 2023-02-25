@@ -16,6 +16,8 @@ import { createSearchParam } from "./shared/selectors";
 import { Examples, Install, Intro, Started } from "./components";
 import { SideNav } from "./modules";
 
+import "./styles.scss";
+
 const HomePage = () => {
   const state = useLocalState(() => new HomeState());
   const { pathname } = useLocation();
@@ -36,6 +38,8 @@ const HomePage = () => {
       />
     );
   }
+
+  console.log(state);
 
   return (
     <Layout sidebar={<SideNav lib={lib} section={section} version={version} />}>
