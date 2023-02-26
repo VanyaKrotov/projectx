@@ -12,14 +12,15 @@ import { Themes } from "entities/view/types";
 
 interface Props {
   children: string;
+  language?: "typescript" | "http";
 }
 
-const CodeView: FC<Props> = ({ children }) => {
+const CodeView: FC<Props> = ({ children, language = "typescript" }) => {
   const [theme] = useWatch<[Themes]>(["theme"], viewState);
   const style = theme === "dark" ? oneDark : oneLight;
 
   return (
-    <Prism language="typescript" style={style}>
+    <Prism language={language} style={style}>
       {children}
     </Prism>
   );

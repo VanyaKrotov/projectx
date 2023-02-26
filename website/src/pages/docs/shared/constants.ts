@@ -5,14 +5,9 @@ export const SECTIONS = [
     pathname: "intro",
   },
   {
-    title: "Устанока",
+    title: "Установка",
     eventKey: "install",
     pathname: "install",
-  },
-  {
-    title: "Начало работы",
-    eventKey: "started",
-    pathname: "started",
   },
   {
     title: "Примеры",
