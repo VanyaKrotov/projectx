@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useEffect } from "react";
 import { Affix } from "rsuite";
 
 import "./layout.scss";
@@ -11,7 +11,7 @@ interface Props {
 const Layout: FC<Props> = ({ children, sidebar }) => {
   return (
     <div className="layout-container">
-      <Affix top={60}>
+      <Affix top={72}>
         <div>{sidebar}</div>
       </Affix>
       <div>{children}</div>

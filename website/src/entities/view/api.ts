@@ -14,14 +14,16 @@ class ViewApi implements ViewApiInstance {
     return instance.get(`data/${path}`);
   }
 
-  public async loadData(): Promise<AxiosResponse<ViewData>> {
+  public loadData(): Promise<AxiosResponse<ViewData>> {
     return this.getFromGithub("index.json");
   }
 
-  public async loadDocsForLib(
-    libName: string
-  ): Promise<AxiosResponse<DocData>> {
+  public loadDocsForLib(libName: string): Promise<AxiosResponse<DocData>> {
     return this.getFromGithub(`docs/${libName}.json`);
+  }
+
+  public loadPageSection(path: string): Promise<AxiosResponse<string>> {
+    return this.getFromGithub(`${path}`);
   }
 }
 

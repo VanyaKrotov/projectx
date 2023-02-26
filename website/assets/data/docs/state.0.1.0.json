@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "sections": {
+    "intro": {
+      "path": "pages/docs/state/intro.html"
+    },
+    "install": {
+      "path": "pages/docs/state/install.html"
+    },
+    "examples": {
+      "path": "pages/docs/state/examples.html"
+    }
+  }
+}

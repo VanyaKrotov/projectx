@@ -3,7 +3,7 @@ import React, { FC } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FlexboxGrid, IconButton } from "rsuite";
 
-interface Props {
+export interface ToolbarProps {
   prev?: {
     link: string;
     title: string;
@@ -14,7 +14,7 @@ interface Props {
   };
 }
 
-const Toolbar: FC<Props> = ({ prev, next }) => {
+const Toolbar: FC<ToolbarProps> = ({ prev, next }) => {
   const { search } = useLocation();
 
   return (

@@ -9,12 +9,11 @@ import {
 } from "react-router-dom";
 
 import Layout from "components/layout";
-import DocumentTitle from "components/document-title";
 
 import HomeState from "./shared/state";
 import { createSearchParam } from "./shared/selectors";
 
-import { Examples, Install, Intro } from "./components";
+import { Section } from "./components";
 import { SideNav } from "./modules";
 
 import "./styles.scss";
@@ -40,7 +39,7 @@ const HomePage = () => {
     );
   }
 
-  console.log(state);
+  const currentSectionPath = state.data.data?.sections[section].path;
 
   return (
     <Layout sidebar={<SideNav lib={lib} section={section} version={version} />}>
@@ -49,25 +48,38 @@ const HomePage = () => {
           <Route
             path="intro"
             element={
-              <DocumentTitle title={`Введение - ${lib}`}>
-                <Intro section={section} />
-              </DocumentTitle>
+              <Section
+                path={currentSectionPath}
+                title={`Введение - ${lib}`}
+                toolbarProps={{
+                  next: { link: "/docs/install", title: "Установка" },
+                }}
+              />
             }
           />
           <Route
             path="install"
             element={
-              <DocumentTitle title={`Установка - ${lib}`}>
-                <Install section={section} />
-              </DocumentTitle>
+              <Section
+                path={currentSectionPath}
+                title={`Установка - ${lib}`}
+                toolbarProps={{
+                  next: { link: "/docs/examples", title: "Примеры" },
+                  prev: { link: "/docs/intro", title: "Введение" },
+                }}
+              />
             }
           />
           <Route
             path="examples"
             element={
-              <DocumentTitle title={`Примеры - ${lib}`}>
-                <Examples section={section} />
-              </DocumentTitle>
+              <Section
+                path={currentSectionPath}
+                title={`Примеры - ${lib}`}
+                toolbarProps={{
+                  prev: { link: "/docs/install", title: "Установка" },
+                }}
+              />
             }
           />
         </Routes>

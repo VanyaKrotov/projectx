@@ -26,6 +26,16 @@ class ViewService implements ViewServiceInstance {
       throw new Error(JSON.stringify((error as AxiosError).response?.data));
     }
   }
+
+  public async loadPageSection(path: string): Promise<string> {
+    try {
+      const { data } = await this.api.loadPageSection(path);
+
+      return data;
+    } catch (error) {
+      throw new Error(JSON.stringify((error as AxiosError).response?.data));
+    }
+  }
 }
 
 di.register(ViewService);

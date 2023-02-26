@@ -30,7 +30,9 @@ export interface ViewData {
   };
 }
 
-export interface DocSection {}
+export interface DocSection {
+  path: string;
+}
 
 export interface DocData {
   version: string;
