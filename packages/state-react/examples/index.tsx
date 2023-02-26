@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { createRoot } from "react-dom/client";
+import { LocalState, LocalStateStrict } from "./local-state";
 import TodoList from "./todo-list";
 
 const App: FC = () => {
@@ -11,6 +12,11 @@ const App: FC = () => {
       <div>
         <h2>Todo list</h2>
         <TodoList />
+      </div>
+      <div>
+        <h2>Counter (local state)</h2>
+        <LocalState />
+        <LocalStateStrict />
       </div>
     </div>
   );

@@ -51,8 +51,13 @@ function useWatch<R = unknown[], S extends DataObject = DataObject>(
   return result;
 }
 
+interface LocalStateOptions {
+  mode: "strict" | "react";
+}
+
 function useLocalState<S extends DataObject, T extends ObserveStateInstance<S>>(
-  initial: () => T
+  initial: () => T,
+  { mode = "react" }: Partial<LocalStateOptions> = {}
 ): T {
   const [_, forceUpdate] = useState([]);
   const ref = useRef<T>();
@@ -61,12 +66,18 @@ function useLocalState<S extends DataObject, T extends ObserveStateInstance<S>>(
   }
 
   useEffect(() => {
-    const unsubscribe = ref.current!.listen(() => forceUpdate([]));
+    let unsubscribe: VoidFunction;
+    if (mode === "react") {
+      unsubscribe = ref.current!.listen(() => forceUpdate([]));
+    }
 
     return () => {
-      unsubscribe();
-      ref.current?.dispose();
-      ref.current = undefined;
+      unsubscribe?.();
+
+      if (ref.current) {
+        ref.current.dispose();
+        ref.current = undefined;
+      }
     };
   }, []);
 
