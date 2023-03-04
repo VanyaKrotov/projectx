@@ -229,7 +229,7 @@ const comb = combine({
 //     state.data.array[2]
 //   );
 // });
-
+/*
 const buttonPlus = document.createElement("button");
 const buttonMinus = document.createElement("button");
 const buttonTest1 = document.createElement("button");
@@ -284,3 +284,207 @@ document.body.appendChild(buttonPlus);
 document.body.appendChild(buttonMinus);
 document.body.appendChild(buttonTest1);
 document.body.appendChild(buttonTest2);
+*/
+
+function createInterceptor() {
+  let handlers = new Set<(o: Observer) => void>();
+
+  return {
+    register: (handler: (o: Observer) => void) => {
+      handlers.add(handler);
+
+      return () => {
+        handlers.delete(handler);
+      };
+    },
+    get handler(): (o: Observer) => void {
+      return Array.from(handlers).pop()!;
+    },
+  };
+}
+
+const interceptor = createInterceptor();
+
+interface Event {}
+
+interface Observer {
+  listen: (listener: (e: Event) => void) => VoidFunction;
+  emit: (e: Event) => void;
+  paths: string[];
+}
+
+function createObserver(paths: string[]): Observer {
+  const listeners = new Set<(e: Event) => void>();
+
+  return {
+    paths,
+    listen: (listener) => {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    emit: (e) => {
+      for (const listener of listeners) {
+        listener(e);
+      }
+    },
+  };
+}
+
+const OBJ_PROPERTIES = Object.getPrototypeOf({});
+
+function getAllObjectFields<T extends object>(object: T): PropertiesInfo {
+  const prototypes = Object.getPrototypeOf(object);
+  if (!prototypes || prototypes === OBJ_PROPERTIES) {
+    return Object.getOwnPropertyDescriptors(object);
+  }
+
+  return Object.assign(
+    getAllObjectFields(prototypes),
+    Object.getOwnPropertyDescriptors(prototypes),
+    Object.getOwnPropertyDescriptors(object)
+  );
+}
+
+function observerObject<T extends object>(target: T, path: string[] = []): T {
+  const properties = getAllObjectFields(target);
+  const result = {} as T;
+  const observers = {} as Record<string, Observer>;
+  for (const key in properties) {
+    const {
+      get,
+      value,
+      configurable = true,
+      enumerable = true,
+    } = properties[key];
+
+    let prop: PropertyDescriptor = {
+      configurable,
+      enumerable,
+    };
+    if (typeof value === "function") {
+      prop.value = value;
+    } else {
+      observers[key] = createObserver([...path, key]);
+
+      const val = observer(get?.() || value, [...path, key]);
+
+      prop.get = () => {
+        interceptor.handler(observers[key]);
+
+        return val;
+      };
+
+      prop.set = (value) => {
+        result[key as keyof T] = value;
+
+        observers[key].emit({});
+
+        return true;
+      };
+    }
+
+    Object.defineProperty(result, key, prop);
+  }
+
+  return result;
+}
+
+function observerArray<T>(target: Array<T>, path: string[] = []): Array<T> {
+  return new Proxy(
+    target.map((e, i) => observer(e, [...path, String(i)])) as Array<T>,
+    {
+      deleteProperty(target, p) {
+        const index = Number(p);
+        if (Number.isNaN(index)) {
+          return false;
+        }
+
+        return target.splice(index, 1).length > 0;
+      },
+      get(_t, p) {
+        const index = Number(p);
+        if (Number.isNaN(index)) {
+          const fn = _t[p as any];
+
+          return typeof fn === "function" ? fn.bind(_t) : fn;
+        }
+
+        return _t[index];
+      },
+      set(_t, p, value) {
+        const index = Number(p);
+        if (Number.isNaN(index)) {
+          return true;
+        }
+
+        _t[index] = observer(value, [...path, p as string]);
+
+        return true;
+      },
+    }
+  );
+}
+
+function observer<T>(target: T, path: string[] = []): T {
+  if (target === null || target === undefined || typeof target === "function") {
+    return target;
+  }
+
+  if (Array.isArray(target)) {
+    return observerArray(target, path) as T;
+  }
+
+  if (typeof target === "object") {
+    return observerObject(target as any, path);
+  }
+
+  return target;
+}
+
+function reaction(fn: VoidFunction) {
+  const tree = new ();
+
+  const handler = (observer: Observer) => {
+    
+  };
+
+  let unlisten: VoidFunction;
+  return {
+    watch: () => {
+      unlisten = interceptor.register(handler);
+    },
+    unwatch: () => {
+      unlisten?.();
+    },
+    dispose: () => {
+      unlisten?.();
+    },
+  };
+}
+
+const obj = {
+  value: {
+    data: 1,
+    array: [1, 2, 3],
+  },
+  set(value: number) {
+    this.value.data = value;
+  },
+};
+
+const obs = observer(obj);
+
+reaction(
+  () => obs.value.data,
+  () => {}
+);
+
+let i = 0;
+setTimeout(() => {
+  obs.set(i++);
+}, 1000);
+
+console.log(obs);
