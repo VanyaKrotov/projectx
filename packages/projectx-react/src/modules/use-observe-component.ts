@@ -1,6 +1,7 @@
 import { useRef, ReactElement } from "react";
 
-import { Reaction } from "projectx.store/src/client";
+// @ts-ignore
+import { createReaction } from "../../../projectx/src/client";
 
 import type { ObserverComponentRefData } from "../shared/types";
 import { useForceUpdate, useHandleReaction } from "../shared/hooks";
@@ -12,13 +13,11 @@ function useObserveComponent<P extends object>(
   const ref = useRef<ObserverComponentRefData>();
   const forceUpdate = useForceUpdate();
   if (!ref.current) {
-    const reaction = new Reaction(name);
-
-    reaction.setReactionCallback(() => {
+    const reaction = createReaction(() => {
       ref.current!.isCallBeforeMount = !ref.current!.isMount;
 
       forceUpdate();
-    });
+    }, name);
 
     ref.current = {
       reaction,

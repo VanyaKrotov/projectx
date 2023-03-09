@@ -1,7 +1,9 @@
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
-import { observable } from "projectx.store";
+// @ts-ignore
+import { create } from "../../projectx/src";
+// import { observable } from "projectx.store";
 import { LocalObserver, observer, useLocalObservable } from "./index";
 
 const root = createRoot(document.getElementById("root")!);
@@ -18,8 +20,8 @@ class State {
   }
 }
 
-const state1 = observable.fromClass(State);
-const state2 = observable.fromClass(State);
+const state1 = create(new State());
+const state2 = create(new State());
 
 console.log(state1);
 
@@ -54,10 +56,6 @@ const App = () => {
 
   console.log("render [App]");
 
-  useLayoutEffect(() => {
-    data.increment();
-  }, []);
-
   useEffect(() => {
     console.log("mount [App]");
   }, []);
@@ -79,6 +77,6 @@ const App = () => {
   );
 };
 
-const AppO = observer(App);
+const AppO = App;
 
 root.render(<AppO />);
