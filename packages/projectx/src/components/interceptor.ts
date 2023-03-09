@@ -1,32 +1,23 @@
-import {
-  InterceptorEvent,
-  InterceptorListener,
-  InterceptorInstance,
-} from "../shared";
+function createInterceptor() {
+  const handlers = new Set<(o: Observer) => void>();
 
-class Interceptor implements InterceptorInstance {
-  private readonly listeners = new Set<InterceptorListener>();
+  return {
+    register: (handler: (o: Observer) => void) => {
+      handlers.add(handler);
 
-  public register(listener: InterceptorListener): void {
-    this.listeners.add(listener);
-  }
-
-  public unregister(listener: InterceptorListener): void {
-    this.listeners.delete(listener);
-  }
-
-  public emit(event: InterceptorEvent): void {
-    if (!this.listeners.size) {
-      return;
-    }
-
-    const reversedListeners = Array.from(this.listeners).reverse();
-    for (const listener of reversedListeners) {
-      if (!listener(event)) {
+      return () => {
+        handlers.delete(handler);
+      };
+    },
+    handler: (o: Observer) => {
+      const handler = Array.from(handlers);
+      if (!handler[handler.length - 1]) {
         return;
       }
-    }
-  }
+
+      return handler[handler.length - 1](o);
+    },
+  };
 }
 
-export default Interceptor;
+export { createInterceptor };

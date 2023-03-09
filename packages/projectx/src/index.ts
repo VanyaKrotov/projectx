@@ -1,8 +1,6 @@
 export {
-  observe,
-  native,
-  observable,
-  configuration,
+  create,
+  createReaction,
   autorun,
   transaction,
   watch,

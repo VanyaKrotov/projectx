@@ -1,82 +1,80 @@
-import { uid } from "../shared/uid";
+import { interceptor } from "../components";
 
-import PathTree from "./paths-tree";
-import { batch, interceptor, managers, reactions } from "../components";
+function createObserverManager(action: VoidFunction) {
+  const unlisten = new Map<Observer, VoidFunction>();
+  let observers = new Set<Observer>();
+  let memo = new Set<Observer>();
 
-class Reaction implements ReactionInstance {
-  private unsubscribeFns: (() => void)[] = [];
-  private tree: PathTree;
-  private reactionCallback: ReactionCallback | null = null;
+  return {
+    add: (observer: Observer) => {
+      if (observers.has(observer)) {
+        return;
+      }
 
-  public readonly id: string;
+      observers.add(observer);
+      if (!memo.has(observer)) {
+        unlisten.set(observer, observer.listen(action));
+      } else {
+        memo.delete(observer);
+      }
+    },
+    reset: () => {
+      memo = observers;
+      observers = new Set<Observer>();
+    },
+    dispose: () => {
+      unlisten.forEach((unsubscribe) => unsubscribe());
+      unlisten.clear();
+      observers.clear();
+      memo.clear();
+    },
+    end: () => {
+      for (const obs of memo) {
+        unlisten.get(obs)?.();
+        unlisten.delete(obs);
+      }
 
-  public get isEmptyObservers(): boolean {
-    return this.tree.isEmpty;
-  }
-
-  constructor(
-    id = "",
-    private scope: Map<Path, ContainerManagerInstance> = managers
-  ) {
-    this.id = `${id}@${uid()}`;
-    this.tree = new PathTree(scope);
-
-    reactions.set(this.id, this);
-  }
-
-  private changeHandler = () => this.reactionCallback?.(this.unlisten);
-
-  private listener = ({ path }: InterceptorEvent) => {
-    const has = this.scope?.has(path[0]);
-    if (!has) {
-      return true;
-    }
-
-    this.tree.push(path);
-
-    const managers = this.tree.getListenManagers();
-    this.unlisten();
-    this.unsubscribeFns = managers.map(({ listenTypes, manager }) =>
-      manager.listen(listenTypes, () => {
-        batch.action(this.changeHandler);
-      })
-    );
+      memo.clear();
+    },
   };
-
-  private unlisten = () => {
-    this.unsubscribeFns.forEach((unlistener) => unlistener());
-    this.unsubscribeFns = [];
-  };
-
-  public setReactionCallback(callback: ReactionCallback): void {
-    this.reactionCallback = callback;
-  }
-
-  public dispose(): void {
-    reactions.delete(this.id);
-
-    this.tree.clear();
-    this.unlisten();
-  }
-
-  public startCatchCalls(): void {
-    this.tree.clear();
-    interceptor.register(this.listener);
-  }
-
-  public endCatchCalls(): void {
-    interceptor.unregister(this.listener);
-  }
-
-  public syncCaptured<T>(fn: () => T): T {
-    this.startCatchCalls();
-
-    const result = fn();
-
-    this.endCatchCalls();
-
-    return result;
-  }
 }
 
-export { Reaction };
+function createReaction(action: VoidFunction) {
+  const observers = createObserverManager(action);
+
+  let unregister: VoidFunction;
+  const start = () => {
+    observers.reset();
+    unregister = interceptor.register(observers.add);
+  };
+
+  const end = () => {
+    observers.end();
+    unregister?.();
+  };
+
+  return {
+    start,
+    end,
+    syncCaptured: <T>(fn: () => T): T => {
+      start();
+      let result: T;
+
+      try {
+        result = fn();
+      } catch (error) {
+        console.error(error);
+      }
+
+      end();
+
+      return result!;
+    },
+    dispose: () => {
+      end();
+      observers.dispose();
+    },
+  };
+}
+
+export { createReaction };

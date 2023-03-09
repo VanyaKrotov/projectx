@@ -2,10 +2,6 @@ export const OBJ_PROPERTIES = Object.getPrototypeOf({});
 
 export const SERVICE_FIELD_NAME = "[px]";
 
-export const OBJECT_TYPES: ActionTypes[] = ["expansion", "compression"];
-
-export const DEFAULT_TYPES: ActionTypes[] = ["change", "reinstall"];
-
 export const enum ObservableAnnotationTypes {
   deep = 2,
   shadow = 4,
@@ -20,4 +16,11 @@ export const enum AnnotationTypes {
   native = 0,
   observable = ObservableAnnotationTypes.deep,
   computed = 16,
+}
+
+export const enum Properties {
+  none = 0,
+  observerDeep = 1,
+  observerRef = 2,
+  observerShadow = 4,
 }

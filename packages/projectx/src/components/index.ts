@@ -1,2 +1,2 @@
 export * from "./initialize";
-export { ObserverWithType } from "./observer";
+export { createObserver } from "./observer";

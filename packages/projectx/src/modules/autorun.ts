@@ -1,9 +1,7 @@
-import { Reaction } from "./reaction";
+import { createReaction } from "./reaction";
 
 function autorun<T>(fn: () => T): VoidFunction {
-  const reaction = new Reaction("Autorun");
-
-  reaction.setReactionCallback(() => {
+  const reaction = createReaction(() => {
     reaction.syncCaptured(fn);
   });
 

@@ -1,28 +1,28 @@
-import { BatchInstance } from "../shared";
+function createBatchManager() {
+  const batches: Set<VoidFunction>[] = [];
 
-class Batch implements BatchInstance {
-  private readonly batches: Set<VoidFunction>[] = [];
+  return {
+    open: () => {
+      batches.push(new Set<VoidFunction>());
+    },
 
-  public open(): void {
-    this.batches.push(new Set<VoidFunction>());
-  }
+    action: (handler: VoidFunction): void => {
+      if (!batches.length) {
+        return handler();
+      }
 
-  public action(handler: VoidFunction): void {
-    if (!this.batches.length) {
-      return handler();
-    }
+      batches[batches.length - 1].add(handler);
+    },
 
-    this.batches[this.batches.length - 1].add(handler);
-  }
+    close: () => {
+      const batch = batches.pop();
+      if (!batch) {
+        return;
+      }
 
-  public close(): void {
-    const batch = this.batches.pop();
-    if (!batch) {
-      return;
-    }
-
-    batch.forEach((handler) => handler());
-  }
+      batch.forEach((handler) => handler());
+    },
+  };
 }
 
-export default Batch;
+export { createBatchManager };

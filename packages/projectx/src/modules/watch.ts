@@ -1,4 +1,4 @@
-import { Reaction } from "./reaction";
+import { createReaction } from "./reaction";
 
 function watch<T>(
   contextFn: () => T,
@@ -8,13 +8,7 @@ function watch<T>(
     initialCall = false,
   }: Partial<WatchOptions<T>> = {}
 ): VoidFunction {
-  const reaction = new Reaction("Watch");
-  let result = reaction.syncCaptured(contextFn);
-  if (initialCall) {
-    callback(result, undefined as T);
-  }
-
-  reaction.setReactionCallback(() => {
+  const reaction = createReaction(() => {
     const value = reaction.syncCaptured(contextFn);
     if (isEqual(value, result)) {
       return;
@@ -23,6 +17,11 @@ function watch<T>(
     callback(value, result);
     result = value;
   });
+
+  let result = reaction.syncCaptured(contextFn);
+  if (initialCall) {
+    callback(result, undefined as T);
+  }
 
   return () => {
     reaction.dispose();

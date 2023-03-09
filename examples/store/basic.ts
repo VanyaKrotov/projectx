@@ -1,13 +1,4 @@
-import {
-  autorun,
-  watch,
-  configuration,
-  observe,
-} from "../../packages/projectx";
-
-configuration({
-  develop: true,
-});
+import { autorun, watch, create } from "../../packages/projectx";
 
 class Account {
   public isAuthorized = true;
@@ -21,7 +12,7 @@ class BaseState {
   array = [10, 23];
 }
 
-const account = observe.fromObject(new Account());
+const account = create(new Account());
 
 class State extends BaseState {
   counter = 1;
@@ -47,6 +38,8 @@ class State extends BaseState {
         value: 12,
       },
     };
+
+    this.array.pop();
   }
 
   push() {
@@ -69,16 +62,19 @@ const obj = {
   },
 };
 
-const state = observe.fromObject(new State());
+const state = create(new State());
 
-const stateObj = observe.fromObject(obj, { saveInstance: true });
+const stateObj = create(obj, { saveInstance: true });
 
-const map = observe.fromMap(new Map<number, number>());
+const map = create(new Map<number, number>());
+
+const array = create<number>([]);
 
 console.log(state);
 console.log(stateObj, obj);
 console.log(account);
 console.log(map);
+console.log(array);
 
 const div = document.createElement("div");
 const div1 = document.createElement("div");
@@ -98,28 +94,26 @@ buttonMinus2.innerText = "-";
 buttonFetch.innerText = "fetch";
 buttonPush.innerText = "push";
 
-configuration;
-
-watch(
-  () => (state.counter > 3 ? stateObj.counter : state.counter),
-  (val) => {
-    console.log("watch: ", val);
-  }
-);
+// watch(
+//   () => (state.counter > 3 ? stateObj.counter : state.counter),
+//   (val) => {
+//     console.log("watch: ", val);
+//   }
+// );
 
 autorun(() => {
   console.log("trigger counter");
   div.innerText = `state: ${state.counter}`;
 });
 
-autorun(() => {
-  console.log("trigger stateObj");
-  div1.innerText = `stateObj: ${state.array.join()}`;
-});
+// autorun(() => {
+//   console.log("trigger stateObj");
+//   div1.innerText = `stateObj: ${state.array.join()}`;
+// });
 
 autorun(() => {
-  console.log("trigger data");
-  div2.innerText = `auth: ${JSON.stringify(state.data)}`;
+  console.log("trigger array");
+  div2.innerText = `auth: ${JSON.stringify(array)}`;
 });
 
 autorun(() => {
@@ -137,20 +131,22 @@ buttonMinus.addEventListener("click", () => {
 
 buttonPlus2.addEventListener("click", () => {
   stateObj.counter++;
-  // map.set(map.size, map.size ** 2);
+  map.set(map.size, map.size ** 2);
 });
 
 buttonMinus2.addEventListener("click", () => {
   stateObj.counter--;
-  // map.delete(map.size - 1);
+  map.delete(map.size - 1);
 });
 
 buttonFetch.addEventListener("click", () => {
+  array.pop();
   state.fetch();
 });
 
 buttonPush.addEventListener("click", () => {
   state.push();
+  array.push(array.length + 1);
 });
 
 document.body.appendChild(div);
