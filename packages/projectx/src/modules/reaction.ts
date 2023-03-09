@@ -1,4 +1,5 @@
-import { interceptor } from "../components";
+import { batch, interceptor } from "../components";
+import { uid } from "../shared/uid";
 
 function createObserverManager(action: VoidFunction) {
   const unlisten = new Map<Observer, VoidFunction>();
@@ -13,7 +14,10 @@ function createObserverManager(action: VoidFunction) {
 
       observers.add(observer);
       if (!memo.has(observer)) {
-        unlisten.set(observer, observer.listen(action));
+        unlisten.set(
+          observer,
+          observer.listen(() => batch.action(action))
+        );
       } else {
         memo.delete(observer);
       }
@@ -39,7 +43,8 @@ function createObserverManager(action: VoidFunction) {
   };
 }
 
-function createReaction(action: VoidFunction) {
+function createReaction(action: VoidFunction, name = "reaction") {
+  name = `${name}#${uid()}`;
   const observers = createObserverManager(action);
 
   let unregister: VoidFunction;
@@ -63,6 +68,7 @@ function createReaction(action: VoidFunction) {
       try {
         result = fn();
       } catch (error) {
+        console.error(`[px] Error work action in reaction \`${name}\`.`);
         console.error(error);
       }
 

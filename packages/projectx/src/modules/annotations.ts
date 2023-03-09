@@ -1,9 +1,9 @@
-import { AnnotationTypes, ObservableAnnotationTypes } from "../shared";
+import { Properties } from "../shared";
 
-export const native = AnnotationTypes.native;
+export const native = Properties.none;
 
 export const observable = {
-  deep: ObservableAnnotationTypes.deep,
-  shadow: ObservableAnnotationTypes.shadow,
-  ref: ObservableAnnotationTypes.ref,
+  deep: Properties.observerDeep,
+  shadow: Properties.observerShadow,
+  ref: Properties.observerRef,
 };

@@ -1,6 +1,11 @@
 import { createReaction } from "./reaction";
 
-function watch<T>(
+interface WatchOptions<T> {
+  isEqual: (a: T, b: T) => boolean;
+  initialCall: boolean;
+}
+
+function reaction<T>(
   contextFn: () => T,
   callback: (current: T, prev: T) => void,
   {
@@ -28,4 +33,4 @@ function watch<T>(
   };
 }
 
-export { watch };
+export { reaction };

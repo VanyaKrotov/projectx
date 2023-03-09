@@ -1,4 +1,4 @@
-import { OBJ_PROPERTIES, Properties, SERVICE_FIELD_NAME } from "./constants";
+import { OBJ_PROPERTIES, SERVICE_FIELD_NAME } from "./constants";
 
 export function isObject<T>(target: T) {
   return target && typeof target === "object" && !Array.isArray(target);

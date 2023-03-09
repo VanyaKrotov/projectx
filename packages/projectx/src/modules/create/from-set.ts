@@ -91,7 +91,15 @@ function getTraps<K, V>(self: Self<V>) {
   };
 }
 
-type PickMethods = "clear" | "delete" | "forEach" | "add" | "values" | "has";
+type PickMethods =
+  | "clear"
+  | "delete"
+  | "forEach"
+  | "add"
+  | "values"
+  | "has"
+  | "entries"
+  | "values";
 
 function createFromSet<V>(
   target: Set<V>,
@@ -128,6 +136,7 @@ function createFromSet<V>(
     values: () => traps.getSet().values(),
     forEach: traps.forEach,
     has: traps.has,
+    entries: () => traps.getSet().entries(),
   };
 
   defineServiceProperty(values, true);

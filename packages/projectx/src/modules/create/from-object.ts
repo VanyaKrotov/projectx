@@ -73,7 +73,10 @@ function defineProp<T>(
   self.observers.set(key, observer);
 
   if (isGetter(descriptor)) {
-    const computed = createComputed(descriptor, observer);
+    const computed = createComputed(
+      { ...descriptor, get: descriptor.get!.bind(self.result) },
+      observer
+    );
 
     return Object.defineProperty(self.result, key, {
       configurable,

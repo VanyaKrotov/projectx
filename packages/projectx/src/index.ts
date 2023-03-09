@@ -1,8 +1,3 @@
-export {
-  create,
-  createReaction,
-  autorun,
-  transaction,
-  watch,
-  when,
-} from "./modules";
+export * from "./modules/annotations";
+
+export { create, autorun, transaction, reaction, when } from "./modules";

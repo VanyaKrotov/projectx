@@ -1,9 +1,7 @@
 import { test, expect } from "@jest/globals";
 
 import {
-  getUniqPath,
   getAllObjectFields,
-  isEqualArray,
   isFunction,
   isObject,
   isObjectOfClass,
@@ -24,20 +22,6 @@ test("isObject", () => {
 test("isFunction", () => {
   expect(isFunction(() => {})).toBe(true);
   expect(isFunction(async () => {})).toBe(true);
-});
-
-test("createUniqPath", () => {
-  expect(getUniqPath()).toBe("ObservableState#0");
-  expect(getUniqPath("State")).toBe("State#1");
-  expect(getUniqPath("State")).toBe("State#2");
-});
-
-test("isEqualArray", () => {
-  expect(isEqualArray([], [])).toBe(true);
-  expect(isEqualArray([1], [1])).toBe(true);
-  expect(isEqualArray([1, 2, 4], [1])).toBe(false);
-  expect(isEqualArray(["1", "2"], ["2", "1"])).toBe(true);
-  expect(isEqualArray(["1", "2"], ["2", "2"])).toBe(false);
 });
 
 test("runAfterScript", async () => {

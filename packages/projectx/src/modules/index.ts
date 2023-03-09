@@ -1,4 +1,4 @@
-export { watch } from "./watch";
+export { reaction } from "./watch";
 export { autorun } from "./autorun";
 export { when } from "./when";
 export { transaction } from "./transaction";

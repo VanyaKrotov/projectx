@@ -58,8 +58,8 @@ function createFromArray<T>(
 
       const observer = observers.get(index);
       if (observer) {
-        observer?.emit();
-        observer?.dispose();
+        observer.dispose();
+        mainObserver.emit();
       }
 
       observers.delete(index);

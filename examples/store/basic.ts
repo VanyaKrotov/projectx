@@ -1,4 +1,4 @@
-import { autorun, watch, create } from "../../packages/projectx";
+import { autorun, reaction, create } from "../../packages/projectx";
 
 class Account {
   public isAuthorized = true;
@@ -20,6 +20,7 @@ class State extends BaseState {
   data: any = null;
 
   get mul() {
+    console.log("mul");
     return this.counter * 2;
   }
 
@@ -68,6 +69,8 @@ const stateObj = create(obj, { saveInstance: true });
 
 const map = create(new Map<number, number>());
 
+const set = create(new Set<number>());
+
 const array = create<number>([]);
 
 console.log(state);
@@ -106,14 +109,19 @@ autorun(() => {
   div.innerText = `state: ${state.counter}`;
 });
 
+autorun(() => {
+  console.log("trigger mul");
+  div1.innerText = `state: ${state.mul}`;
+});
+
 // autorun(() => {
 //   console.log("trigger stateObj");
 //   div1.innerText = `stateObj: ${state.array.join()}`;
 // });
 
 autorun(() => {
-  console.log("trigger array");
-  div2.innerText = `auth: ${JSON.stringify(array)}`;
+  console.log("trigger set");
+  div2.innerText = `set: ${JSON.stringify(Array.from(set.values()))}`;
 });
 
 autorun(() => {
@@ -142,11 +150,13 @@ buttonMinus2.addEventListener("click", () => {
 buttonFetch.addEventListener("click", () => {
   array.pop();
   state.fetch();
+  set.delete(set.size);
 });
 
 buttonPush.addEventListener("click", () => {
   state.push();
   array.push(array.length + 1);
+  set.add(set.size + 1);
 });
 
 document.body.appendChild(div);

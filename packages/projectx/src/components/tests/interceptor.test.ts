@@ -1,8 +1,10 @@
 import { test, expect } from "@jest/globals";
-import Interceptor from "../interceptor";
+import { createInterceptor } from "../interceptor";
+import { createObserver } from "../observer";
 
 test("Interceptor", () => {
-  const interceptor = new Interceptor();
+  const interceptor = createInterceptor();
+  const observer = createObserver();
   const events: string[] = [];
 
   expect(events.length).toBe(0);
@@ -11,14 +13,14 @@ test("Interceptor", () => {
     events.push("event");
   };
 
-  interceptor.register(listener);
+  const unregister = interceptor.register(listener);
 
-  interceptor.emit({ path: [] });
-  interceptor.emit({ path: [] });
+  interceptor.handler(observer);
+  interceptor.handler(observer);
 
-  interceptor.unregister(listener);
+  unregister();
 
-  interceptor.emit({ path: [] });
+  interceptor.handler(observer);
 
   expect(events.length).toBe(2);
   expect(events).toEqual(["event", "event"]);

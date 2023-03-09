@@ -1,9 +1,9 @@
 import { describe, test, expect } from "@jest/globals";
 
-import Batch from "../batch";
+import { createBatchManager } from "../batch";
 
 describe("Batch", () => {
-  const batch = new Batch();
+  const batch = createBatchManager();
 
   test("Default", () => {
     const res: string[] = [];
