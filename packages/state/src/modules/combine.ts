@@ -22,6 +22,7 @@ function combine<T extends Record<string, ObserveStateInstance>>(
         this.unlisten.push(
           state.listen((event) =>
             this.emit({
+              detail: event.detail,
               changeTree: PathTree.pushPrefix(key, event.changeTree),
             })
           )

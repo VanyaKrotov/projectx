@@ -5,12 +5,13 @@ export interface PathTreeNodeInstance {
   point: boolean;
 }
 
-export interface ObserverEvent {
+export interface ObserverEvent<D = object> {
   changeTree: PathTreeNodeInstance;
+  detail: D;
 }
 
-export interface ObserverListener<T> {
-  (event: ObserverEvent): void | boolean;
+export interface ObserverListener<D> {
+  (event: ObserverEvent<D>): void | boolean;
 }
 
 export interface ObserverInstance<T> {
@@ -22,8 +23,10 @@ export interface WatchOptions {
   initCall: boolean;
 }
 
-export interface ObserveStateInstance<S extends DataObject = DataObject>
-  extends ObserverInstance<S> {
+export interface ObserveStateInstance<
+  S extends DataObject = DataObject,
+  D extends object = object
+> extends ObserverInstance<D> {
   data: S;
   reaction<T extends unknown[]>(
     selectors: ((state: S) => unknown)[],

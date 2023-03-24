@@ -26,25 +26,40 @@ function setRecursive(target: object, path: string[], value: unknown): boolean {
     return false;
   }
 
-  if (isNull(target) || isUndefined(target)) {
+  if (isNull(target) || isUndefined(target) || typeof target !== "object") {
     return false;
   }
 
-  if (typeof target === "object") {
-    const [first, ...rest] = path;
-    for (const key in target) {
-      if (first !== key) {
-        continue;
-      }
-
-      if (!rest.length) {
-        (target[key as keyof object] as unknown) = value;
-
-        return true;
-      }
-
-      return setRecursive(target[key as keyof object] as object, rest, value);
+  const [first, ...rest] = path;
+  for (const key in target) {
+    if (first !== key) {
+      continue;
     }
+
+    if (!rest.length) {
+      (target[key as keyof object] as unknown) = value;
+
+      return true;
+    }
+
+    return setRecursive(target[key as keyof object] as object, rest, value);
+  }
+
+  return false;
+}
+
+function hasRecursive(target: object, path: string[]): boolean {
+  if (!path.length) {
+    return Boolean(target);
+  }
+
+  if (isNull(target) || isUndefined(target) || typeof target !== "object") {
+    return false;
+  }
+
+  const [first, ...rest] = path;
+  if (first in target) {
+    return hasRecursive(target[first as keyof object], rest);
   }
 
   return false;
@@ -69,6 +84,16 @@ abstract class Path {
     }
 
     return getRecursive<T>(target, path.split("."));
+  }
+
+  public static has(target: object, path: string): boolean {
+    if (!this.isValid(path)) {
+      console.assert(false, `[px.state] Path \`${path}\` is not valid.`);
+
+      return false;
+    }
+
+    return hasRecursive(target, path.split("."));
   }
 
   public static set(target: object, path: string, value: unknown): boolean {

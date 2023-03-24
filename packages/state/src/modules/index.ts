@@ -1,3 +1,3 @@
-export { State } from "./state";
-export { combine } from "./combine";
-export { batch } from "./batch";
+export * from "./state";
+export * from "./combine";
+export * from "./batch";

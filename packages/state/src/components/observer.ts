@@ -4,7 +4,7 @@ import type {
   ObserverListener,
 } from "../shared/types";
 
-abstract class Observer<T = unknown> implements ObserverInstance<T> {
+abstract class Observer<T extends object> implements ObserverInstance<T> {
   readonly #listeners = new Set<ObserverListener<T>>();
 
   public listen(listener: ObserverListener<T>): VoidFunction {
@@ -15,7 +15,7 @@ abstract class Observer<T = unknown> implements ObserverInstance<T> {
     };
   }
 
-  public emit(event: ObserverEvent): void {
+  public emit(event: ObserverEvent<T>): void {
     for (const listener of this.#listeners) {
       if (listener(event)) {
         return;

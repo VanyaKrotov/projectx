@@ -7,7 +7,7 @@ import { PathTree } from "../path-tree";
 describe("Observer", () => {
   test("default", () => {
     const events: ObserverEvent[] = [];
-    const observer = new (class extends Observer<number> {})();
+    const observer = new (class extends Observer<object> {})();
 
     const unlisten = observer.listen((event) => {
       events.push(event);
@@ -15,9 +15,9 @@ describe("Observer", () => {
 
     expect(typeof unlisten).toBe("function");
 
-    const event1 = { changeTree: new PathTree(["counter"]) };
-    const event2 = { changeTree: new PathTree(["test"]) };
-    const event3 = { changeTree: new PathTree() };
+    const event1 = { changeTree: new PathTree(["counter"]), detail: {} };
+    const event2 = { changeTree: new PathTree(["test"]), detail: {} };
+    const event3 = { changeTree: new PathTree(), detail: {} };
 
     expect(events.length).toBe(0);
 
@@ -35,7 +35,7 @@ describe("Observer", () => {
   test("stop event", () => {
     const events1: ObserverEvent[] = [];
     const events2: ObserverEvent[] = [];
-    const observer = new (class extends Observer {})();
+    const observer = new (class extends Observer<object> {})();
 
     const unlisten1 = observer.listen((event) => {
       events1.push(event);
@@ -50,9 +50,12 @@ describe("Observer", () => {
     expect(typeof unlisten1).toBe("function");
     expect(typeof unlisten2).toBe("function");
 
-    const event1 = { changeTree: new PathTree(["counter"]) };
-    const event2 = { changeTree: new PathTree(["test", "counter"]) };
-    const event3 = { changeTree: new PathTree() };
+    const event1 = { changeTree: new PathTree(["counter"]), detail: {} };
+    const event2 = {
+      changeTree: new PathTree(["test", "counter"]),
+      detail: {},
+    };
+    const event3 = { changeTree: new PathTree(), detail: {} };
 
     expect(events1.length).toBe(0);
     expect(events2.length).toBe(0);

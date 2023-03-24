@@ -46,6 +46,25 @@ describe("path", () => {
     expect(Path.set(null as any, "array.1", 10)).toBe(false);
   });
 
+  test("has", () => {
+    const obj = {
+      array: [{ value: 10 }],
+      test: 10,
+      deep: { value: { test: 1 } },
+      next: null,
+    };
+
+    expect(Path.has(obj, "")).toBe(false);
+    expect(Path.has(obj, "next.next")).toBe(false);
+    expect(Path.has(obj, "array")).toBe(true);
+    expect(Path.has(obj, "array.0")).toBe(true);
+    expect(Path.has(obj, "array.0.value")).toBe(true);
+    expect(Path.has(obj, "array.0.test")).toBe(false);
+    expect(Path.has(obj, "test")).toBe(true);
+    expect(Path.has(obj, "deep.value.test")).toBe(true);
+    expect(Path.has(null as any, "deep.value.test")).toBe(false);
+  });
+
   test("isValid", () => {
     expect(Path.isValid("value")).toEqual(true);
     expect(Path.isValid("value.test.0")).toEqual(true);

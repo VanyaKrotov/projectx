@@ -1,4 +1,4 @@
-export { Observer } from "./observer";
-export { BatchManager } from "./batch-manager";
-export { Path } from "./path";
-export { PathTree } from "./path-tree";
+export * from "./observer";
+export * from "./batch-manager";
+export * from "./path";
+export * from "./path-tree";

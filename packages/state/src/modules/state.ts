@@ -12,9 +12,12 @@ import { Observer, Path, PathTree } from "../components";
 import { defaultEqualResolver } from "../shared";
 import { manager } from "./batch";
 
-abstract class ObserveState<S extends DataObject = DataObject>
-  extends Observer<S>
-  implements ObserveStateInstance<S>
+abstract class ObserveState<
+    S extends DataObject = DataObject,
+    D extends object = object
+  >
+  extends Observer<D>
+  implements ObserveStateInstance<S, D>
 {
   public abstract readonly data: S;
 
@@ -102,6 +105,7 @@ abstract class State<S extends DataObject = DataObject>
 
     this.emit({
       changeTree,
+      detail: {},
     });
   }
 
@@ -114,7 +118,7 @@ abstract class State<S extends DataObject = DataObject>
       results.push(Path.set(this.data, path, value));
     }
 
-    this.emit({ changeTree });
+    this.emit({ changeTree, detail: {} });
 
     return results;
   }
