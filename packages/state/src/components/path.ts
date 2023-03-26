@@ -9,43 +9,74 @@ function getRecursive<T>(target: object, path: string[]): T | null {
     return null;
   }
 
-  if (typeof target === "object") {
-    const [first, ...rest] = path;
-    for (const key in target) {
-      if (first == key) {
-        return getRecursive<T>(target[key as keyof object], rest);
-      }
-    }
+  let next = undefined;
+  const [first, ...rest] = path;
+  if (target instanceof Map) {
+    next = target.get(first);
+  } else if (target instanceof Set) {
+    next =
+      target.size < Number(first)
+        ? undefined
+        : Array.from(target)[first as keyof object];
+  } else if (first in target) {
+    next = target[first as keyof object];
   }
 
-  return null;
+  return isUndefined(next) ? null : getRecursive<T>(next, rest);
+}
+
+function set(target: object, key: string, value: unknown) {
+  if (target instanceof Map) {
+    target.set(key, value);
+
+    return true;
+  }
+
+  if (target instanceof Set) {
+    throw new Error(
+      "The `Path.set` function does not support setting in values `Set` by key."
+    );
+  }
+
+  if (typeof target === "object") {
+    target[key as keyof object] = value as never;
+
+    return true;
+  }
+
+  return false;
 }
 
 function setRecursive(target: object, path: string[], value: unknown): boolean {
-  if (!path.length) {
-    return false;
-  }
-
-  if (isNull(target) || isUndefined(target) || typeof target !== "object") {
+  if (isNull(target) || isUndefined(target)) {
     return false;
   }
 
   const [first, ...rest] = path;
-  for (const key in target) {
-    if (first !== key) {
-      continue;
-    }
-
-    if (!rest.length) {
-      (target[key as keyof object] as unknown) = value;
-
-      return true;
-    }
-
-    return setRecursive(target[key as keyof object] as object, rest, value);
+  if (!rest.length) {
+    return set(target, first, value);
   }
 
-  return false;
+  const next = getRecursive(target, [first]);
+  if (next) {
+    return setRecursive(next, rest, value);
+  }
+
+  const [second] = rest;
+  const isNumberKey = !Number.isNaN(Number(second));
+  const nextVal = isNumberKey ? new Array() : {};
+  if (target instanceof Map) {
+    target.set(first, nextVal);
+  } else if (target instanceof Set) {
+    const arr = Array.from(target);
+    arr[first as keyof object] = nextVal;
+  } else if (typeof target === "object") {
+    (target[first as keyof object] as object) = nextVal;
+  } else {
+    return false;
+  }
+
+  return setRecursive(nextVal, rest, value);
 }
 
 function hasRecursive(target: object, path: string[]): boolean {
@@ -53,16 +84,27 @@ function hasRecursive(target: object, path: string[]): boolean {
     return Boolean(target);
   }
 
-  if (isNull(target) || isUndefined(target) || typeof target !== "object") {
+  if (isNull(target) || isUndefined(target)) {
     return false;
   }
 
+  let next = null;
+  let has = true;
+
   const [first, ...rest] = path;
-  if (first in target) {
-    return hasRecursive(target[first as keyof object], rest);
+  if (target instanceof Map) {
+    next = target.get(first);
+    has = target.has(first);
+  } else if (target instanceof Set) {
+    const array = Array.from(target);
+    has = first in array;
+    next = array[first as keyof object];
+  } else if (first in target) {
+    has = first in target;
+    next = target[first as keyof object];
   }
 
-  return false;
+  return has && hasRecursive(next, rest);
 }
 
 abstract class Path {

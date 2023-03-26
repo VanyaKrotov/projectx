@@ -1,6 +1,6 @@
 {
   "name": "projectx.state",
-  "version": "0.0.4-beta",
+  "version": "0.0.5-beta",
   "description": "State manager",
   "main": "src/index.ts",
   "author": {

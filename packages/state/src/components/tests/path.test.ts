@@ -20,6 +20,13 @@ describe("path", () => {
     expect(Path.get(obj, "test")).toBe(obj.test);
     expect(Path.get(obj, "deep.value.test")).toBe(obj.deep.value.test);
     expect(Path.get(null as any, "deep.value.test")).toBeNull();
+    expect(Path.get(new Set([12, { test: 12 }]), "1.test")).toBe(12);
+    expect(Path.get(new Set([12, { test: 12 }]), "0")).toBe(12);
+    expect(Path.get(new Set([12, { test: 12 }]), "3")).toBe(null);
+    expect(Path.get(new Map([["key", { test: 12 }]]), "key.test")).toBe(12);
+    expect(Path.get(new Map([["key", { test: 12 }]]), "key")).toEqual({
+      test: 12,
+    });
   });
 
   test("set", () => {
@@ -37,13 +44,26 @@ describe("path", () => {
     expect(Path.set(obj, "next.value", 30)).toEqual(true);
     expect(obj.next.value).toEqual(30);
 
-    expect(Path.set(obj, "next.next.value", 30)).toEqual(false);
+    expect(Path.set(obj, "next.next.value", 30)).toEqual(true);
 
     expect(Path.set(obj, "array.1", null)).toBe(true);
     expect(obj.array[1]).toBeNull();
 
     expect(Path.set(obj, "array[1]", 10)).toBe(false);
     expect(Path.set(null as any, "array.1", 10)).toBe(false);
+
+    const val = new Set([{ test: { value: 1 } }]);
+    expect(Path.set(val, "0.test.value", 22)).toBe(true);
+    expect(Path.get(val, "0.test.value")).toBe(22);
+
+    expect(Path.has(val, "0.test.test")).toBe(false);
+    expect(Path.set(val, "0.test.test", 12)).toBe(true);
+    expect(Path.has(val, "0.test.test")).toBe(true);
+    expect(Path.get(val, "0.test.test")).toBe(12);
+
+    const map = new Map([["test", new Set([12, { array: [1, 2, 3] }])]]);
+    expect(Path.set(map, "test.1.array.0", 5)).toBe(true);
+    expect(Path.get(map, "test.1.array.0")).toBe(5);
   });
 
   test("has", () => {
@@ -63,6 +83,11 @@ describe("path", () => {
     expect(Path.has(obj, "test")).toBe(true);
     expect(Path.has(obj, "deep.value.test")).toBe(true);
     expect(Path.has(null as any, "deep.value.test")).toBe(false);
+    expect(Path.has(new Set([12, { test: 12 }]), "1.test")).toBe(true);
+    expect(Path.has(new Set([12, { test: 12 }]), "0")).toBe(true);
+    expect(Path.has(new Set([12, { test: 12 }]), "3")).toBe(false);
+    expect(Path.has(new Map([["key", { test: 12 }]]), "key.test")).toBe(true);
+    expect(Path.has(new Map([["key", { test: 12 }]]), "key")).toBe(true);
   });
 
   test("isValid", () => {
