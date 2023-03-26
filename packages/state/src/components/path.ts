@@ -80,17 +80,12 @@ function setRecursive(target: object, path: string[], value: unknown): boolean {
 }
 
 function hasRecursive(target: object, path: string[]): boolean {
-  if (!path.length) {
-    return Boolean(target);
-  }
-
   if (isNull(target) || isUndefined(target)) {
     return false;
   }
 
   let next = null;
   let has = true;
-
   const [first, ...rest] = path;
   if (target instanceof Map) {
     next = target.get(first);
@@ -102,9 +97,15 @@ function hasRecursive(target: object, path: string[]): boolean {
   } else if (first in target) {
     has = first in target;
     next = target[first as keyof object];
+  } else {
+    return false;
   }
 
-  return has && hasRecursive(next, rest);
+  if (!has || !rest.length) {
+    return has;
+  }
+
+  return hasRecursive(next, rest);
 }
 
 abstract class Path {

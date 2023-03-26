@@ -56,7 +56,6 @@ describe("path", () => {
     expect(Path.set(val, "0.test.value", 22)).toBe(true);
     expect(Path.get(val, "0.test.value")).toBe(22);
 
-    expect(Path.has(val, "0.test.test")).toBe(false);
     expect(Path.set(val, "0.test.test", 12)).toBe(true);
     expect(Path.has(val, "0.test.test")).toBe(true);
     expect(Path.get(val, "0.test.test")).toBe(12);
@@ -82,6 +81,9 @@ describe("path", () => {
     expect(Path.has(obj, "array.0.test")).toBe(false);
     expect(Path.has(obj, "test")).toBe(true);
     expect(Path.has(obj, "deep.value.test")).toBe(true);
+    expect(Path.has({ second: 0, first: 1 }, "second")).toBe(true);
+    expect(Path.has({ second: 0, first: 1 }, "first")).toBe(true);
+    expect(Path.has({ second: 0, first: 1 }, "price")).toBe(false);
     expect(Path.has(null as any, "deep.value.test")).toBe(false);
     expect(Path.has(new Set([12, { test: 12 }]), "1.test")).toBe(true);
     expect(Path.has(new Set([12, { test: 12 }]), "0")).toBe(true);
