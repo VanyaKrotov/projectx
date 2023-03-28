@@ -1,20 +1,9 @@
-import { defineServiceProperty, isFunction, Properties } from "../../shared";
+import { defineServiceProperty, isFunction } from "../../shared";
 
 import { interceptor, createObserver } from "../../components";
 
 import { create } from "./create";
-import {
-  getDecomposeScheme,
-  getMainObserver,
-  getSchemaChildren,
-} from "./utils";
-
-const GET_METHODS = new Set<string | symbol>([
-  "join",
-  "entries",
-  "values",
-  "toJSON",
-]);
+import { getDecomposeScheme, getMainObserver } from "./utils";
 
 function createFromArray<T>(
   target: Array<T>,
@@ -26,22 +15,18 @@ function createFromArray<T>(
     return target;
   }
 
-  const { mainObserver, root } = getMainObserver(parent);
+  const { mainObserver } = getMainObserver(parent);
 
   function observable(...items: T[]): [T[], Observer[]] {
     const arr = [];
     const obs = [];
-
     for (let i = 0; i < items.length; i++) {
-      const sh = getSchemaChildren(schema, i);
       let value = items[i];
-      if (sh !== Properties.none) {
-        const observer = createObserver();
+      const observer = createObserver();
 
-        obs.push(observer);
+      obs.push(observer);
 
-        value = create(value, schema, observer);
-      }
+      value = create(value, schema, observer);
 
       arr.push(value);
     }
@@ -52,6 +37,12 @@ function createFromArray<T>(
   const [items, observers] = observable(...target);
 
   const values = new (class extends Array<T> {
+    public get length() {
+      interceptor.handler(mainObserver);
+
+      return super.length;
+    }
+
     public push(...items: T[]): number {
       const [arr, obs] = observable(...items);
       const result = super.push(...arr);
@@ -65,10 +56,7 @@ function createFromArray<T>(
     }
 
     public at(index: number): T | undefined {
-      const obs = observers[index];
-      if (obs) {
-        interceptor.handler(obs);
-      }
+      interceptor.handler(mainObserver);
 
       return super.at(index);
     }
@@ -85,14 +73,14 @@ function createFromArray<T>(
     }
 
     public entries(): IterableIterator<[number, T]> {
-      interceptor.handler(mainObserver, ...observers);
+      interceptor.handler(mainObserver);
 
       return super.entries();
     }
 
     public pop(): T | undefined {
       const result = super.pop();
-      if (result) {
+      if (result !== undefined) {
         observers.pop()?.dispose();
         mainObserver.emit();
       }
@@ -102,7 +90,7 @@ function createFromArray<T>(
 
     public shift(): T | undefined {
       const result = super.shift();
-      if (result) {
+      if (result !== undefined) {
         observers.shift()?.dispose();
         mainObserver.emit();
       }
@@ -126,36 +114,28 @@ function createFromArray<T>(
       predicate: (value: T, index: number, obj: T[]) => unknown,
       thisArg?: unknown
     ): T | undefined {
-      const index = super.findIndex(predicate, thisArg);
-      if (index === -1) {
-        return undefined;
-      }
+      interceptor.handler(mainObserver);
 
-      interceptor.handler(observers[index]);
-
-      return this[index];
+      return super.at(super.findIndex(predicate, thisArg));
     }
 
     public findIndex(
       predicate: (value: T, index: number, obj: T[]) => unknown,
       thisArg?: any
     ): number {
-      const index = super.findIndex(predicate, thisArg);
-      if (index !== -1) {
-        interceptor.handler(observers[index]);
-      }
+      interceptor.handler(mainObserver);
 
-      return index;
+      return super.findIndex(predicate, thisArg);
     }
 
     public join(separator?: string): string {
-      interceptor.handler(mainObserver, ...observers);
+      interceptor.handler(mainObserver);
 
       return super.join(separator);
     }
 
     public values(): IterableIterator<T> {
-      interceptor.handler(mainObserver, ...observers);
+      interceptor.handler(mainObserver);
 
       return super.values();
     }
@@ -168,6 +148,9 @@ function createFromArray<T>(
       const _observers = observers.splice(start, deleteCount as number, ...obs);
 
       _observers.forEach((observer) => observer.dispose());
+      if (result.length) {
+        mainObserver.emit();
+      }
 
       return result;
     }
@@ -177,71 +160,133 @@ function createFromArray<T>(
 
       return super.includes(searchElement, fromIndex);
     }
+
+    public filter(
+      predicate: (value: T, index: number, array: T[]) => boolean,
+      thisArg?: any
+    ): T[] {
+      interceptor.handler(mainObserver);
+
+      return super.filter(predicate, thisArg);
+    }
+
+    public keys(): IterableIterator<number> {
+      interceptor.handler(mainObserver);
+
+      return super.keys();
+    }
+
+    public forEach(
+      callbackfn: (value: T, index: number, array: T[]) => void,
+      thisArg?: any
+    ): void {
+      interceptor.handler(mainObserver);
+
+      return super.forEach(callbackfn, thisArg);
+    }
+
+    public sort(compareFn?: ((a: T, b: T) => number) | undefined): this {
+      interceptor.handler(mainObserver);
+
+      return super.sort(compareFn);
+    }
+
+    public some(
+      predicate: (value: T, index: number, array: T[]) => unknown,
+      thisArg?: any
+    ): boolean {
+      interceptor.handler(mainObserver);
+
+      return super.some(predicate, thisArg);
+    }
+
+    public every(
+      predicate: (value: T, index: number, array: T[]) => unknown,
+      thisArg?: any
+    ): boolean {
+      interceptor.handler(mainObserver);
+
+      return super.every(predicate, thisArg);
+    }
+
+    public reduce(
+      callbackfn: (
+        previousValue: T,
+        currentValue: T,
+        currentIndex: number,
+        array: T[]
+      ) => T,
+      initialValue?: any
+    ): T {
+      interceptor.handler(mainObserver);
+
+      return super.reduce(callbackfn, initialValue);
+    }
+
+    public reduceRight(
+      callbackfn: (
+        previousValue: T,
+        currentValue: T,
+        currentIndex: number,
+        array: T[]
+      ) => T,
+      initialValue?: any
+    ): T {
+      interceptor.handler(mainObserver);
+
+      return super.reduceRight(callbackfn, initialValue);
+    }
+
+    public map<U>(
+      callbackfn: (value: T, index: number, array: T[]) => U,
+      thisArg?: any
+    ): U[] {
+      interceptor.handler(mainObserver);
+
+      return this.map(callbackfn, thisArg);
+    }
+
+    public indexOf(searchElement: T, fromIndex?: number | undefined): number {
+      interceptor.handler(mainObserver);
+
+      return super.indexOf(searchElement, fromIndex);
+    }
+
+    public lastIndexOf(
+      searchElement: T,
+      fromIndex?: number | undefined
+    ): number {
+      interceptor.handler(mainObserver);
+
+      return super.lastIndexOf(searchElement, fromIndex);
+    }
   })(...items);
 
   defineServiceProperty(values, true);
 
   return new Proxy(values, {
-    deleteProperty(target, p) {
-      const index = Number(p);
-      if (Number.isNaN(index)) {
-        return false;
-      }
-
-      if (!target.splice(index, 1).length) {
-        return false;
-      }
-
-      const observer = observers.at(index);
-      if (observer) {
-        observer.dispose();
-        mainObserver.emit();
-      }
-
-      observers.splice(index, 1);
-
-      return true;
-    },
-    get(_target, p) {
-      const index = Number(p);
+    get(_target, key) {
+      const index = Number(key);
       if (!Number.isNaN(index)) {
-        if (observers[index]) {
-          interceptor.handler(observers[index]);
-        }
+        interceptor.handler(mainObserver);
 
         return _target[index];
       }
 
-      const field = Reflect.get(_target, p);
-      if (isFunction(field)) {
-        return field.bind(_target);
-      }
+      const field = Reflect.get(_target, key);
 
-      return field;
+      return isFunction(field) ? field.bind(_target) : field;
     },
-    set(_target, p, value) {
-      const index = Number(p);
+    set(_target, key, value) {
+      const index = Number(key);
       if (Number.isNaN(index)) {
         return true;
       }
 
-      const update = index in _target;
-      let observer;
-      if (update) {
-        observer = observers.at(index);
-      } else {
-        observer = createObserver();
-
-        observers[index] = observer;
-      }
-
+      const observer = index in _target ? observers[index] : createObserver();
+      observers[index] = observer;
       _target[index] = create(value, schema, observer);
-
-      if (update) {
-        observer!.emit();
-      } else {
-        mainObserver.emit();
-      }
+      mainObserver.emit();
 
       return true;
     },

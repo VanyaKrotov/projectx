@@ -105,13 +105,13 @@ buttonPush.innerText = "push";
 // );
 
 autorun(() => {
-  console.log("trigger counter");
-  div.innerText = `state: ${state.counter}`;
+  console.log("trigger counter", array);
+  div.innerText = `state: ${state.array.join(", ")}`;
 });
 
 autorun(() => {
   console.log("trigger mul");
-  div1.innerText = `state: ${state.mul}`;
+  div1.innerText = `state: ${JSON.stringify(state.array)}`;
 });
 
 // autorun(() => {
@@ -119,14 +119,15 @@ autorun(() => {
 //   div1.innerText = `stateObj: ${state.array.join()}`;
 // });
 
-autorun(() => {
-  console.log("trigger set");
-  div2.innerText = `set: ${JSON.stringify(Array.from(set.values()))}`;
-});
+// autorun(() => {
+//   console.log("trigger set");
+//   div2.innerText = `set: ${JSON.stringify(Array.from(set.values()))}`;
+// });
 
 autorun(() => {
   console.log("trigger acc");
-  div3.innerText = `ss: ${JSON.stringify(Object.fromEntries(map.entries()))}`;
+  // console.log(map.entries());
+  div3.innerText = `ss: ${map.size}`;
 });
 
 buttonPlus.addEventListener("click", () => {
@@ -148,15 +149,11 @@ buttonMinus2.addEventListener("click", () => {
 });
 
 buttonFetch.addEventListener("click", () => {
-  array.pop();
-  state.fetch();
-  set.delete(set.size);
+  state.array.pop();
 });
 
 buttonPush.addEventListener("click", () => {
-  state.push();
-  array.push(array.length + 1);
-  set.add(set.size + 1);
+  state.array.push(state.array.length);
 });
 
 document.body.appendChild(div);
