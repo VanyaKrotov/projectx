@@ -1,21 +1,22 @@
 function createInterceptor() {
-  const handlers = new Set<(o: Observer) => void>();
+  const listeners = new Set<(o: Observer) => void>();
 
   return {
     register: (handler: (o: Observer) => void) => {
-      handlers.add(handler);
+      listeners.add(handler);
 
       return () => {
-        handlers.delete(handler);
+        listeners.delete(handler);
       };
     },
-    handler: (o: Observer) => {
-      const handler = Array.from(handlers);
-      if (!handler[handler.length - 1]) {
-        return;
+    handler: (...observers: Observer[]) => {
+      const handlers = Array.from(listeners);
+      const handler = handlers[handlers.length - 1];
+      if (!handler) {
+        return null;
       }
 
-      return handler[handler.length - 1](o);
+      return observers.map(handler);
     },
   };
 }
