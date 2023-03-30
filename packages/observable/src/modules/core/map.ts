@@ -1,31 +1,26 @@
-import { defineServiceProperty, Properties } from "../../shared";
-
 import { createObserver, interceptor } from "../../components";
+import { snapshot } from "../snapshot";
 
-import { create } from "./create";
-import { getDecomposeScheme, getMainObserver } from "./utils";
+import { makeObservable } from "./common";
+import { getMainObserver } from "./utils";
 
-function createFromMap<K, V>(
+function makeObservableMap<K, V>(
   target: Map<K, V>,
-  parent?: Observer,
-  schemaArg: Schema | Properties = {}
+  parent?: Observer
 ): Map<K, V> {
-  const { exit, schema } = getDecomposeScheme(schemaArg);
-  if (exit) {
-    return target;
-  }
+  const mainObserver = getMainObserver(parent);
+  const entries = Array.from(target.entries());
+  const observers = new Map<K, Observer>(
+    entries.map(([key]) => [key, createObserver()])
+  );
 
-  const { mainObserver } = getMainObserver(parent);
-  const observers = new Map<K, Observer>();
+  return new (class extends Map<K, V> {
+    public get _observers(): Map<K, Observer> {
+      return observers;
+    }
 
-  const result = new (class extends Map<K, V> {
-    constructor() {
-      super();
-
-      for (const [key, value] of target) {
-        super.set(key, value);
-        observers.set(key, createObserver());
-      }
+    public get _observer(): Observer {
+      return mainObserver;
     }
 
     public get size() {
@@ -69,7 +64,7 @@ function createFromMap<K, V>(
 
       mainObserver.emit();
 
-      return super.set(key, create(value, schema, observer));
+      return super.set(key, makeObservable(value, observer));
     }
 
     public values(): IterableIterator<V> {
@@ -104,11 +99,19 @@ function createFromMap<K, V>(
 
       return super.keys();
     }
-  })();
 
-  defineServiceProperty(result, true);
+    public _snapshot() {
+      const res = new Map();
+      super.forEach((value, key) => res.set(key, snapshot(value)));
 
-  return result;
+      return res;
+    }
+  })(
+    entries.map(([key, value]) => [
+      key,
+      makeObservable(value, observers.get(key)),
+    ])
+  );
 }
 
-export { createFromMap };
+export { makeObservableMap };

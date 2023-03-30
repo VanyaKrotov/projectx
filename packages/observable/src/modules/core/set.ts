@@ -1,36 +1,42 @@
-import { defineServiceProperty, Properties } from "../../shared";
-
 import { createObserver, interceptor } from "../../components";
+import { snapshot } from "../snapshot";
 
-import { create } from "./create";
-import { getDecomposeScheme, getMainObserver } from "./utils";
+import { makeObservable } from "./common";
+import { getMainObserver } from "./utils";
 
-function createFromSet<V>(
-  target: Set<V>,
-  parent?: Observer,
-  schemaArg: Schema | Properties = {}
-): Set<V> {
-  const { exit, schema } = getDecomposeScheme(schemaArg);
-  if (exit) {
-    return target;
+function makeObservableSet<V>(target: Set<V>, parent?: Observer): Set<V> {
+  const observers = new Map<V, Observer>();
+  const mainObserver = getMainObserver(parent);
+
+  const values = [];
+  for (const value of target) {
+    const observer = createObserver();
+    const observable = makeObservable(value, observer);
+
+    values.push(observable);
+    observers.set(observable, observer);
   }
 
-  const observers = new Map<V, Observer>();
-  const { mainObserver } = getMainObserver(parent);
-  const result = new (class extends Set<V> {
-    constructor() {
-      super();
+  return new (class extends Set<V> {
+    public get _observers() {
+      return observers;
+    }
 
-      for (const value of target) {
-        super.add(value);
-        observers.set(value, createObserver());
-      }
+    public get _observer() {
+      return mainObserver;
     }
 
     public get size() {
       interceptor.handler(mainObserver);
 
       return super.size;
+    }
+
+    public _snapshot() {
+      const result = new Set();
+      super.forEach((value) => result.add(snapshot(value)));
+
+      return result;
     }
 
     public clear(): void {
@@ -48,16 +54,14 @@ function createFromSet<V>(
     }
 
     public add(value: V): this {
-      let observer = observers.get(value);
-      if (!observer) {
-        observer = createObserver();
+      const observer = observers.get(value) || createObserver();
+      const observable = makeObservable(value, observer);
+      const result = super.add(observable);
 
-        observers.set(value, observer);
-      }
-
+      observers.set(observable, observer);
       mainObserver.emit();
 
-      return super.add(create(value, schema, observer));
+      return result;
     }
 
     public values(): IterableIterator<V> {
@@ -92,11 +96,7 @@ function createFromSet<V>(
 
       return super.keys();
     }
-  })();
-
-  defineServiceProperty(result, true);
-
-  return result;
+  })(values);
 }
 
-export { createFromSet };
+export { makeObservableSet };

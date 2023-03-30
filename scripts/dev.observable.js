@@ -7,8 +7,8 @@ const { runServer } = require("./server");
 esbuild
   .context(
     getConfig({
-      path: path.resolve(__dirname, "../packages/projectx"),
-      entryPoints: [path.resolve(__dirname, "../examples/store/basic.ts")],
+      path: path.resolve(__dirname, "../packages/observable"),
+      entryPoints: [path.resolve(__dirname, "../examples/observable/basic.ts")],
     })
   )
   .then((ctx) => ctx.watch())

@@ -1,4 +1,4 @@
-import { OBJ_PROPERTIES, SERVICE_FIELD_NAME } from "./constants";
+import { OBJ_PROPERTIES } from "./constants";
 
 export function isObject<T>(target: T) {
   return target && typeof target === "object" && !Array.isArray(target);
@@ -6,10 +6,6 @@ export function isObject<T>(target: T) {
 
 export function isFunction(functionToCheck: Function) {
   return typeof functionToCheck === "function";
-}
-
-export function isFunctionDescriptor({ value }: PropertyDescriptor): boolean {
-  return isFunction(value);
 }
 
 export function isGetter({ get, set }: PropertyDescriptor): boolean {
@@ -25,7 +21,19 @@ export function isObjectOfClass<T>(target: T): boolean {
 }
 
 export function isObserveValue<T>(target: T): boolean {
-  return isObject(target) && Reflect.get(target as object, SERVICE_FIELD_NAME);
+  if (!target || typeof target !== "object") {
+    return false;
+  }
+
+  return Boolean(Reflect.get(target as object, "_observer"));
+}
+
+export function getObserver<T>(target: T): Observer | null {
+  if (!target || typeof target !== "object") {
+    return null;
+  }
+
+  return Reflect.get(target as object, "_observer");
 }
 
 export function runAfterScript(fn: VoidFunction): Promise<void> {
@@ -45,25 +53,4 @@ export function getAllObjectFields<T extends object>(
     Object.getOwnPropertyDescriptors(prototypes),
     Object.getOwnPropertyDescriptors(object)
   );
-}
-
-export function defineServiceProperty<T extends object, V>(
-  target: T,
-  value: V
-): T {
-  if (SERVICE_FIELD_NAME in target) {
-    return target;
-  }
-
-  return Object.defineProperty(target, SERVICE_FIELD_NAME, {
-    value,
-    enumerable: false,
-    configurable: false,
-    writable: false,
-  });
-}
-
-export function deleteServiceProperty<T extends object>(target: T): boolean {
-  // @ts-ignore
-  return delete target[SERVICE_FIELD_NAME];
 }

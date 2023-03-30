@@ -1,46 +1,62 @@
-import { defineServiceProperty, isFunction } from "../../shared";
+import { isFunction } from "../../shared";
 
 import { interceptor, createObserver } from "../../components";
 
-import { create } from "./create";
-import { getDecomposeScheme, getMainObserver } from "./utils";
+import { makeObservable } from "./common";
+import { getMainObserver } from "./utils";
+import { snapshot } from "../snapshot";
 
-function createFromArray<T>(
-  target: Array<T>,
-  parent?: Observer,
-  schemaArg: Schema = {}
-): Array<T> {
-  const { exit, schema } = getDecomposeScheme(schemaArg);
-  if (exit) {
-    return target;
+function observable<T>(...items: T[]): [T[], Observer[]] {
+  const arr = [];
+  const obs = [];
+  for (let i = 0; i < items.length; i++) {
+    let value = items[i];
+    const observer = createObserver();
+
+    obs.push(observer);
+
+    value = makeObservable(value, observer);
+
+    arr.push(value);
   }
 
-  const { mainObserver } = getMainObserver(parent);
+  return [arr, obs];
+}
 
-  function observable(...items: T[]): [T[], Observer[]] {
-    const arr = [];
-    const obs = [];
-    for (let i = 0; i < items.length; i++) {
-      let value = items[i];
-      const observer = createObserver();
+function tryParseNumber(value: string | symbol): number {
+  let result = Number.NaN;
+  try {
+    result = Number(value);
+  } catch {}
 
-      obs.push(observer);
+  return result;
+}
 
-      value = create(value, schema, observer);
+function makeObservableArray<T>(target: Array<T>, parent?: Observer): Array<T> {
+  const mainObserver = getMainObserver(parent);
 
-      arr.push(value);
-    }
-
-    return [arr, obs];
-  }
-
-  const [items, observers] = observable(...target);
+  let [items, observers] = observable(...target);
 
   const values = new (class extends Array<T> {
+    public get _observers(): Observer[] {
+      return observers;
+    }
+
+    public get _observer(): Observer {
+      return mainObserver;
+    }
+
     public get length() {
       interceptor.handler(mainObserver);
 
       return super.length;
+    }
+
+    public _snapshot() {
+      const result: T[] = [];
+      super.forEach((value) => result.push(snapshot(value)));
+
+      return result;
     }
 
     public push(...items: T[]): number {
@@ -61,12 +77,11 @@ function createFromArray<T>(
       return super.at(index);
     }
 
-    public concat(...items: ConcatArray<T>[]): T[];
-    public concat(...items: (T | ConcatArray<T>)[]): T[];
-    public concat(...items: unknown[]): T[] {
+    public concat(...items: (T | ConcatArray<T>)[]): T[] {
       const [array, obs] = observable(...(items as T[]));
       if (obs.length) {
         mainObserver.emit();
+        observers = observers.concat(obs);
       }
 
       return super.concat(...array);
@@ -98,13 +113,10 @@ function createFromArray<T>(
       return result;
     }
 
-    public fill(value: T, start = 0, end = this.length): this {
+    public fill(value: T, start = 0, end = super.length): this {
+      mainObserver.emit();
       for (let index = start; index < end; index++) {
-        const obs = observers[index];
-
-        this[index] = create(value, schema, obs);
-
-        obs.emit();
+        super[index] = makeObservable(value, observers[index]);
       }
 
       return this;
@@ -140,8 +152,6 @@ function createFromArray<T>(
       return super.values();
     }
 
-    public splice(start: number, deleteCount?: number): T[];
-    public splice(start: number, deleteCount?: number, ...items: T[]): T[];
     public splice(start: number, deleteCount?: number, ...rest: T[]): T[] {
       const [items, obs] = observable(...rest);
       const result = super.splice(start, deleteCount as number, ...items);
@@ -243,7 +253,7 @@ function createFromArray<T>(
     ): U[] {
       interceptor.handler(mainObserver);
 
-      return this.map(callbackfn, thisArg);
+      return super.map(callbackfn, thisArg);
     }
 
     public indexOf(searchElement: T, fromIndex?: number | undefined): number {
@@ -262,15 +272,19 @@ function createFromArray<T>(
     }
   })(...items);
 
-  defineServiceProperty(values, true);
-
   return new Proxy(values, {
+    deleteProperty(_target, key) {
+      const result = Reflect.deleteProperty(_target, key);
+      if (result) {
+        mainObserver.emit();
+      }
+
+      return result;
+    },
     get(_target, key) {
-      const index = Number(key);
+      const index = tryParseNumber(key);
       if (!Number.isNaN(index)) {
         interceptor.handler(mainObserver);
-
-        return _target[index];
       }
 
       const field = Reflect.get(_target, key);
@@ -278,14 +292,17 @@ function createFromArray<T>(
       return isFunction(field) ? field.bind(_target) : field;
     },
     set(_target, key, value) {
-      const index = Number(key);
+      const index = tryParseNumber(key);
       if (Number.isNaN(index)) {
-        return true;
+        return Reflect.set(_target, key, value);
       }
 
-      const observer = index in _target ? observers[index] : createObserver();
+      const observer = observers[index] || createObserver();
+
       observers[index] = observer;
-      _target[index] = create(value, schema, observer);
+
+      _target[index] = makeObservable(value, observer);
+
       mainObserver.emit();
 
       return true;
@@ -293,4 +310,4 @@ function createFromArray<T>(
   });
 }
 
-export { createFromArray };
+export { makeObservableArray };

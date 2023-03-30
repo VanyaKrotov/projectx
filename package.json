@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev:store": "node scripts/dev.store.js",
+    "dev:observable": "node scripts/dev.observable.js",
     "dev:react": "node scripts/dev.react.js",
     "dev:di": "node scripts/dev.di.js",
     "test": "jest --config=config/jest.config.ts",

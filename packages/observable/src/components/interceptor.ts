@@ -16,7 +16,7 @@ function createInterceptor() {
         return null;
       }
 
-      return observers.map(handler);
+      return observers.forEach(handler);
     },
   };
 }
