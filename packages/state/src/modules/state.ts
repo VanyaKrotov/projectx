@@ -7,9 +7,12 @@ import type {
   PathTreeInstance,
   WatchOptions,
 } from "../shared/types";
+import { defaultEqualResolver } from "../shared/utils";
 
-import { Observer, Path, PathTree } from "../components";
-import { defaultEqualResolver } from "../shared";
+import { Observer } from "../components/observer";
+import { Path } from "../components/path";
+import { PathTree } from "../components/path-tree";
+
 import { manager } from "./batch";
 
 abstract class ObserveState<

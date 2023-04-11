@@ -1,4 +1,4 @@
-import { PathTree } from "../components";
+import { PathTree } from "../components/path-tree";
 import type { ObserveStateInstance, CombineState } from "../shared/types";
 
 import { ObserveState } from "./state";

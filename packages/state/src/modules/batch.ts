@@ -1,4 +1,4 @@
-import { BatchManager } from "../components";
+import { BatchManager } from "../components/batch-manager";
 
 const manager = new BatchManager();
 

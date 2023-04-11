@@ -1,6 +1,4 @@
-interface BatchManagerInstance {}
-
-class BatchManager implements BatchManagerInstance {
+class BatchManager {
   private readonly batches: Set<VoidFunction>[] = [];
 
   public open(): void {

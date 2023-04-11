@@ -1,5 +1,5 @@
-import { isEmptyObject } from "../shared";
-import { PathTreeInstance, PathTreeNodeInstance } from "../shared/types";
+import { isEmptyObject } from "../shared/utils";
+import type { PathTreeInstance, PathTreeNodeInstance } from "../shared/types";
 
 import { Path } from "./path";
 

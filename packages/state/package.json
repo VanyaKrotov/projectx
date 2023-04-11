@@ -1,8 +1,10 @@
 {
   "name": "projectx.state",
-  "version": "0.0.6-beta",
+  "version": "0.0.8-beta",
   "description": "State manager",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": {
     "name": "Ivan Krotov",
     "email": "vanyakrotov3059@gmail.com"

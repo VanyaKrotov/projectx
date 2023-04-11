@@ -1,4 +1,4 @@
-import { isNull, isUndefined } from "../shared";
+import { isNull, isUndefined } from "../shared/utils";
 
 function getRecursive<T>(target: object, path: string[]): T | null {
   if (!path.length) {
@@ -154,9 +154,7 @@ abstract class Path {
   }
 
   public static toLodashPath(path: string): string {
-    return path
-      .replaceAll(/\.(\d)+/g, "[$1]")
-      .replaceAll(/^(\d)+\./gm, "[$1].");
+    return path.replace(/\.(\d)+/g, "[$1]").replace(/^(\d)+\./gm, "[$1].");
   }
 
   public static fromString(path: string): string[] {

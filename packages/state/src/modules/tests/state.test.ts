@@ -79,7 +79,7 @@ describe("State", () => {
   });
 
   test("reaction", () => {
-    const values = [];
+    const values: number[] = [];
     let tests = "";
     const state = new Counter();
 
