@@ -8,7 +8,6 @@ const dist = path.resolve(state, "dist");
 const tsconfig = path.resolve(state, "tsconfig.json");
 
 const common = {
-  format: "esm",
   tsconfig,
   outdir: dist,
   bundle: true,
@@ -22,17 +21,37 @@ async function main() {
   try {
     await build({
       entryPoints: {
-        dev: path.resolve(state, "src/index.ts"),
+        "dev.esm": path.resolve(state, "src/index.ts"),
       },
       ...common,
+      format: "esm",
       minify: false,
     });
 
     await build({
       entryPoints: {
-        production: path.resolve(state, "src/index.ts"),
+        "production.esm": path.resolve(state, "src/index.ts"),
       },
       ...common,
+      format: "esm",
+      minify: true,
+    });
+
+    await build({
+      entryPoints: {
+        "dev.cjs": path.resolve(state, "src/index.ts"),
+      },
+      ...common,
+      format: "cjs",
+      minify: false,
+    });
+
+    await build({
+      entryPoints: {
+        "production.cjs": path.resolve(state, "src/index.ts"),
+      },
+      ...common,
+      format: "cjs",
       minify: true,
     });
 

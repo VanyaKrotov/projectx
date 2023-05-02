@@ -1,4 +1,4 @@
-import State, { batch, combine, PathTree } from "../../packages/state";
+import State, { combine } from "../../packages/state/src";
 
 /*
 
@@ -243,18 +243,32 @@ buttonMinus.innerText = "-";
 buttonTest1.innerText = "test1";
 buttonTest2.innerText = "test2";
 
-comb.watch(
+comb.on(
   ["counter.counter"],
   () => {
     div.innerText = `counter: ${state.data.counter}`;
+    console.log("counter");
   },
   { initCall: true }
 );
 
-comb.watch(
-  ["test.array.0", "test.array"],
+comb.once(["counter.counter"], () => {
+  console.log("counter once");
+});
+
+comb.on(
+  ["counter.array"],
+  () => {
+    console.log("counter.array");
+  },
+  { initCall: true }
+);
+
+comb.on(
+  ["test.array"],
   () => {
     divTest.innerText = `test: ${JSON.stringify(test.data.array)}`;
+    console.log("test.array");
   },
   { initCall: true }
 );
@@ -268,14 +282,25 @@ buttonMinus.addEventListener("click", () => {
 });
 
 buttonTest1.addEventListener("click", () => {
-  // state.changeString();
+  state.changeString();
   test.changeArray();
 });
 
 buttonTest2.addEventListener("click", () => {
-  // state.restoreString();
+  state.restoreString();
   test.restore();
 });
+
+async function main() {
+  const res = await comb.when(
+    ["counter.counter"],
+    (data) => data.counter.counter > 3
+  );
+
+  console.log("main end", res);
+}
+
+main();
 
 document.body.appendChild(div);
 document.body.appendChild(divTest);

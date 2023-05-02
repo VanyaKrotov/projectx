@@ -1,9 +1,7 @@
-import { isEmptyObject } from "../shared/utils";
-import type { PathTreeInstance, PathTreeNodeInstance } from "../shared/types";
+import toPath from "lodash/toPath";
+import isEmpty from "lodash/isEmpty";
 
-import { Path } from "./path";
-
-class PathTreeNode implements PathTreeNodeInstance {
+class PathTreeNode {
   public point = false;
 
   constructor(
@@ -12,18 +10,18 @@ class PathTreeNode implements PathTreeNodeInstance {
   ) {}
 
   public get isEmpty(): boolean {
-    return isEmptyObject(this.children);
+    return isEmpty(this.children);
   }
 }
 
-class PathTree extends PathTreeNode implements PathTreeInstance {
+class PathTree extends PathTreeNode {
   constructor(paths: string[] = []) {
     super("");
 
     this.createTree(paths);
   }
 
-  public static pushPrefix(path: string, node: PathTreeNode): PathTreeInstance {
+  public static pushPrefix(path: string, node: PathTreeNode): PathTree {
     const tree = new PathTree();
 
     tree.children[path] = new PathTreeNode(path, node.children);
@@ -45,21 +43,15 @@ class PathTree extends PathTreeNode implements PathTreeInstance {
 
   private createTree(paths: string[]): void {
     for (const path of paths) {
-      if (!Path.isValid(path)) {
-        console.assert(false, `[px.state] Path \`${path}\` is not valid!`);
-
-        continue;
-      }
-
-      this.pushNode(this, Path.fromString(path));
+      this.pushNode(this, toPath(path));
     }
   }
 
   public push(path: string): void {
-    this.pushNode(this, Path.fromString(path));
+    this.pushNode(this, toPath(path));
   }
 
-  private testTreeRecursive(
+  private includesRecursive(
     watch: PathTreeNode,
     change: PathTreeNode
   ): boolean {
@@ -76,7 +68,7 @@ class PathTree extends PathTreeNode implements PathTreeInstance {
         continue;
       }
 
-      if (this.testTreeRecursive(watch.children[key], change.children[key])) {
+      if (this.includesRecursive(watch.children[key], change.children[key])) {
         return true;
       }
     }
@@ -84,13 +76,13 @@ class PathTree extends PathTreeNode implements PathTreeInstance {
     return false;
   }
 
-  public includes(node: PathTreeNodeInstance): boolean {
+  public includes(node: PathTreeNode): boolean {
     if (node.isEmpty) {
       return this.isEmpty;
     }
 
-    return this.testTreeRecursive(this, node);
+    return this.includesRecursive(this, node);
   }
 }
 
-export { PathTree };
+export { PathTree, PathTreeNode };

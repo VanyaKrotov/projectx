@@ -12,19 +12,25 @@ npm i projectx.state
 
 ### Описание функций и классов
 
-- `State` - базовый класс для создания состояний.
+- `ObserveState` - абстрактный класс для создания состояний (без методов мутировани).
 
   - `data = {}` - основное хранилище состояния (_readonly_);
+
+  - `reaction()` - метод для отслеживания мутаций состояния с использованием мемоизации вычисляемых данных;
+
+  - `on()` - метод для отслеживания точечных мутаций определенных полей состояния;
+
+  - `once()` - метод для отслеживания точечных мутаций определенных полей состояния только один раз;
+
+  - `when()` - метод для асинхронное отслеживания изменения состояния до необходимого значения;
+
+  - `dispose()` - метод для сброса всех отслеживаний состояния;
+
+- `State` - класс для создания состояний (наследуется от `ObserveState`).
 
   - `change()` - метод для мутации состояния;
 
   - `commit()` - метод для мутации состояния посредством точечного внесения изменений;
-
-  - `reaction()` - метод для отслеживания мутаций состояния с использованием мемоизации вычисляемых данных;
-
-  - `watch()` - метод для отслеживания точечных мутаций определенных полей состояния;
-
-  - `dispose()` - метод для сброса всех отслеживаний состояния;
 
 Пример:
 
@@ -202,7 +208,7 @@ batch(() => {
 // reaction[c]:  105
 ```
 
-- `PathTree` - класс для создания дерева точечных отслеживаний. (необходимо для метода `watch`)
+- `PathTree` - класс для создания дерева точечных отслеживаний. (необходимо для методов `on`, `once`, `when`)
 
   - `push()` - добавляет путь в дерево;
 
@@ -211,55 +217,13 @@ batch(() => {
 Пример:
 
 ```ts
-const tree = new PathTree(["array.0", "test.value"]);
+const tree = new PathTree(["array[0]", "test.value"]);
 
-tree.includes(new PathTree(["array.1"])); // false
-tree.includes(new PathTree(["array.0"])); // true
+tree.includes(new PathTree(["array[1]"])); // false
+tree.includes(new PathTree(["array[0]"])); // true
 tree.includes(new PathTree(["test.value"])); // true
 tree.includes(new PathTree(["test"])); // true
 tree.includes(new PathTree(["array"])); // true
-```
-
-- `Path` - статический класс предоставляющий набор методов для работы с путями мутаций (работает также с es6 Map и Set)
-
-  - `get()` - получает значние поля по пути для объекта;
-
-  - `set()` - мутирует значние поля по пути для объектов;
-
-  - `has()` - проверяет есть ли поле по ключу или индексу в объекте;
-
-  - `isValid()` - проверяет валидность строки пути;
-
-  - `toString()` - объединяет путь представленный как коллекцию в строку;
-
-  - `fromString()` - разбивает строковый путь в вид коллекции;
-
-  - `toLodashPath()` - переводит строковый путь `projectx.state` в [lodash](https://github.com/lodash/lodash) path;
-
-Пример:
-
-```ts
-Path.get({ value: 10, next: { value: 11 } }, "value"); // 10
-Path.get({ value: 10, next: { value: 11 } }, "next.value"); // 11
-Path.get({ value: 10, next: { value: 11, next: null } }, "next.next.value"); // null
-
-const obj = { value: 10, next: { value: 11, next: null } };
-
-Path.set(obj, "next.value", 20); // true
-// obj => { value: 10, next: { value: 20, next: null } }
-Path.set(obj, "next.next.value", 20); // false
-// obj => { value: 10, next: { value: 11, next: null } }
-
-Path.isValid("path."); // false
-Path.isValid("path.0"); // true
-Path.isValid("path.0.test"); // true
-Path.isValid(".path.0.test"); // false
-Path.isValid("path[0].test"); // false
-
-Path.toString(["next", "value"]); // 'next.value'
-Path.fromString("next.value"); // ["next", "value"]
-
-Path.toLodashPath("value.array.0.test"); // value.array[0].test
 ```
 
 ## Особые возможности

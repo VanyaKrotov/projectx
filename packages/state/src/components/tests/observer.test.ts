@@ -1,12 +1,11 @@
 import { describe, test, expect } from "@jest/globals";
 
-import { ObserverEvent } from "../../shared/types";
-import { Observer } from "../observer";
+import { Observer, Event } from "../observer";
 import { PathTree } from "../path-tree";
 
 describe("Observer", () => {
   test("default", () => {
-    const events: ObserverEvent[] = [];
+    const events: Event[] = [];
     const observer = new (class extends Observer<object> {})();
 
     const unlisten = observer.listen((event) => {
@@ -33,8 +32,8 @@ describe("Observer", () => {
   });
 
   test("stop event", () => {
-    const events1: ObserverEvent[] = [];
-    const events2: ObserverEvent[] = [];
+    const events1: Event[] = [];
+    const events2: Event[] = [];
     const observer = new (class extends Observer<object> {})();
 
     const unlisten1 = observer.listen((event) => {

@@ -1,9 +1,9 @@
 {
   "name": "projectx.state",
-  "version": "0.0.8-beta",
+  "version": "0.0.9-beta",
   "description": "State manager",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "author": {
     "name": "Ivan Krotov",
@@ -20,5 +20,11 @@
     "observe",
     "reactive",
     "state manager"
-  ]
+  ],
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.194"
+  }
 }

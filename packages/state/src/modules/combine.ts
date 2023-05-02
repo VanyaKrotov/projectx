@@ -1,25 +1,28 @@
 import { PathTree } from "../components/path-tree";
-import type { ObserveStateInstance, CombineState } from "../shared/types";
 
 import { ObserveState } from "./state";
 
-function combine<T extends Record<string, ObserveStateInstance>>(
+export type CombineState<T extends Record<string, ObserveState>> = {
+  [P in keyof T]: T[P]["data"];
+};
+
+function combine<T extends Record<string, ObserveState>>(
   states: T
-): ObserveStateInstance<CombineState<T>> {
+): ObserveState<CombineState<T>> {
   return new (class extends ObserveState<CombineState<T>> {
     public data: CombineState<T>;
-    private readonly unlisten: VoidFunction[] = [];
+    private readonly unsubscribe: VoidFunction[] = [];
 
     constructor() {
       super();
 
       const combined = {} as CombineState<T>;
       for (const key in states) {
-        const state = states[key] as ObserveStateInstance;
+        const state = states[key] as ObserveState;
 
         combined[key] = state.data;
 
-        this.unlisten.push(
+        this.unsubscribe.push(
           state.listen((event) =>
             this.emit({
               detail: event.detail,
@@ -33,7 +36,7 @@ function combine<T extends Record<string, ObserveStateInstance>>(
     }
 
     public dispose() {
-      this.unlisten.forEach((unlisten) => unlisten());
+      this.unsubscribe.forEach((callback) => callback());
       super.dispose();
     }
   })();

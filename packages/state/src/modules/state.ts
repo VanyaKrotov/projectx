@@ -1,27 +1,36 @@
-import type {
-  ObserveStateInstance,
-  ReactionOptions,
-  DataObject,
-  StateInstance,
-  CommitChange,
-  PathTreeInstance,
-  WatchOptions,
-} from "../shared/types";
-import { defaultEqualResolver } from "../shared/utils";
+import set from "lodash/set";
 
 import { Observer } from "../components/observer";
-import { Path } from "../components/path";
 import { PathTree } from "../components/path-tree";
 
 import { manager } from "./batch";
 
+interface EqualResolver<T> {
+  (a: T, b: T): boolean;
+}
+
+interface OnOptions {
+  initCall: boolean;
+}
+
+interface ReactionOptions {
+  resolver: EqualResolver<unknown>;
+  initCall: boolean;
+}
+
+interface CommitChange {
+  path: string;
+  value: unknown;
+}
+
+type DataObject = { [key: string | symbol | never]: unknown | any };
+
+const defaultEqualResolver: EqualResolver<unknown> = (a, b) => a === b;
+
 abstract class ObserveState<
-    S extends DataObject = DataObject,
-    D extends object = object
-  >
-  extends Observer<D>
-  implements ObserveStateInstance<S, D>
-{
+  S extends DataObject = DataObject,
+  D extends object = object
+> extends Observer<D> {
   public abstract readonly data: S;
 
   public reaction<T extends unknown[]>(
@@ -58,22 +67,22 @@ abstract class ObserveState<
     return this.listen(() => manager.action(handler));
   }
 
-  public watch(
+  public on(
     paths: string[],
     action: VoidFunction,
-    options?: Partial<WatchOptions>
+    options?: Partial<OnOptions>
   ): VoidFunction;
-  public watch(
-    paths: PathTreeInstance,
+  public on(
+    paths: PathTree,
     action: VoidFunction,
-    options?: Partial<WatchOptions>
+    options?: Partial<OnOptions>
   ): VoidFunction;
-  public watch(
+  public on(
     paths: unknown,
     action: VoidFunction,
-    { initCall = false }: Partial<WatchOptions> = {}
+    { initCall = false }: Partial<OnOptions> = {}
   ): VoidFunction {
-    let tree = paths as PathTreeInstance;
+    let tree = paths as PathTree;
     if (!(paths instanceof PathTree)) {
       tree = new PathTree(paths as string[]);
     }
@@ -90,12 +99,37 @@ abstract class ObserveState<
       return manager.action(action);
     });
   }
+
+  public once(paths: string[], action: VoidFunction): VoidFunction;
+  public once(paths: PathTree, action: VoidFunction): VoidFunction;
+  public once(paths: any, action: VoidFunction): VoidFunction {
+    const unsubscribe = this.on(paths, () => {
+      action();
+      unsubscribe();
+    });
+
+    return unsubscribe;
+  }
+
+  public when(paths: string[], action: (data: S) => boolean): Promise<S>;
+  public when(paths: PathTree, action: (data: S) => boolean): Promise<S>;
+  public when(paths: any, action: (data: S) => boolean): Promise<S> {
+    return new Promise((resolve) => {
+      const unsubscribe = this.on(paths, () => {
+        if (!action(this.data)) {
+          return;
+        }
+
+        resolve(structuredClone(this.data));
+        unsubscribe();
+      });
+    });
+  }
 }
 
-abstract class State<S extends DataObject = DataObject>
-  extends ObserveState<S>
-  implements StateInstance<S>
-{
+abstract class State<
+  S extends DataObject = DataObject
+> extends ObserveState<S> {
   public abstract readonly data: S;
 
   public change(value: Partial<S>): void {
@@ -118,7 +152,7 @@ abstract class State<S extends DataObject = DataObject>
     for (const { path, value } of changes) {
       changeTree.push(path);
 
-      results.push(Path.set(this.data, path, value));
+      results.push(Boolean(set(this.data, path, value)));
     }
 
     this.emit({ changeTree, detail: {} });

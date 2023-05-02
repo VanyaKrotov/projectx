@@ -37,7 +37,7 @@ describe("State", () => {
     const state = new Counter();
     let changeCount = 0;
 
-    state.watch(["counter"], () => {
+    state.on(["counter"], () => {
       changeCount++;
     });
 
@@ -59,7 +59,7 @@ describe("State", () => {
     const state = new Counter();
     let changeCount = 0;
 
-    state.watch(["counter"], () => {
+    state.on(["counter"], () => {
       changeCount++;
     });
 
@@ -158,15 +158,15 @@ describe("State", () => {
     const arr: string[] = [];
     const state = new Counter();
 
-    state.watch(["test"], () => {
+    state.on(["test"], () => {
       test += state.data.test;
     });
 
-    state.watch(["counter"], () => {
+    state.on(["counter"], () => {
       value.push(String(state.data.counter));
     });
 
-    state.watch(["array.0"], () => {
+    state.on(["array.0"], () => {
       arr.push(state.data.array[0]);
     });
 
