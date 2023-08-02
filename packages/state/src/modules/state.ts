@@ -11,6 +11,7 @@ interface EqualResolver<T> {
 
 interface OnOptions {
   initCall: boolean;
+  priority: number;
 }
 
 interface ReactionOptions {
@@ -80,7 +81,7 @@ abstract class ObserveState<
   public on(
     paths: unknown,
     action: VoidFunction,
-    { initCall = false }: Partial<OnOptions> = {}
+    { initCall = false, priority }: Partial<OnOptions> = {}
   ): VoidFunction {
     let tree = paths as PathTree;
     if (!(paths instanceof PathTree)) {
@@ -97,32 +98,64 @@ abstract class ObserveState<
       }
 
       return manager.action(action);
-    });
+    }, priority);
   }
 
-  public once(paths: string[], action: VoidFunction): VoidFunction;
-  public once(paths: PathTree, action: VoidFunction): VoidFunction;
-  public once(paths: any, action: VoidFunction): VoidFunction {
-    const unsubscribe = this.on(paths, () => {
-      action();
-      unsubscribe();
-    });
+  public once(
+    paths: string[],
+    action: VoidFunction,
+    priority?: number
+  ): VoidFunction;
+  public once(
+    paths: PathTree,
+    action: VoidFunction,
+    priority?: number
+  ): VoidFunction;
+  public once(
+    paths: any,
+    action: VoidFunction,
+    priority?: number
+  ): VoidFunction {
+    const unsubscribe = this.on(
+      paths,
+      () => {
+        action();
+        unsubscribe();
+      },
+      { priority }
+    );
 
     return unsubscribe;
   }
 
-  public when(paths: string[], action: (data: S) => boolean): Promise<S>;
-  public when(paths: PathTree, action: (data: S) => boolean): Promise<S>;
-  public when(paths: any, action: (data: S) => boolean): Promise<S> {
+  public when(
+    paths: string[],
+    action: (data: S) => boolean,
+    priority?: number
+  ): Promise<S>;
+  public when(
+    paths: PathTree,
+    action: (data: S) => boolean,
+    priority?: number
+  ): Promise<S>;
+  public when(
+    paths: any,
+    action: (data: S) => boolean,
+    priority?: number
+  ): Promise<S> {
     return new Promise((resolve) => {
-      const unsubscribe = this.on(paths, () => {
-        if (!action(this.data)) {
-          return;
-        }
+      const unsubscribe = this.on(
+        paths,
+        () => {
+          if (!action(this.data)) {
+            return;
+          }
 
-        resolve(structuredClone(this.data));
-        unsubscribe();
-      });
+          resolve(structuredClone(this.data));
+          unsubscribe();
+        },
+        { priority }
+      );
     });
   }
 }

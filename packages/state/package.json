@@ -1,6 +1,6 @@
 {
   "name": "projectx.state",
-  "version": "0.0.9-beta",
+  "version": "0.0.10-beta",
   "description": "State manager",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

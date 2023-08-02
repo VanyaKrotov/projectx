@@ -249,7 +249,7 @@ comb.on(
     div.innerText = `counter: ${state.data.counter}`;
     console.log("counter");
   },
-  { initCall: true }
+  { initCall: true, priority: 2 }
 );
 
 comb.once(["counter.counter"], () => {

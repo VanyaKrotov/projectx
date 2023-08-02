@@ -9,19 +9,31 @@ export interface Listener<D> {
   (event: Event<D>): void | boolean;
 }
 
-abstract class Observer<T extends object> {
-  private readonly listeners = new Set<Listener<T>>();
+interface ListenerModel<D> {
+  listener: Listener<D>;
+  priority: number;
+}
 
-  public listen(listener: Listener<T>): VoidFunction {
-    this.listeners.add(listener);
+abstract class Observer<T extends object> {
+  private listeners = new Set<ListenerModel<T>>();
+
+  public listen(listener: Listener<T>, priority: number = 1): VoidFunction {
+    const item = { listener, priority };
+    this.listeners.add(item);
+
+    this.listeners = new Set(
+      Array.from(this.listeners).sort((a, b) =>
+        a.priority > b.priority ? 1 : -1
+      )
+    );
 
     return () => {
-      this.listeners.delete(listener);
+      this.listeners.delete(item);
     };
   }
 
   public emit(event: Event<T>): void {
-    for (const listener of this.listeners) {
+    for (const { listener } of this.listeners) {
       if (listener(event)) {
         return;
       }
